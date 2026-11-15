@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Beer, Wallet, Clock } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
@@ -14,9 +14,9 @@ export default function MiCervezaPerfil({ sesion }) {
   useEffect(() => {
     if (!sesion?.nombre) { setLoading(false); return; }
     Promise.all([
-      base44.entities.CervezaEntrada.filter({ nombre: sesion.nombre }),
-      base44.entities.CervezaPago.filter({ integrante_nombre: sesion.nombre }),
-      base44.entities.AppConfig.filter({ clave: "cerveza_precio" }),
+      api.entities.CervezaEntrada.filter({ nombre: sesion.nombre }),
+      api.entities.CervezaPago.filter({ integrante_nombre: sesion.nombre }),
+      api.entities.AppConfig.filter({ clave: "cerveza_precio" }),
     ]).then(([entradas, pagosData, configs]) => {
       setEntrada(entradas[0] || null);
       setPagos(pagosData.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)));

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import JSZip from "jszip";
 import { Code, Download, Copy, Check, ChevronDown, ChevronRight, RefreshCw, FolderTree, Smartphone, FileCode, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -30,14 +30,14 @@ export default function CodigoApp() {
   const [apkZipping, setApkZipping] = useState(false);
 
   useEffect(() => {
-    base44.entities.AppConfig.list("clave").then(setAppConfigs).catch(() => {});
+    api.entities.AppConfig.list("clave").then(setAppConfigs).catch(() => {});
   }, []);
 
   const fetchSchema = async (name) => {
     if (schemas[name]) { setExpanded(expanded === name ? null : name); return; }
     setLoading(prev => ({ ...prev, [name]: true }));
     try {
-      const schema = await base44.entities[name].schema();
+      const schema = await api.entities[name].schema();
       setSchemas(prev => ({ ...prev, [name]: schema }));
       setExpanded(name);
     } catch {}
@@ -65,10 +65,10 @@ export default function CodigoApp() {
       WEB_SOURCE_FILES.forEach(f => root.file(f.path, f.content));
 
       // Esquemas de entidades (todos, vía SDK)
-      const entitiesFolder = root.folder("base44/entities");
+      const entitiesFolder = root.folder("entities");
       for (const name of ENTITY_NAMES) {
         try {
-          const schema = await base44.entities[name].schema();
+          const schema = await api.entities[name].schema();
           entitiesFolder.file(`${name}.jsonc`, JSON.stringify(schema, null, 2));
         } catch {}
       }

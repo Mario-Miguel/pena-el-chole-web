@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { X, Camera, StickyNote, Trash2, Upload, Download, Calendar, Flag } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -28,7 +28,7 @@ export default function DiaDrawer({ dia, onClose, onUpdate, actividades = [], ta
 
   useEffect(() => {
     if (!fechaStr) return;
-    base44.entities.DiaCalendario.filter({ fecha: fechaStr }).then(results => {
+    api.entities.DiaCalendario.filter({ fecha: fechaStr }).then(results => {
       if (results.length > 0) {
         setDiaData(results[0]);
         setNotas(results[0].notas || "");
@@ -42,10 +42,10 @@ export default function DiaDrawer({ dia, onClose, onUpdate, actividades = [], ta
   const guardarNotas = async () => {
     setGuardando(true);
     if (diaData) {
-      const updated = await base44.entities.DiaCalendario.update(diaData.id, { notas });
+      const updated = await api.entities.DiaCalendario.update(diaData.id, { notas });
       setDiaData(updated);
     } else {
-      const created = await base44.entities.DiaCalendario.create({ fecha: fechaStr, notas, fotos: [] });
+      const created = await api.entities.DiaCalendario.create({ fecha: fechaStr, notas, fotos: [] });
       setDiaData(created);
     }
     setGuardando(false);
@@ -56,14 +56,14 @@ export default function DiaDrawer({ dia, onClose, onUpdate, actividades = [], ta
     const file = e.target.files[0];
     if (!file) return;
     setSubiendo(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    const { file_url } = await api.uploadFile({ file });
     let fotosActuales = diaData?.fotos || [];
     fotosActuales = [...fotosActuales, file_url];
     if (diaData) {
-      const updated = await base44.entities.DiaCalendario.update(diaData.id, { fotos: fotosActuales });
+      const updated = await api.entities.DiaCalendario.update(diaData.id, { fotos: fotosActuales });
       setDiaData(updated);
     } else {
-      const created = await base44.entities.DiaCalendario.create({ fecha: fechaStr, notas, fotos: fotosActuales });
+      const created = await api.entities.DiaCalendario.create({ fecha: fechaStr, notas, fotos: fotosActuales });
       setDiaData(created);
     }
     setSubiendo(false);
@@ -73,7 +73,7 @@ export default function DiaDrawer({ dia, onClose, onUpdate, actividades = [], ta
 
   const eliminarFoto = async (url) => {
     const fotosActuales = (diaData?.fotos || []).filter(f => f !== url);
-    const updated = await base44.entities.DiaCalendario.update(diaData.id, { fotos: fotosActuales });
+    const updated = await api.entities.DiaCalendario.update(diaData.id, { fotos: fotosActuales });
     setDiaData(updated);
     onUpdate();
   };

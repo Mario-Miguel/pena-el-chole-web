@@ -1,4 +1,4 @@
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 
 /**
  * Registra una acción en el log de auditoría (AdminLog).
@@ -10,7 +10,7 @@ import { base44 } from "@/api/base44Client";
  */
 export async function registrarLog({ accion, entidad, descripcion, autorNombre = "Sistema" }) {
   try {
-    await base44.entities.AdminLog.create({
+    await api.entities.AdminLog.create({
       accion,
       entidad,
       descripcion,

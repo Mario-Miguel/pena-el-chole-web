@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { useAuth } from "../auth/AuthContext";
 import { ExternalLink, Pencil, Check, X, Copy, CheckCheck } from "lucide-react";
 
@@ -71,7 +71,7 @@ export default function SocialButton({ red }) {
   const ref = useRef(null);
 
   const cargarConfig = async () => {
-    const configs = await base44.entities.AppConfig.filter({ clave: CONFIG_KEYS[red] });
+    const configs = await api.entities.AppConfig.filter({ clave: CONFIG_KEYS[red] });
     if (configs.length > 0) {
       setUrl(configs[0].valor || DEFAULT_URLS[red]);
       setConfigId(configs[0].id);
@@ -92,9 +92,9 @@ export default function SocialButton({ red }) {
     if (!urlEdit.trim()) return;
     setGuardando(true);
     if (configId) {
-      await base44.entities.AppConfig.update(configId, { valor: urlEdit.trim() });
+      await api.entities.AppConfig.update(configId, { valor: urlEdit.trim() });
     } else {
-      const nueva = await base44.entities.AppConfig.create({ clave: CONFIG_KEYS[red], valor: urlEdit.trim() });
+      const nueva = await api.entities.AppConfig.create({ clave: CONFIG_KEYS[red], valor: urlEdit.trim() });
       setConfigId(nueva.id);
     }
     setUrl(urlEdit.trim());

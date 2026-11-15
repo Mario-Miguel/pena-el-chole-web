@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Trash2, RotateCcw } from "lucide-react";
 import { motion } from "framer-motion";
@@ -14,7 +14,7 @@ export default function VotacionCard({ votacion, onComplete, onEliminar, onRepet
   const hasVoted = !!miVoto;
 
   useEffect(() => {
-    base44.entities.VotoRespuesta.filter({ votacion_id: votacion.id }).then(setVotos);
+    api.entities.VotoRespuesta.filter({ votacion_id: votacion.id }).then(setVotos);
   }, [votacion.id]);
 
   const totalVotos = votos.length;
@@ -23,8 +23,8 @@ export default function VotacionCard({ votacion, onComplete, onEliminar, onRepet
     if (hasVoted || !usuarioId || votacion.completada) return;
     localStorage.setItem(storageKey, opcion);
     forceUpdate(n => n + 1);
-    await base44.entities.VotoRespuesta.create({ votacion_id: votacion.id, opcion, integrante_id: usuarioId });
-    const actualizados = await base44.entities.VotoRespuesta.filter({ votacion_id: votacion.id });
+    await api.entities.VotoRespuesta.create({ votacion_id: votacion.id, opcion, integrante_id: usuarioId });
+    const actualizados = await api.entities.VotoRespuesta.filter({ votacion_id: votacion.id });
     setVotos(actualizados);
   };
 

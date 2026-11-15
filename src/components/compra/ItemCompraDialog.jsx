@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Upload, Trash2, X, Plus, Minus } from "lucide-react";
 
 export default function ItemCompraDialog({ open, onOpenChange, item, integrantes, onSave, onDelete, isNew, puedePagar }) {
@@ -34,7 +34,7 @@ export default function ItemCompraDialog({ open, onOpenChange, item, integrantes
     const file = e.target.files[0];
     if (!file) return;
     setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    const { file_url } = await api.uploadFile({ file });
     set("thumbnail_url", file_url);
     setUploading(false);
     e.target.value = "";
@@ -45,7 +45,7 @@ export default function ItemCompraDialog({ open, onOpenChange, item, integrantes
     if (!files.length) return;
     setUploading(true);
     for (const file of files) {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await api.uploadFile({ file });
       setForm(f => ({ ...f, fotos: [...(f.fotos || []), file_url] }));
     }
     setUploading(false);
@@ -57,7 +57,7 @@ export default function ItemCompraDialog({ open, onOpenChange, item, integrantes
     if (!files.length) return;
     setUploading(true);
     for (const file of files) {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await api.uploadFile({ file });
       setForm(f => ({ ...f, fotos_ticket: [...(f.fotos_ticket || []), file_url] }));
     }
     setUploading(false);
@@ -91,7 +91,7 @@ export default function ItemCompraDialog({ open, onOpenChange, item, integrantes
     if (usandoOtro && form.comprador_nombre?.trim() && form.comprado) {
       const importe = (form.precio || 0) * (form.cantidad || 1);
       if (importe > 0) {
-        await base44.entities.DeudaProveedor.create({
+        await api.entities.DeudaProveedor.create({
           proveedor: form.comprador_nombre.trim(),
           concepto: form.nombre,
           importe,

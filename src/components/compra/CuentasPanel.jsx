@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../auth/AuthContext";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { X, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,7 @@ export default function CuentasPanel({ items = [], onClose, onPagosActualizados 
   const [confirmado, setConfirmado] = useState(false);
 
   useEffect(() => {
-    base44.entities.Integrante.list().then(setIntegrantes);
+    api.entities.Integrante.list().then(setIntegrantes);
   }, []);
 
   // Solo items comprados y no pagados generan deuda
@@ -50,7 +50,7 @@ export default function CuentasPanel({ items = [], onClose, onPagosActualizados 
     if (pagadoNum >= deuda && deuda > 0) {
       const itemsDePersona = items.filter((i) => i.comprador_nombre === nombreEfectivo && i.comprado && !i.pagado);
       await Promise.all(itemsDePersona.map((i) =>
-      base44.entities.ItemCompra.update(i.id, { pagado: true, fecha_pagado: new Date().toISOString() })
+      api.entities.ItemCompra.update(i.id, { pagado: true, fecha_pagado: new Date().toISOString() })
       ));
       if (onPagosActualizados) await onPagosActualizados();
     }

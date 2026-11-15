@@ -1,4 +1,4 @@
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 
 // Logros sugeridos en función del contenido de la app
 export const LOGROS_POR_DEFECTO = [
@@ -26,7 +26,7 @@ export const CATEGORIAS_LOGRO = {
 };
 
 const safeList = async (name) => {
-  try { return await base44.entities[name].list(); } catch { return []; }
+  try { return await api.entities[name].list(); } catch { return []; }
 };
 
 // Computa el progreso de cada integrante en cada logro activo + puntos totales

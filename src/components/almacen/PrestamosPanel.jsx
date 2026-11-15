@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Trash2, CheckCircle, Package, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +30,7 @@ function NuevoPrestamoForm({ items, onGuardado, onCancelar }) {
   const handleGuardar = async () => {
     if (!itemNombre.trim() || !prestadoA.trim() || !fechaPrestamo) return;
     setGuardando(true);
-    await base44.entities.PrestamoAlmacen.create({
+    await api.entities.PrestamoAlmacen.create({
       item_id: itemId || null,
       item_nombre: itemNombre.trim(),
       prestado_a: prestadoA.trim(),
@@ -107,7 +107,7 @@ export default function PrestamosPanel({ items, puedeGestionar }) {
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   const cargar = async () => {
-    const data = await base44.entities.PrestamoAlmacen.list("-fecha_prestamo");
+    const data = await api.entities.PrestamoAlmacen.list("-fecha_prestamo");
     setPrestamos(data);
     setLoading(false);
   };
@@ -115,7 +115,7 @@ export default function PrestamosPanel({ items, puedeGestionar }) {
   useEffect(() => { cargar(); }, []);
 
   const handleDevuelto = async (prestamo) => {
-    await base44.entities.PrestamoAlmacen.update(prestamo.id, {
+    await api.entities.PrestamoAlmacen.update(prestamo.id, {
       devuelto: true,
       fecha_devolucion_real: new Date().toISOString().split("T")[0],
     });
@@ -123,7 +123,7 @@ export default function PrestamosPanel({ items, puedeGestionar }) {
   };
 
   const handleDelete = async (id) => {
-    await base44.entities.PrestamoAlmacen.delete(id);
+    await api.entities.PrestamoAlmacen.delete(id);
     setConfirmDeleteId(null);
     cargar();
   };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../auth/AuthContext";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { X, Send, Download, Users, Building2, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,8 +28,8 @@ export default function CuentasPanelFixed({ items = [], onClose, onPagosActualiz
   const [confirmado, setConfirmado] = useState(false);
 
   useEffect(() => {
-    base44.entities.Integrante.list().then(setIntegrantes);
-    base44.entities.PagoRegistrado.list().then(setPagosRegistrados);
+    api.entities.Integrante.list().then(setIntegrantes);
+    api.entities.PagoRegistrado.list().then(setPagosRegistrados);
   }, []);
 
   // ── Deudas internas (solo integrantes) ──
@@ -125,7 +125,7 @@ export default function CuentasPanelFixed({ items = [], onClose, onPagosActualiz
   const handleRegistrarPago = async () => {
     if (!nombreEfectivo || nuevoPago <= 0) return;
     setPagando(true);
-    const nuevoPagoRecord = await base44.entities.PagoRegistrado.create({
+    const nuevoPagoRecord = await api.entities.PagoRegistrado.create({
       persona: nombreEfectivo,
       importe: nuevoPago,
       registrado_por: sesion?.nombre || "Admin",
@@ -135,7 +135,7 @@ export default function CuentasPanelFixed({ items = [], onClose, onPagosActualiz
     if (totalPagadoTras >= deudaActual && deudaActual > 0) {
       const itemsDePersona = items.filter((i) => i.comprador_nombre === nombreEfectivo && i.comprado && !i.pagado);
       await Promise.all(itemsDePersona.map((i) =>
-        base44.entities.ItemCompra.update(i.id, { pagado: true, fecha_pagado: new Date().toISOString() })
+        api.entities.ItemCompra.update(i.id, { pagado: true, fecha_pagado: new Date().toISOString() })
       ));
       if (onPagosActualizados) await onPagosActualizados();
     }

@@ -1,5 +1,5 @@
 import React from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { AlertTriangle, ShoppingCart } from "lucide-react";
 
 export default function StockBajoPanel({ items, onAbrirDetalle, onCrearCompra }) {
@@ -10,10 +10,10 @@ export default function StockBajoPanel({ items, onAbrirDetalle, onCrearCompra })
   const crearSugerenciaCompra = async (e, item) => {
     e.stopPropagation();
     // Verificar si ya existe un pedido pendiente para este artículo
-    const pedidosExistentes = await base44.entities.ItemCompra.filter({ nombre: item.nombre });
+    const pedidosExistentes = await api.entities.ItemCompra.filter({ nombre: item.nombre });
     const yaTiene = pedidosExistentes.some(p => !p.comprado);
     if (!yaTiene) {
-      await base44.entities.ItemCompra.create({
+      await api.entities.ItemCompra.create({
         nombre: item.nombre,
         descripcion: `Reposición automática por stock bajo (${item.cantidad ?? 0}/${item.stock_minimo} uds)`,
         thumbnail_url: item.miniatura_url || item.imagen_urls?.[0] || item.imagen_url || "",

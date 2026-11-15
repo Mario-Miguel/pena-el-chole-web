@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Search, ChevronDown, QrCode, BarChart2, Trash2, ArrowLeftRight, ShoppingCart, CheckCircle2, CreditCard, Package } from "lucide-react";
 import ConfirmDialog from "../components/ConfirmDialog";
 import HelpIcon from "../components/layout/HelpIcon";
@@ -101,7 +101,7 @@ function TabInventario({ items, cargar, categorias, setCategorias, puedeGestiona
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   const handleCrearCompraRapida = async (form) => {
-    await base44.entities.ItemCompra.create({
+    await api.entities.ItemCompra.create({
       nombre: form.nombre,
       descripcion: form.descripcion,
       thumbnail_url: form.thumbnail_url,
@@ -135,7 +135,7 @@ function TabInventario({ items, cargar, categorias, setCategorias, puedeGestiona
   };
 
   const handleDelete = async (id) => {
-    await base44.entities.ItemAlmacen.delete(id);
+    await api.entities.ItemAlmacen.delete(id);
     setConfirmDeleteId(null);
     cargar();
   };
@@ -281,10 +281,10 @@ function TabInventario({ items, cargar, categorias, setCategorias, puedeGestiona
           await handleCrearCompraRapida(form);
           // Si está marcado como comprado y tiene referencia al item de almacén → sumar stock
           if (form.comprado && form.item_almacen_id) {
-            const almacenItems = await base44.entities.ItemAlmacen.filter({ id: form.item_almacen_id });
+            const almacenItems = await api.entities.ItemAlmacen.filter({ id: form.item_almacen_id });
             if (almacenItems.length > 0) {
               const ai = almacenItems[0];
-              await base44.entities.ItemAlmacen.update(ai.id, { cantidad: (ai.cantidad || 0) + (form.cantidad || 1) });
+              await api.entities.ItemAlmacen.update(ai.id, { cantidad: (ai.cantidad || 0) + (form.cantidad || 1) });
             }
           }
           cargar();
@@ -307,7 +307,7 @@ function TabPedidos({ items: itemsAlmacen, cargarAlmacen, integrantes, puedePaga
   const [pagadosOpen, setPagadosOpen] = useState(false);
 
   const loadData = useCallback(async () => {
-    const its = await base44.entities.ItemCompra.list("-created_date");
+    const its = await api.entities.ItemCompra.list("-created_date");
     setItems(its);
     setLoading(false);
   }, []);
@@ -319,22 +319,22 @@ function TabPedidos({ items: itemsAlmacen, cargarAlmacen, integrantes, puedePaga
     const eraComprado = selectedItem?.comprado;
     const ahoraComprado = form.comprado;
 
-    if (selectedItem) await base44.entities.ItemCompra.update(selectedItem.id, form);
-    else await base44.entities.ItemCompra.create(form);
+    if (selectedItem) await api.entities.ItemCompra.update(selectedItem.id, form);
+    else await api.entities.ItemCompra.create(form);
 
     // Integración almacén: si pasa de "no comprado" a "comprado" → sumar/crear en inventario
     if (ahoraComprado && (!eraComprado || esNuevo)) {
       const nombreBuscar = form.nombre?.trim().toLowerCase();
       if (nombreBuscar) {
-        const todosAlmacen = await base44.entities.ItemAlmacen.list();
+        const todosAlmacen = await api.entities.ItemAlmacen.list();
         const encontrado = todosAlmacen.find(a => a.nombre.trim().toLowerCase() === nombreBuscar);
         if (encontrado) {
-          await base44.entities.ItemAlmacen.update(encontrado.id, {
+          await api.entities.ItemAlmacen.update(encontrado.id, {
             cantidad: (encontrado.cantidad || 0) + (form.cantidad || 1),
           });
         } else {
           // Crear nuevo artículo en almacén
-          await base44.entities.ItemAlmacen.create({
+          await api.entities.ItemAlmacen.create({
             nombre: form.nombre,
             categoria: "otros",
             cantidad: form.cantidad || 1,
@@ -354,17 +354,17 @@ function TabPedidos({ items: itemsAlmacen, cargarAlmacen, integrantes, puedePaga
   const handleDelete = async () => {
     if (!selectedItem) return;
     const itemEliminar = selectedItem;
-    await base44.entities.ItemCompra.delete(itemEliminar.id);
+    await api.entities.ItemCompra.delete(itemEliminar.id);
     if (itemEliminar.comprador_nombre && itemEliminar.comprado) {
       const [todosItems, pagos] = await Promise.all([
-        base44.entities.ItemCompra.list(),
-        base44.entities.PagoRegistrado.list(),
+        api.entities.ItemCompra.list(),
+        api.entities.PagoRegistrado.list(),
       ]);
       const restantes = todosItems.filter(i => i.id !== itemEliminar.id && i.comprador_nombre === itemEliminar.comprador_nombre && i.comprado);
       const deudaRestante = restantes.reduce((s, i) => s + (i.precio || 0) * (i.cantidad || 1), 0);
       if (deudaRestante === 0) {
         const pagosPersona = pagos.filter(p => p.persona === itemEliminar.comprador_nombre);
-        await Promise.all(pagosPersona.map(p => base44.entities.PagoRegistrado.delete(p.id)));
+        await Promise.all(pagosPersona.map(p => api.entities.PagoRegistrado.delete(p.id)));
       }
     }
     setDialogOpen(false);
@@ -533,7 +533,7 @@ export default function Almacen() {
   const puedePagar = sesion?.esAdmin || sesion?.cargo === "presidente" || sesion?.cargo === "tesorero";
 
   const cargarCategorias = useCallback(async () => {
-    const configs = await base44.entities.AppConfig.filter({ clave: "almacen_categorias" });
+    const configs = await api.entities.AppConfig.filter({ clave: "almacen_categorias" });
     if (configs.length > 0) {
       try {
         const parsed = JSON.parse(configs[0].valor);
@@ -543,7 +543,7 @@ export default function Almacen() {
   }, []);
 
   const cargar = useCallback(async () => {
-    const data = await base44.entities.ItemAlmacen.list("-created_date");
+    const data = await api.entities.ItemAlmacen.list("-created_date");
     setItems(data);
     setLoading(false);
   }, []);
@@ -551,7 +551,7 @@ export default function Almacen() {
   useEffect(() => {
     cargarCategorias();
     cargar();
-    base44.entities.Integrante.list().then(setIntegrantes).catch(() => {});
+    api.entities.Integrante.list().then(setIntegrantes).catch(() => {});
   }, [cargar, cargarCategorias]);
 
   if (loading) return (

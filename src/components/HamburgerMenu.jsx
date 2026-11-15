@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "./auth/AuthContext";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { getSavedMenuOrder, ALL_PAGES, getDisabledPages } from "../lib/menuConfig";
 import { getStoredLabels } from "../lib/appConfig";
 
@@ -56,7 +56,7 @@ export default function HamburgerMenu() {
 
   const cargarMenu = async () => {
     try {
-      const configs = await base44.entities.AppConfig.filter({ clave: "menu_desactivado" });
+      const configs = await api.entities.AppConfig.filter({ clave: "menu_desactivado" });
       const disabled = configs[0]?.valor ? JSON.parse(configs[0].valor) : [];
       setMenuItems(buildItems(disabled, getStoredLabels()));
     } catch {

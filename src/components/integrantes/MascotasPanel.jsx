@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Trash2, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,11 +33,11 @@ function NuevaMascotaForm({ integrantes, onGuardado, onCancelar }) {
     setGuardando(true);
     let foto_url = "";
     if (fotoFile) {
-      const res = await base44.integrations.Core.UploadFile({ file: fotoFile });
+      const res = await api.uploadFile({ file: fotoFile });
       foto_url = res.file_url;
     }
     const duenio = integrantes.find(i => i.id === duenioId);
-    await base44.entities.Mascota.create({
+    await api.entities.Mascota.create({
       nombre: nombre.trim(),
       especie,
       raza: raza.trim(),
@@ -122,7 +122,7 @@ export default function MascotasPanel({ integrantes, puedeGestionar }) {
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   const cargar = async () => {
-    const data = await base44.entities.Mascota.list();
+    const data = await api.entities.Mascota.list();
     setMascotas(data.sort((a, b) => a.nombre.localeCompare(b.nombre)));
     setLoading(false);
   };
@@ -130,7 +130,7 @@ export default function MascotasPanel({ integrantes, puedeGestionar }) {
   useEffect(() => { cargar(); }, []);
 
   const handleDelete = async (id) => {
-    await base44.entities.Mascota.delete(id);
+    await api.entities.Mascota.delete(id);
     setConfirmDeleteId(null);
     cargar();
   };

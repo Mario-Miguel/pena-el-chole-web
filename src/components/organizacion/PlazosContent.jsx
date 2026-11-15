@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Trash2, CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -279,19 +279,19 @@ export default function PlazosContent() {
   const cargar = useCallback(async () => {
     // Filtramos solo los plazos de fases de carroza (categorías de FASES)
     const fasesKeys = FASES.map(f => f.value);
-    const data = await base44.entities.PlazoCalendario.list("fecha_inicio");
+    const data = await api.entities.PlazoCalendario.list("fecha_inicio");
     setPlazos(data.filter(p => fasesKeys.includes(p.categoria)));
   }, []);
 
   useEffect(() => { cargar(); }, [cargar]);
 
   const handleGuardar = async (data) => {
-    await base44.entities.PlazoCalendario.create(data);
+    await api.entities.PlazoCalendario.create(data);
     cargar();
   };
 
   const handleEliminar = async (id) => {
-    await base44.entities.PlazoCalendario.delete(id);
+    await api.entities.PlazoCalendario.delete(id);
     cargar();
   };
 

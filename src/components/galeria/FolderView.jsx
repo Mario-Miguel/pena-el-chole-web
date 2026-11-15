@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ArrowLeft, Upload, Trash2, Video, Camera, X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { motion, AnimatePresence } from "framer-motion";
 import MediaViewer from "./MediaViewer";
 import { useAuth } from "../auth/AuthContext";
@@ -19,7 +19,7 @@ export default function FolderView({ carpeta, onBack, onRefresh }) {
   // Mapa integrante_id → nombre
   const { data: integrantes = [] } = useQuery({
     queryKey: ["integrantes-galeria"],
-    queryFn: () => base44.entities.Integrante.list(),
+    queryFn: () => api.entities.Integrante.list(),
     staleTime: 5 * 60 * 1000,
   });
   const nombrePorSesion = (sesionId) => {
@@ -32,7 +32,7 @@ export default function FolderView({ carpeta, onBack, onRefresh }) {
   }, [carpeta.id]);
 
   const loadItems = async () => {
-    const data = await base44.entities.MediaItem.filter({ carpeta_id: carpeta.id }, "-created_date");
+    const data = await api.entities.MediaItem.filter({ carpeta_id: carpeta.id }, "-created_date");
     setItems(data);
     setLoading(false);
   };
@@ -44,8 +44,8 @@ export default function FolderView({ carpeta, onBack, onRefresh }) {
 
     for (const file of files) {
       const tipo = file.type.startsWith("video") ? "video" : "foto";
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      const nuevo = await base44.entities.MediaItem.create({
+      const { file_url } = await api.uploadFile({ file });
+      const nuevo = await api.entities.MediaItem.create({
         carpeta_id: carpeta.id,
         tipo,
         url: file_url,
@@ -53,7 +53,7 @@ export default function FolderView({ carpeta, onBack, onRefresh }) {
         subido_por: sesion?.integranteId || null,
       });
       if (tipo === "foto" && !carpeta.miniatura_url) {
-        await base44.entities.Carpeta.update(carpeta.id, { miniatura_url: file_url });
+        await api.entities.Carpeta.update(carpeta.id, { miniatura_url: file_url });
         carpeta.miniatura_url = file_url;
         onRefresh();
       }
@@ -66,27 +66,27 @@ export default function FolderView({ carpeta, onBack, onRefresh }) {
   const handleChangeThumbnail = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    await base44.entities.Carpeta.update(carpeta.id, { miniatura_url: file_url });
+    const { file_url } = await api.uploadFile({ file });
+    await api.entities.Carpeta.update(carpeta.id, { miniatura_url: file_url });
     carpeta.miniatura_url = file_url;
     onRefresh();
     e.target.value = "";
   };
 
   const handleRemoveThumbnail = async () => {
-    await base44.entities.Carpeta.update(carpeta.id, { miniatura_url: null });
+    await api.entities.Carpeta.update(carpeta.id, { miniatura_url: null });
     carpeta.miniatura_url = null;
     onRefresh();
   };
 
   const handleDelete = async (item) => {
-    await base44.entities.Papelera.create({
+    await api.entities.Papelera.create({
       entidad: "MediaItem",
       descripcion: `${item.nombre} (${item.tipo}) en carpeta "${carpeta.nombre}"`,
       datos_json: JSON.stringify(item),
       eliminado_por: sesion?.nombre || "Desconocido",
     });
-    await base44.entities.MediaItem.delete(item.id);
+    await api.entities.MediaItem.delete(item.id);
     setItems(prev => prev.filter(i => i.id !== item.id));
   };
 

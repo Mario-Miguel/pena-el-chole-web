@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus } from "lucide-react";
 import ResultadoAnioCard from "../resultados/ResultadoAnioCard";
 
@@ -9,7 +9,7 @@ export default function ResultadosContent() {
   const [nuevoAnio, setNuevoAnio] = useState("");
 
   const cargar = useCallback(async () => {
-    const data = await base44.entities.ResultadoAnio.list("-anio");
+    const data = await api.entities.ResultadoAnio.list("-anio");
     setResultados(data);
     setLoading(false);
   }, []);
@@ -19,13 +19,13 @@ export default function ResultadosContent() {
   const handleCreate = async () => {
     const anio = parseInt(nuevoAnio, 10);
     if (!anio) return;
-    await base44.entities.ResultadoAnio.create({ anio, filas: [] });
+    await api.entities.ResultadoAnio.create({ anio, filas: [] });
     setNuevoAnio("");
     cargar();
   };
 
   const handleDelete = async (id) => {
-    await base44.entities.ResultadoAnio.delete(id);
+    await api.entities.ResultadoAnio.delete(id);
     cargar();
   };
 

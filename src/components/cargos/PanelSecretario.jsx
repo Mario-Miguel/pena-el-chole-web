@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -11,10 +11,10 @@ export default function PanelSecretario() {
 
   const cargar = useCallback(async () => {
     const [integrantes, notifs, votaciones, tareas] = await Promise.all([
-      base44.entities.Integrante.list(),
-      base44.entities.Notificacion.list("-created_date", 10),
-      base44.entities.Votacion.list(),
-      base44.entities.Tarea.list(),
+      api.entities.Integrante.list(),
+      api.entities.Notificacion.list("-created_date", 10),
+      api.entities.Votacion.list(),
+      api.entities.Tarea.list(),
     ]);
     setDatos({ integrantes, notifs, votaciones, tareas });
     setLoading(false);

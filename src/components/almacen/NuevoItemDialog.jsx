@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { X, Upload, Loader2, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,7 +78,7 @@ export default function NuevoItemDialog({ open, onClose, onCreado, categorias, i
 
     let miniatura_url = itemEditar?.miniatura_url || "";
     if (miniaturaFile) {
-      const res = await base44.integrations.Core.UploadFile({ file: miniaturaFile });
+      const res = await api.uploadFile({ file: miniaturaFile });
       miniatura_url = res.file_url;
     }
 
@@ -90,7 +90,7 @@ export default function NuevoItemDialog({ open, onClose, onCreado, categorias, i
     if (nuevasImagenes.length > 0) {
       setSubiendoImg(true);
       imagen_urls_nuevas = await Promise.all(nuevasImagenes.map(img =>
-        base44.integrations.Core.UploadFile({ file: img.file }).then(r => r.file_url)
+        api.uploadFile({ file: img.file }).then(r => r.file_url)
       ));
       setSubiendoImg(false);
     }
@@ -108,9 +108,9 @@ export default function NuevoItemDialog({ open, onClose, onCreado, categorias, i
     };
 
     if (modoEdicion) {
-      await base44.entities.ItemAlmacen.update(itemEditar.id, datos);
+      await api.entities.ItemAlmacen.update(itemEditar.id, datos);
     } else {
-      await base44.entities.ItemAlmacen.create(datos);
+      await api.entities.ItemAlmacen.create(datos);
     }
 
     setGuardando(false);

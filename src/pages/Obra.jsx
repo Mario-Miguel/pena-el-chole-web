@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Theater } from "lucide-react";
 import HelpIcon from "../components/layout/HelpIcon";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ export default function Obra() {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const cargar = useCallback(async () => {
-    const data = await base44.entities.ObraAnio.list("-anio");
+    const data = await api.entities.ObraAnio.list("-anio");
     setAnios(data);
     setLoading(false);
   }, []);
@@ -23,12 +23,12 @@ export default function Obra() {
   useEffect(() => { cargar(); }, [cargar]);
 
   const handleCreate = async (datos) => {
-    await base44.entities.ObraAnio.create(datos);
+    await api.entities.ObraAnio.create(datos);
     cargar();
   };
 
   const handleDelete = async (id) => {
-    await base44.entities.ObraAnio.delete(id);
+    await api.entities.ObraAnio.delete(id);
     cargar();
   };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { registrarLog } from "../../lib/registrarLog";
 import {
@@ -21,7 +21,7 @@ export default function AjustesApp() {
   const [showLabels, setShowLabels]       = useState(false);
 
   useEffect(() => {
-    base44.entities.AppConfig.list().then(data => {
+    api.entities.AppConfig.list().then(data => {
       setConfigs(data);
       const color    = data.find(c => c.clave === COLOR_KEY);
       const colorSec = data.find(c => c.clave === COLOR_SEC_KEY);
@@ -58,9 +58,9 @@ export default function AjustesApp() {
   const upsert = async (clave, valor) => {
     const existing = configs.find(c => c.clave === clave);
     if (existing) {
-      return base44.entities.AppConfig.update(existing.id, { valor });
+      return api.entities.AppConfig.update(existing.id, { valor });
     } else {
-      return base44.entities.AppConfig.create({ clave, valor });
+      return api.entities.AppConfig.create({ clave, valor });
     }
   };
 
@@ -72,7 +72,7 @@ export default function AjustesApp() {
       upsert(NOMBRE_KEY, nombreApp),
       upsert(LABELS_KEY, JSON.stringify(labels)),
     ]);
-    const data = await base44.entities.AppConfig.list();
+    const data = await api.entities.AppConfig.list();
     setConfigs(data);
     setGuardando(false);
     setGuardado(true);

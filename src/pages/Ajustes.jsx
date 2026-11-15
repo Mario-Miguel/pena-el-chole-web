@@ -10,7 +10,7 @@ import BottomNavConfig from "../components/layout/BottomNavConfig";
 import { motion } from "framer-motion";
 import { useAuth } from "../components/auth/AuthContext";
 import { usePushNotifications } from "../components/notifications/usePushNotifications";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ALL_PAGES, getSavedMenuOrder } from "../lib/menuConfig";
@@ -217,7 +217,7 @@ export default function Ajustes() {
   const handleEnviarFeedback = async () => {
     if (!feedback.mensaje.trim()) return;
     setEnviando(true);
-    await base44.entities.FeedbackApp.create({
+    await api.entities.FeedbackApp.create({
       tipo: feedback.tipo,
       mensaje: feedback.mensaje.trim(),
       autor_nombre: sesion?.nombre || "Anónimo",

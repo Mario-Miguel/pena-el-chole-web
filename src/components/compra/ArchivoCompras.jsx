@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Archive, ChevronDown, ChevronUp, Trash2, ShoppingBag, CreditCard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../auth/AuthContext";
@@ -17,7 +17,7 @@ export default function ArchivoCompras({ items, onArchivar, onRefresh }) {
   const [archivando, setArchivando] = useState(false);
 
   const loadArchivos = useCallback(async () => {
-    const data = await base44.entities.CompraArchivo.list("-created_date");
+    const data = await api.entities.CompraArchivo.list("-created_date");
     setArchivos(data);
   }, []);
 
@@ -26,7 +26,7 @@ export default function ArchivoCompras({ items, onArchivar, onRefresh }) {
   const handleArchivar = async () => {
     if (!anio.trim()) return;
     setArchivando(true);
-    const pagos = await base44.entities.PagoRegistrado.list();
+    const pagos = await api.entities.PagoRegistrado.list();
     const totalGasto = items.reduce((sum, i) => sum + (i.precio || 0) * (i.cantidad || 1), 0);
 
     // Calcular resumen de cuentas
@@ -41,7 +41,7 @@ export default function ArchivoCompras({ items, onArchivar, onRefresh }) {
       cuentasMap[p.persona].pagado += p.importe || 0;
     });
 
-    await base44.entities.CompraArchivo.create({
+    await api.entities.CompraArchivo.create({
       anio,
       titulo: `Archivo compras ${anio}`,
       items_json: JSON.stringify(items.map(i => ({
@@ -60,8 +60,8 @@ export default function ArchivoCompras({ items, onArchivar, onRefresh }) {
 
     // Eliminar todos los items y pagos registrados
     await Promise.all([
-      ...items.map(i => base44.entities.ItemCompra.delete(i.id)),
-      ...pagos.map(p => base44.entities.PagoRegistrado.delete(p.id)),
+      ...items.map(i => api.entities.ItemCompra.delete(i.id)),
+      ...pagos.map(p => api.entities.PagoRegistrado.delete(p.id)),
     ]);
 
     // Limpiar log de pagos en Admin también
@@ -75,7 +75,7 @@ export default function ArchivoCompras({ items, onArchivar, onRefresh }) {
 
   const handleEliminarArchivo = async (id) => {
     if (!confirm("¿Eliminar este archivo? No se puede deshacer.")) return;
-    await base44.entities.CompraArchivo.delete(id);
+    await api.entities.CompraArchivo.delete(id);
     loadArchivos();
   };
 

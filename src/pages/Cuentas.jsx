@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, ChevronDown, ChevronUp, ShoppingCart, CheckCircle2, CreditCard } from "lucide-react";
 import HelpIcon from "../components/layout/HelpIcon";
 import { useAuth } from "../components/auth/AuthContext";
@@ -24,8 +24,8 @@ export default function Cuentas() {
 
   const loadData = useCallback(async () => {
     const [its, ints] = await Promise.all([
-    base44.entities.ItemCompra.list("-created_date"),
-    base44.entities.Integrante.list()]
+    api.entities.ItemCompra.list("-created_date"),
+    api.entities.Integrante.list()]
     );
     setItems(its);
     setIntegrantes(ints);
@@ -35,8 +35,8 @@ export default function Cuentas() {
   useEffect(() => {loadData();}, [loadData]);
 
   const handleSave = async (form) => {
-    if (selectedItem) await base44.entities.ItemCompra.update(selectedItem.id, form);else
-    await base44.entities.ItemCompra.create(form);
+    if (selectedItem) await api.entities.ItemCompra.update(selectedItem.id, form);else
+    await api.entities.ItemCompra.create(form);
     setDialogOpen(false);
     setSelectedItem(null);
     loadData();
@@ -45,20 +45,20 @@ export default function Cuentas() {
   const handleDelete = async () => {
     if (!selectedItem) return;
     const itemEliminar = selectedItem;
-    await base44.entities.ItemCompra.delete(itemEliminar.id);
+    await api.entities.ItemCompra.delete(itemEliminar.id);
 
     // Si el item tenía comprador y estaba comprado, recalcular si quedan deudas
     if (itemEliminar.comprador_nombre && itemEliminar.comprado) {
       const [todosItems, pagos] = await Promise.all([
-        base44.entities.ItemCompra.list(),
-        base44.entities.PagoRegistrado.list(),
+        api.entities.ItemCompra.list(),
+        api.entities.PagoRegistrado.list(),
       ]);
       const restantes = todosItems.filter(i => i.id !== itemEliminar.id && i.comprador_nombre === itemEliminar.comprador_nombre && i.comprado);
       const deudaRestante = restantes.reduce((s, i) => s + (i.precio || 0) * (i.cantidad || 1), 0);
       if (deudaRestante === 0) {
         // Sin deuda → borrar pagos registrados de esa persona
         const pagosPersona = pagos.filter(p => p.persona === itemEliminar.comprador_nombre);
-        await Promise.all(pagosPersona.map(p => base44.entities.PagoRegistrado.delete(p.id)));
+        await Promise.all(pagosPersona.map(p => api.entities.PagoRegistrado.delete(p.id)));
       }
     }
 

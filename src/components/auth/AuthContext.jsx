@@ -1,64 +1,56 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 
 const AuthContext = createContext(null);
 
+// Usuario especial de administración; la contraseña la valida el backend
 export const ADMIN_ID = "__admin__";
-export const ADMIN_PASSWORD = "Adminadmin3366";
+
+const SESION_KEY = "pena_sesion";
 
 export function AuthProvider({ children }) {
   const [sesion, setSesion] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const guardarSesion = (s) => {
+    setSesion(s);
+    localStorage.setItem(SESION_KEY, JSON.stringify(s));
+  };
+
   useEffect(() => {
-    const init = async () => {
-      const saved = localStorage.getItem("pena_sesion");
-      if (saved) {
-        try { setSesion(JSON.parse(saved)); } catch {}
-      }
-      setLoading(false);
-    };
-    init();
+    const saved = localStorage.getItem(SESION_KEY);
+    if (saved && api.auth.isAuthenticated()) {
+      try { setSesion(JSON.parse(saved)); } catch {}
+    } else {
+      localStorage.removeItem(SESION_KEY);
+    }
+    setLoading(false);
   }, []);
 
+  // El backend valida usuario/contraseña y devuelve { token, sesion }
   const login = async (username, password) => {
-    if (username === ADMIN_ID) {
-      if (password !== ADMIN_PASSWORD) throw new Error("Contraseña incorrecta");
-      const s = { integranteId: ADMIN_ID, nombre: "Admin", cargo: null, avatarUrl: null, esAdmin: true };
-      setSesion(s);
-      localStorage.setItem("pena_sesion", JSON.stringify(s));
-      return s;
-    }
-    const sesiones = await base44.entities.SesionUsuario.list();
-    const sesionDB = sesiones.find(s => s.usuario && s.usuario.toLowerCase() === String(username).toLowerCase());
-    if (!sesionDB) throw new Error("Usuario no encontrado");
-    if (sesionDB.disabled) throw new Error("Usuario desactivado");
-    if (sesionDB.contrasena !== password) throw new Error("Contraseña incorrecta");
-
-    const ints = await base44.entities.Integrante.filter({ id: sesionDB.integrante_id });
-    const integrante = ints[0] || { nombre: "Desconocido" };
-
-    const s = {
-      integranteId: sesionDB.integrante_id,
-      nombre: integrante.nombre,
-      cargo: integrante.cargo,
-      avatarUrl: sesionDB.avatar_url || null,
-      esAdmin: false,
-    };
-    setSesion(s);
-    localStorage.setItem("pena_sesion", JSON.stringify(s));
+    const s = await api.auth.login(username, password);
+    guardarSesion(s);
     return s;
   };
 
   const logout = () => {
+    api.auth.logout();
     setSesion(null);
-    localStorage.removeItem("pena_sesion");
+    localStorage.removeItem(SESION_KEY);
   };
+
+  // Vuelve a leer la sesión del backend (p. ej. tras cambiar el avatar)
+  const refreshSesion = useCallback(async () => {
+    const s = await api.auth.me();
+    guardarSesion(s);
+    return s;
+  }, []);
 
   const puedeConfigurar = sesion?.esAdmin || sesion?.cargo === "presidente" || sesion?.cargo === "vicepresidente";
 
   return (
-    <AuthContext.Provider value={{ sesion, loading, login, logout, puedeConfigurar }}>
+    <AuthContext.Provider value={{ sesion, loading, login, logout, refreshSesion, puedeConfigurar }}>
       {children}
     </AuthContext.Provider>
   );

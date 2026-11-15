@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
@@ -366,10 +366,10 @@ export default function HerramientasCargo({ cargo }) {
 
   const cargar = useCallback(async () => {
     const [integrantes, items, pagos, cuotas] = await Promise.all([
-      base44.entities.Integrante.list(),
-      base44.entities.ItemCompra.list(),
-      base44.entities.PagoRegistrado.list(),
-      base44.entities.Cuota.list().catch(() => []),
+      api.entities.Integrante.list(),
+      api.entities.ItemCompra.list(),
+      api.entities.PagoRegistrado.list(),
+      api.entities.Cuota.list().catch(() => []),
     ]);
     setDatos({ integrantes, items, pagos, cuotas });
     setLoading(false);

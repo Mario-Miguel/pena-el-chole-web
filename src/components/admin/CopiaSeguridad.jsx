@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import {
   Download, Upload, Database, RefreshCw, ChevronDown, ChevronRight,
   FileJson, AlertTriangle, CheckCircle2, Search, X
@@ -84,7 +84,7 @@ async function fetchAll(name, onProgress) {
   let skip = 0;
   const limit = 500;
   while (true) {
-    const batch = await base44.entities[name].list("-created_date", limit, skip);
+    const batch = await api.entities[name].list("-created_date", limit, skip);
     all.push(...batch);
     onProgress?.(name, all.length);
     if (batch.length < limit) break;
@@ -232,13 +232,13 @@ export default function CopiaSeguridad({ sesion }) {
           const existing = await fetchAll(key);
           for (let j = 0; j < existing.length; j += 500) {
             const ids = existing.slice(j, j + 500).map(r => r.id);
-            if (ids.length) await base44.entities[key].deleteMany({ id: { $in: ids } });
+            if (ids.length) await api.entities[key].deleteMany({ id: { $in: ids } });
           }
           setProgress(p => ({ ...p, phase: "creando" }));
           for (let j = 0; j < records.length; j += 400) {
             const chunk = records.slice(j, j + 400);
             const remapped = chunk.map(r => remapRecord(r, key, idMap));
-            const created = await base44.entities[key].bulkCreate(remapped);
+            const created = await api.entities[key].bulkCreate(remapped);
             (created || []).forEach((c, idx) => {
               if (chunk[idx]?.id) idMap[chunk[idx].id] = c.id;
             });

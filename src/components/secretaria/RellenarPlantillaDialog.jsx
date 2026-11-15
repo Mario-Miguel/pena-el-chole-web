@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { X, Download, Save, FileText } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 
 export default function RellenarPlantillaDialog({ plantilla, onClose, onGuardado }) {
   const [campos, setCampos] = useState({
@@ -18,7 +18,7 @@ export default function RellenarPlantillaDialog({ plantilla, onClose, onGuardado
 
   const guardar = async () => {
     setGuardando(true);
-    await base44.entities.Documento.create({
+    await api.entities.Documento.create({
       nombre: campos.nombre,
       tipo: plantilla.tipo,
       descripcion: campos.descripcion,

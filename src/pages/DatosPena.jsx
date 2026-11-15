@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Building2, Pencil, Check, X, Plus, Trash2 } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthContext";
 
@@ -61,21 +61,21 @@ export default function DatosPena() {
 
   const { data: configs = [], isLoading } = useQuery({
     queryKey: ["app_config_pena"],
-    queryFn: () => base44.entities.AppConfig.list("clave"),
+    queryFn: () => api.entities.AppConfig.list("clave"),
   });
 
   const map = configs.reduce((m, c) => { m[c.clave] = c; return m; }, {});
 
   const upsert = async ({ clave, valor }) => {
     const existing = map[clave];
-    if (existing) await base44.entities.AppConfig.update(existing.id, { valor });
-    else await base44.entities.AppConfig.create({ clave, valor });
+    if (existing) await api.entities.AppConfig.update(existing.id, { valor });
+    else await api.entities.AppConfig.create({ clave, valor });
     qc.invalidateQueries({ queryKey: ["app_config_pena"] });
   };
 
   const del = async (clave) => {
     const existing = map[clave];
-    if (existing) { await base44.entities.AppConfig.delete(existing.id); qc.invalidateQueries({ queryKey: ["app_config_pena"] }); }
+    if (existing) { await api.entities.AppConfig.delete(existing.id); qc.invalidateQueries({ queryKey: ["app_config_pena"] }); }
   };
 
   // Campos personalizados

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import CervezaChart from "../components/cerveza/CervezaChart";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Trash2, Archive, ChevronDown, ChevronUp, Search, Wallet, Package, Users } from "lucide-react";
 import HelpIcon from "../components/layout/HelpIcon";
 import { Button } from "@/components/ui/button";
@@ -66,11 +66,11 @@ export default function Cerveza() {
         const entrada = cervezaEntradas.find(e => e.id === entradaId);
         if (!entrada) continue;
         const newCount = (entrada.cervezas || 0) + tipos.length;
-        await base44.entities.CervezaEntrada.update(entradaId, { cervezas: newCount });
+        await api.entities.CervezaEntrada.update(entradaId, { cervezas: newCount });
         const consumos = tipos.filter(Boolean).map(tipo => ({
           tipo, cantidad: 1, integrante_id: entradaId, integrante_nombre: entrada.nombre || "",
         }));
-        if (consumos.length) await base44.entities.ConsumoCerveza.bulkCreate(consumos);
+        if (consumos.length) await api.entities.ConsumoCerveza.bulkCreate(consumos);
         setConsumoPorTipo(prev => {
           const next = { ...prev };
           for (const t of tipos.filter(Boolean)) next[t] = (next[t] || 0) + 1;
@@ -88,12 +88,12 @@ export default function Cerveza() {
 
   const loadData = useCallback(async () => {
     const [members, configs, entradas, sesionesData, consumos, lotes] = await Promise.all([
-      base44.entities.Integrante.list(),
-      base44.entities.AppConfig.filter({ clave: PRICE_CONFIG_KEY }),
-      base44.entities.CervezaEntrada.list("-created_date"),
-      base44.entities.SesionUsuario.list(),
-      base44.entities.ConsumoCerveza.list(),
-      base44.entities.LoteCerveza.list(),
+      api.entities.Integrante.list(),
+      api.entities.AppConfig.filter({ clave: PRICE_CONFIG_KEY }),
+      api.entities.CervezaEntrada.list("-created_date"),
+      api.entities.SesionUsuario.list(),
+      api.entities.ConsumoCerveza.list(),
+      api.entities.LoteCerveza.list(),
     ]);
     setSesiones(sesionesData);
     const membersSorted = members.sort((a, b) => a.nombre.localeCompare(b.nombre));
@@ -107,12 +107,12 @@ export default function Cerveza() {
     let entradasFinal = [...entradas];
     if (faltantes.length > 0) {
       const nuevas = await Promise.all(
-        faltantes.map(m => base44.entities.CervezaEntrada.create({ nombre: m.nombre, cervezas: 0 }))
+        faltantes.map(m => api.entities.CervezaEntrada.create({ nombre: m.nombre, cervezas: 0 }))
       );
       entradasFinal = [...entradas, ...nuevas];
     }
     if (!entradasFinal.find(e => e.nombre.toLowerCase() === "invitados")) {
-      const nuevaInv = await base44.entities.CervezaEntrada.create({ nombre: "Invitados", cervezas: 0, pagado: 0 });
+      const nuevaInv = await api.entities.CervezaEntrada.create({ nombre: "Invitados", cervezas: 0, pagado: 0 });
       entradasFinal = [...entradasFinal, nuevaInv];
     }
     setCervezaEntradas(entradasFinal);
@@ -140,7 +140,7 @@ export default function Cerveza() {
     setUltimoTipoPorIntegrante(ultimoPorInt);
 
     // Cargar archivos de cerveza
-    const allConfigs = await base44.entities.AppConfig.list();
+    const allConfigs = await api.entities.AppConfig.list();
     const archivoCerveza = allConfigs
       .filter(c => c.clave.startsWith("cerveza_archivo_"))
       .sort((a, b) => b.created_date.localeCompare(a.created_date));
@@ -154,11 +154,11 @@ export default function Cerveza() {
   const handleSavePrecio = async (val) => {
     if (!puedeArchivar) return;
     setPrecio(val);
-    const existing = await base44.entities.AppConfig.filter({ clave: PRICE_CONFIG_KEY });
+    const existing = await api.entities.AppConfig.filter({ clave: PRICE_CONFIG_KEY });
     if (existing.length > 0) {
-      await base44.entities.AppConfig.update(existing[0].id, { valor: val.toString() });
+      await api.entities.AppConfig.update(existing[0].id, { valor: val.toString() });
     } else {
-      await base44.entities.AppConfig.create({ clave: PRICE_CONFIG_KEY, valor: val.toString() });
+      await api.entities.AppConfig.create({ clave: PRICE_CONFIG_KEY, valor: val.toString() });
     }
   };
 
@@ -166,11 +166,11 @@ export default function Cerveza() {
   const handleUpdateCervezas = async (id, newCount, tipoCerveza, accion) => {
     const entrada = cervezaEntradas.find(e => e.id === id);
     setCervezaEntradas(prev => prev.map(e => e.id === id ? { ...e, cervezas: newCount } : e));
-    await base44.entities.CervezaEntrada.update(id, { cervezas: newCount });
+    await api.entities.CervezaEntrada.update(id, { cervezas: newCount });
 
     if (tipoCerveza && accion === "add") {
       // Registrar consumo
-      await base44.entities.ConsumoCerveza.create({
+      await api.entities.ConsumoCerveza.create({
         tipo: tipoCerveza,
         cantidad: 1,
         integrante_id: id,
@@ -180,14 +180,14 @@ export default function Cerveza() {
       setUltimoTipoPorIntegrante(prev => ({ ...prev, [id]: tipoCerveza }));
     } else if (tipoCerveza && accion === "remove") {
       // Revertir consumo: buscar y borrar un registro de consumo de ese tipo para ese integrante
-      const consumos = await base44.entities.ConsumoCerveza.filter({ integrante_id: id, tipo: tipoCerveza });
+      const consumos = await api.entities.ConsumoCerveza.filter({ integrante_id: id, tipo: tipoCerveza });
       if (consumos.length > 0) {
         // Borrar el más reciente
         const masReciente = consumos.sort((a, b) => (b.created_date || "").localeCompare(a.created_date || ""))[0];
         if (masReciente.cantidad > 1) {
-          await base44.entities.ConsumoCerveza.update(masReciente.id, { cantidad: masReciente.cantidad - 1 });
+          await api.entities.ConsumoCerveza.update(masReciente.id, { cantidad: masReciente.cantidad - 1 });
         } else {
-          await base44.entities.ConsumoCerveza.delete(masReciente.id);
+          await api.entities.ConsumoCerveza.delete(masReciente.id);
         }
       }
       setConsumoPorTipo(prev => ({ ...prev, [tipoCerveza]: Math.max(0, (prev[tipoCerveza] || 0) - 1) }));
@@ -201,20 +201,20 @@ export default function Cerveza() {
   const handleDelete = async (id) => {
     const entrada = cervezaEntradas.find(e => e.id === id);
     if (entrada) {
-      await base44.entities.Papelera.create({
+      await api.entities.Papelera.create({
         entidad: "CervezaEntrada",
         descripcion: `${entrada.nombre} (${entrada.cervezas || 0} cervezas)`,
         datos_json: JSON.stringify(entrada),
         eliminado_por: sesion?.nombre || "Desconocido",
       });
     }
-    await base44.entities.CervezaEntrada.delete(id);
+    await api.entities.CervezaEntrada.delete(id);
     setCervezaEntradas(prev => prev.filter(e => e.id !== id));
   };
 
   const handleEliminarArchivo = async (id) => {
     if (!confirm("¿Eliminar este archivo? No se puede deshacer.")) return;
-    await base44.entities.AppConfig.delete(id);
+    await api.entities.AppConfig.delete(id);
     loadData();
   };
 
@@ -222,7 +222,7 @@ export default function Cerveza() {
     if (!puedeArchivar) return;
     const anio = archiveAnio.trim() || new Date().getFullYear().toString();
     const totalCerv = cervezaEntradas.reduce((sum, e) => sum + (e.cervezas || 0), 0);
-    const pagosActuales = await base44.entities.CervezaPago.filter({ archivado: false });
+    const pagosActuales = await api.entities.CervezaPago.filter({ archivado: false });
 
     const claveArchivo = `cerveza_archivo_${anio}_${Date.now()}`;
     const valorArchivo = JSON.stringify({
@@ -242,17 +242,17 @@ export default function Cerveza() {
       })),
     });
 
-    await base44.entities.AppConfig.create({ clave: claveArchivo, valor: valorArchivo });
+    await api.entities.AppConfig.create({ clave: claveArchivo, valor: valorArchivo });
     await Promise.all(cervezaEntradas.map(e =>
-      base44.entities.CervezaEntrada.update(e.id, { cervezas: 0, pagado: 0 })
+      api.entities.CervezaEntrada.update(e.id, { cervezas: 0, pagado: 0 })
     ));
     await Promise.all(pagosActuales.map(p =>
-      base44.entities.CervezaPago.update(p.id, { archivado: true, anio_archivo: anio })
+      api.entities.CervezaPago.update(p.id, { archivado: true, anio_archivo: anio })
     ));
 
     // También borrar consumos registrados
-    const todosConsumos = await base44.entities.ConsumoCerveza.list();
-    await Promise.all(todosConsumos.map(c => base44.entities.ConsumoCerveza.delete(c.id)));
+    const todosConsumos = await api.entities.ConsumoCerveza.list();
+    await Promise.all(todosConsumos.map(c => api.entities.ConsumoCerveza.delete(c.id)));
     setConsumoPorTipo({});
 
     setCervezaEntradas(prev => prev.map(e => ({ ...e, cervezas: 0, pagado: 0 })));

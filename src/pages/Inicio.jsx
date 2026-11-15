@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { motion } from "framer-motion";
 import { useAuth } from "../components/auth/AuthContext";
 import { Link } from "react-router-dom";
@@ -17,8 +17,8 @@ export default function Inicio() {
 
   const cargarDatos = useCallback(async () => {
     const [cuentas, votaciones] = await Promise.all([
-      base44.entities.CuentaAtras.list("-created_date"),
-      base44.entities.Votacion.filter({ completada: false }),
+      api.entities.CuentaAtras.list("-created_date"),
+      api.entities.Votacion.filter({ completada: false }),
     ]);
     setCuentasAtras(cuentas);
     setVotacionesActivas(votaciones);

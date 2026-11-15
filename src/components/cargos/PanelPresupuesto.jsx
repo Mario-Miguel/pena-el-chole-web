@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Trash2, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../auth/AuthContext";
@@ -51,7 +51,7 @@ export default function PanelPresupuesto() {
   const [guardando, setGuardando] = useState({});
 
   const cargar = useCallback(async () => {
-    const data = await base44.entities.Presupuesto.list("-anio");
+    const data = await api.entities.Presupuesto.list("-anio");
     setAnios(data);
     // Inicializar datos locales
     const d = {};
@@ -71,14 +71,14 @@ export default function PanelPresupuesto() {
   const handleCreate = async () => {
     const anio = parseInt(nuevoAnio, 10);
     if (!anio) return;
-    await base44.entities.Presupuesto.create({ anio, partidas: [] });
+    await api.entities.Presupuesto.create({ anio, partidas: [] });
     setNuevoAnio("");
     cargar();
   };
 
   const handleDelete = async (id) => {
     if (!confirm("¿Eliminar este presupuesto?")) return;
-    await base44.entities.Presupuesto.delete(id);
+    await api.entities.Presupuesto.delete(id);
     cargar();
   };
 
@@ -120,7 +120,7 @@ export default function PanelPresupuesto() {
       ...(d.deducciones || []).map(f => ({ ...f, apartado: "deducciones" })),
       ...(d.resto || []).map(f => ({ ...f, apartado: "resto" })),
     ];
-    await base44.entities.Presupuesto.update(pptoId, { partidas });
+    await api.entities.Presupuesto.update(pptoId, { partidas });
     setGuardando(g => ({ ...g, [pptoId]: false }));
   };
 

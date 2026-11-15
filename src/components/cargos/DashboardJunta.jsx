@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { AlertTriangle, CheckSquare, ShoppingCart, BarChart2, RefreshCw } from "lucide-react";
@@ -17,11 +17,11 @@ export default function DashboardJunta() {
   const cargar = useCallback(async () => {
     setLoading(true);
     const [items, tareas, almacen, votaciones, votos] = await Promise.all([
-      base44.entities.ItemCompra.list(),
-      base44.entities.Tarea.list(),
-      base44.entities.ItemAlmacen.list(),
-      base44.entities.Votacion.filter({ completada: false }),
-      base44.entities.VotoRespuesta.list(),
+      api.entities.ItemCompra.list(),
+      api.entities.Tarea.list(),
+      api.entities.ItemAlmacen.list(),
+      api.entities.Votacion.filter({ completada: false }),
+      api.entities.VotoRespuesta.list(),
     ]);
     setDatos({ items, tareas, almacen, votaciones, votos });
     setLoading(false);

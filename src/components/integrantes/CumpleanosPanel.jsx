@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Cake, Edit2, Check, X } from "lucide-react";
 import { format, parseISO, differenceInDays, setYear } from "date-fns";
 import { es } from "date-fns/locale";
@@ -34,14 +34,14 @@ export default function CumpleanosPanel({ puedeEditar = false }) {
   const [editVal, setEditVal] = useState("");
 
   useEffect(() => {
-    base44.entities.Integrante.list().then(data => {
+    api.entities.Integrante.list().then(data => {
       setIntegrantes(data.filter(i => i.categoria !== "patitas"));
       setLoading(false);
     });
   }, []);
 
   const handleSave = async (id) => {
-    await base44.entities.Integrante.update(id, { fecha_nacimiento: editVal || null });
+    await api.entities.Integrante.update(id, { fecha_nacimiento: editVal || null });
     setIntegrantes(prev => prev.map(i => i.id === id ? { ...i, fecha_nacimiento: editVal || null } : i));
     setEditingId(null);
   };

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Download, FileText, Table } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -88,7 +88,7 @@ export default function ExportarAlmacen({ items, onExportCSV, onExportPDF }) {
 
   const handleExport = async (tipo) => {
     setLoading(true);
-    const movimientos = await base44.entities.MovimientoAlmacen.list("-created_date", 200);
+    const movimientos = await api.entities.MovimientoAlmacen.list("-created_date", 200);
     setLoading(false);
     if (tipo === "csv") exportCSV(items, movimientos);
     else exportPDF(items, movimientos);

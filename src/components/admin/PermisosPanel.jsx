@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Trash2, Shield, Eye, Edit3, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -48,7 +48,7 @@ function NuevoPermisoForm({ integrantes, onGuardado, onCancelar }) {
   const handleGuardar = async () => {
     setGuardando(true);
     const integrante = integrantes.find(i => i.id === integranteId);
-    await base44.entities.PermisoSeccion.create({
+    await api.entities.PermisoSeccion.create({
       seccion,
       tipo,
       rol: modoAsignacion === "rol" ? rol : "",
@@ -159,8 +159,8 @@ export default function PermisosPanel() {
 
   const cargar = useCallback(async () => {
     const [ps, ints] = await Promise.all([
-      base44.entities.PermisoSeccion.list(),
-      base44.entities.Integrante.list(),
+      api.entities.PermisoSeccion.list(),
+      api.entities.Integrante.list(),
     ]);
     setPermisos(ps);
     setIntegrantes(ints.sort((a, b) => a.nombre.localeCompare(b.nombre)));
@@ -170,7 +170,7 @@ export default function PermisosPanel() {
   useEffect(() => { cargar(); }, [cargar]);
 
   const handleDelete = async (id) => {
-    await base44.entities.PermisoSeccion.delete(id);
+    await api.entities.PermisoSeccion.delete(id);
     cargar();
   };
 

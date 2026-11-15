@@ -1,4 +1,4 @@
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 
 export const UI_PREFS = [
   { key: "pena_show_theme_toggle", label: "Botón modo claro/oscuro", group: "Cabecera", default: true },

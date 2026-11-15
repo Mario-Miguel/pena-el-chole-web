@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Send, ThumbsUp, Trash2, Archive, ChevronDown, ChevronUp } from "lucide-react";
 import HelpIcon from "../components/layout/HelpIcon";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ export default function Sugerencias() {
   const [confirmDialog, setConfirmDialog] = useState(null); // { accion, id, label }
 
   const loadData = useCallback(async () => {
-    const sugs = await base44.entities.Sugerencia.list("-created_date");
+    const sugs = await api.entities.Sugerencia.list("-created_date");
     setSugerencias(sugs);
     setLoading(false);
   }, []);
@@ -34,7 +34,7 @@ export default function Sugerencias() {
   const handleEnviar = async () => {
     if (!titulo.trim()) return;
     setEnviando(true);
-    await base44.entities.Sugerencia.create({
+    await api.entities.Sugerencia.create({
       titulo: titulo.trim(),
       texto: texto.trim(),
       autor_nombre: sesion?.nombre || "Anónimo",
@@ -43,7 +43,7 @@ export default function Sugerencias() {
       archivada: false
     });
     // Log
-    await base44.entities.AdminLog.create({
+    await api.entities.AdminLog.create({
       accion: "crear",
       entidad: "Sugerencia",
       descripcion: `Nueva sugerencia: "${titulo.trim()}"`,
@@ -60,30 +60,30 @@ export default function Sugerencias() {
     const votosIds = sug.votos_ids || [];
     const yaVotado = votosIds.includes(usuarioId);
     const nuevosIds = yaVotado ? votosIds.filter((id) => id !== usuarioId) : [...votosIds, usuarioId];
-    await base44.entities.Sugerencia.update(sug.id, { votos: nuevosIds.length, votos_ids: nuevosIds });
+    await api.entities.Sugerencia.update(sug.id, { votos: nuevosIds.length, votos_ids: nuevosIds });
     loadData();
   };
 
   const handleEliminar = async (sug) => {
-    await base44.entities.Papelera.create({
+    await api.entities.Papelera.create({
       entidad: "Sugerencia",
       descripcion: `"${sug.titulo}"`,
       datos_json: JSON.stringify(sug),
       eliminado_por: sesion?.nombre || "Desconocido"
     });
-    await base44.entities.AdminLog.create({
+    await api.entities.AdminLog.create({
       accion: "eliminar",
       entidad: "Sugerencia",
       descripcion: `Eliminada sugerencia: "${sug.titulo}"`,
       autor_nombre: sesion?.nombre || "Desconocido"
     });
-    await base44.entities.Sugerencia.delete(sug.id);
+    await api.entities.Sugerencia.delete(sug.id);
     loadData();
   };
 
   const handleArchivar = async (sug) => {
-    await base44.entities.Sugerencia.update(sug.id, { archivada: true });
-    await base44.entities.AdminLog.create({
+    await api.entities.Sugerencia.update(sug.id, { archivada: true });
+    await api.entities.AdminLog.create({
       accion: "editar",
       entidad: "Sugerencia",
       descripcion: `Archivada sugerencia: "${sug.titulo}"`,

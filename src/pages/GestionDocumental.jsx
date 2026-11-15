@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { useAuth } from "../components/auth/AuthContext";
 import { Plus, FileText, Trash2, ExternalLink, Search } from "lucide-react";
 import HelpIcon from "../components/layout/HelpIcon";
@@ -27,7 +27,7 @@ export default function GestionDocumental() {
   const [form, setForm] = useState({ nombre: "", tipo: "otros", descripcion: "", responsable: "", fecha: new Date().toISOString().split("T")[0], url: "" });
 
   const cargar = async () => {
-    const data = await base44.entities.Documento.list("-fecha");
+    const data = await api.entities.Documento.list("-fecha");
     setDocumentos(data);
     setLoading(false);
   };
@@ -38,14 +38,14 @@ export default function GestionDocumental() {
     const file = e.target.files[0];
     if (!file) return;
     setSubiendo(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    const { file_url } = await api.uploadFile({ file });
     setForm(f => ({ ...f, url: file_url }));
     setSubiendo(false);
   };
 
   const guardar = async () => {
     if (!form.nombre) return;
-    await base44.entities.Documento.create(form);
+    await api.entities.Documento.create(form);
     setForm({ nombre: "", tipo: "otros", descripcion: "", responsable: "", fecha: new Date().toISOString().split("T")[0], url: "" });
     setShowForm(false);
     cargar();
@@ -53,7 +53,7 @@ export default function GestionDocumental() {
 
   const eliminar = async (id) => {
     if (!window.confirm("¿Eliminar este documento?")) return;
-    await base44.entities.Documento.delete(id);
+    await api.entities.Documento.delete(id);
     cargar();
   };
 

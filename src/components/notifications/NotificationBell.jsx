@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Bell, MessageCircle, BarChart2 } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { Link } from "react-router-dom";
@@ -27,9 +27,9 @@ export default function NotificationBell() {
     const ahora = new Date();
     const hace2h = new Date(Date.now() - 2 * 60 * 60 * 1000);
     const [ns, vs, msgs] = await Promise.all([
-      base44.entities.Notificacion.filter({ archivada: false }),
-      base44.entities.Votacion.filter({ completada: false }),
-      base44.entities.ChatMensaje.list("-created_date", 50),
+      api.entities.Notificacion.filter({ archivada: false }),
+      api.entities.Votacion.filter({ completada: false }),
+      api.entities.ChatMensaje.list("-created_date", 50),
     ]);
     setNotifs(ns.filter(n => !n.fecha_publicacion || new Date(n.fecha_publicacion) <= ahora));
     setVotaciones(vs);
@@ -59,7 +59,7 @@ export default function NotificationBell() {
 
   const marcarLeida = async (notif) => {
     if ((notif.leida_por || []).includes(integranteId)) return;
-    await base44.entities.Notificacion.update(notif.id, { leida_por: [...(notif.leida_por || []), integranteId] });
+    await api.entities.Notificacion.update(notif.id, { leida_por: [...(notif.leida_por || []), integranteId] });
     setNotifs(prev => prev.map(n => n.id === notif.id ? { ...n, leida_por: [...(n.leida_por || []), integranteId] } : n));
   };
 

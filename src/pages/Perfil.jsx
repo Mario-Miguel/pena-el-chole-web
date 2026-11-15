@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { useAuth } from "../components/auth/AuthContext";
 import { LogOut, Camera, Eye, EyeOff, Save, Beer, Wallet, Cake, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,12 +35,12 @@ export default function Perfil() {
   useEffect(() => {
     if (!sesion || sesion.esAdmin) { setLoading(false); return; }
     Promise.all([
-      base44.entities.Integrante.filter({ id: sesion.integranteId }),
-      base44.entities.ItemCompra.filter({ comprador_nombre: sesion.nombre }),
-      base44.entities.CervezaEntrada.filter({ nombre: sesion.nombre }),
-      base44.entities.AppConfig.filter({ clave: "cerveza_precio" }),
-      base44.entities.Cuota.list(),
-      base44.entities.TareaReunion.filter({ integrante_id: sesion.integranteId }),
+      api.entities.Integrante.filter({ id: sesion.integranteId }),
+      api.entities.ItemCompra.filter({ comprador_nombre: sesion.nombre }),
+      api.entities.CervezaEntrada.filter({ nombre: sesion.nombre }),
+      api.entities.AppConfig.filter({ clave: "cerveza_precio" }),
+      api.entities.Cuota.list(),
+      api.entities.TareaReunion.filter({ integrante_id: sesion.integranteId }),
     ]).then(([ints, items, cervezaEntradas, precioCfg, cuotas, tareasR]) => {
       const int = ints[0] || null;
       setIntegrante(int);
@@ -76,7 +76,7 @@ export default function Perfil() {
     const mes = cumpleMes.padStart(2, "0");
     const dia = cumpleDia.padStart(2, "0");
     const valor = `${anio}-${mes}-${dia}`;
-    await base44.entities.Integrante.update(integrante.id, { fecha_nacimiento: valor });
+    await api.entities.Integrante.update(integrante.id, { fecha_nacimiento: valor });
     setIntegrante(prev => ({ ...prev, fecha_nacimiento: valor }));
     setCumpleVal(valor);
     setEditandoCumple(false);
@@ -93,9 +93,9 @@ export default function Perfil() {
       return;
     }
     setGuardandoPass(true);
-    const sesiones = await base44.entities.SesionUsuario.filter({ integrante_id: sesion.integranteId });
+    const sesiones = await api.entities.SesionUsuario.filter({ integrante_id: sesion.integranteId });
     if (sesiones.length > 0) {
-      await base44.entities.SesionUsuario.update(sesiones[0].id, { contrasena: cambioPass.nueva });
+      await api.entities.SesionUsuario.update(sesiones[0].id, { contrasena: cambioPass.nueva });
     }
     setCambioPass({ nueva: "", confirmar: "" });
     setMsgPass("✅ Contraseña actualizada");
@@ -107,10 +107,10 @@ export default function Perfil() {
     const file = e.target.files[0];
     if (!file) return;
     setSubiendoAvatar(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    const sesiones = await base44.entities.SesionUsuario.filter({ integrante_id: sesion.integranteId });
+    const { file_url } = await api.uploadFile({ file });
+    const sesiones = await api.entities.SesionUsuario.filter({ integrante_id: sesion.integranteId });
     if (sesiones.length > 0) {
-      await base44.entities.SesionUsuario.update(sesiones[0].id, { avatar_url: file_url });
+      await api.entities.SesionUsuario.update(sesiones[0].id, { avatar_url: file_url });
     }
     await refreshSesion();
     setSubiendoAvatar(false);

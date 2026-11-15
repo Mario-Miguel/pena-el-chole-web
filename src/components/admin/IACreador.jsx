@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Send, Bot, User, Sparkles, Copy, Check, RotateCcw, ScrollText } from "lucide-react";
 import ConfirmDialog from "../ConfirmDialog";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ La app tiene las siguientes páginas: Inicio, Acceso, Admin, Integrantes, Calend
 
 Entidades disponibles en la base de datos: Integrante, ItemCompra, Notificacion, Votacion, VotoRespuesta, Tarea, MediaItem, Carpeta, DeudaProveedor, PagoRegistrado, ChatGrupo, ChatMensaje, DiaCalendario, PlazoCalendario, CuentaAtras, ItemAlmacen, ObraAnio, ObraDocumento, AppConfig, AdminLog, Papelera, SesionUsuario, FeedbackApp, ConcursoSeccion, ResultadoAnio, CervezaEntrada, Sugerencia, NotaPersonal.
 
-El stack técnico es: React 18, Tailwind CSS, shadcn/ui, lucide-react, framer-motion, recharts, react-router-dom, @tanstack/react-query, base44 SDK.
+El stack técnico es: React 18, Tailwind CSS, shadcn/ui, lucide-react, framer-motion, recharts, react-router-dom, @tanstack/react-query; backend propio en Spring Boot (API REST).
 
 El color principal de la app es #630027 (granate). El fondo es #faf8f6.
 
@@ -101,7 +101,7 @@ export default function IACreador() {
   // Cargar historial persistido al montar
   useEffect(() => {
     const cargar = async () => {
-      const historial = await base44.entities.IAConversacion.list('created_date', 200);
+      const historial = await api.entities.IAConversacion.list('created_date', 200);
       if (historial && historial.length > 0) {
         setMensajes([MENSAJE_BIENVENIDA, ...historial]);
       }
@@ -124,8 +124,8 @@ export default function IACreador() {
 
     // Persistir mensaje del usuario (conversación activa + registro permanente)
     await Promise.all([
-    base44.entities.IAConversacion.create({ rol: "user", texto: msg }),
-    base44.entities.IARegistro.create({ rol: "user", texto: msg, sesion_id: sesionId.current })]
+    api.entities.IAConversacion.create({ rol: "user", texto: msg }),
+    api.entities.IARegistro.create({ rol: "user", texto: msg, sesion_id: sesionId.current })]
     );
 
     // Construir historial para el LLM
@@ -142,12 +142,12 @@ Admin: ${msg}
 
 IA del Creador:`;
 
-    const respuesta = await base44.integrations.Core.InvokeLLM({ prompt });
+    const respuesta = await api.invokeLLM({ prompt });
 
     // Persistir respuesta de la IA (conversación activa + registro permanente)
     await Promise.all([
-    base44.entities.IAConversacion.create({ rol: "ia", texto: respuesta }),
-    base44.entities.IARegistro.create({ rol: "ia", texto: respuesta, sesion_id: sesionId.current })]
+    api.entities.IAConversacion.create({ rol: "ia", texto: respuesta }),
+    api.entities.IARegistro.create({ rol: "ia", texto: respuesta, sesion_id: sesionId.current })]
     );
 
     setMensajes((prev) => [...prev, { rol: "ia", texto: respuesta }]);
@@ -155,7 +155,7 @@ IA del Creador:`;
   };
 
   const abrirRegistro = async () => {
-    const data = await base44.entities.IARegistro.list('created_date', 500);
+    const data = await api.entities.IARegistro.list('created_date', 500);
     setRegistro(data);
     setVerRegistro(true);
   };
@@ -164,8 +164,8 @@ IA del Creador:`;
   const confirmarReiniciar = async () => {
     setConfirmReiniciar(false);
     setReiniciando(true);
-    const todos = await base44.entities.IAConversacion.list('created_date', 500);
-    await Promise.all(todos.map((m) => base44.entities.IAConversacion.delete(m.id)));
+    const todos = await api.entities.IAConversacion.list('created_date', 500);
+    await Promise.all(todos.map((m) => api.entities.IAConversacion.delete(m.id)));
     setMensajes([MENSAJE_BIENVENIDA]);
     setInput("");
     setCargando(false);

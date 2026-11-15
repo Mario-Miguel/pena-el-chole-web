@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { useAuth } from "../components/auth/AuthContext";
 import {
-  Plus, Trash2, RefreshCw, Eye, EyeOff, Users, MessageSquare, Bell,
+  Plus, Trash2, RefreshCw, Eye, Users, MessageSquare, Bell,
   Shield, RotateCcw, ToggleLeft, ToggleRight, Database, Code,
   Settings, Activity, Wrench, ChevronDown, Trophy
 } from "lucide-react";
@@ -91,21 +91,20 @@ export default function Admin() {
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formUser, setFormUser] = useState(null);
-  const [showPass, setShowPass] = useState({});
   const [guardando, setGuardando] = useState(false);
   const [disabledPages, setDisabledPages] = useState([]);
   const [savingMenu, setSavingMenu] = useState(false);
 
   const cargar = useCallback(async () => {
     const [ints, sess, gs, notificaciones, logsData, papeleraData, fbData, appCfg] = await Promise.all([
-      base44.entities.Integrante.list(),
-      base44.entities.SesionUsuario.list(),
-      base44.entities.ChatGrupo.list(),
-      base44.entities.Notificacion.list("-created_date"),
-      base44.entities.AdminLog.list("-created_date", 100),
-      base44.entities.Papelera.list("-created_date"),
-      base44.entities.FeedbackApp.list("-created_date"),
-      base44.entities.AppConfig.filter({ clave: DISABLED_PAGES_CONFIG_KEY }),
+      api.entities.Integrante.list(),
+      api.entities.SesionUsuario.list(),
+      api.entities.ChatGrupo.list(),
+      api.entities.Notificacion.list("-created_date"),
+      api.entities.AdminLog.list("-created_date", 100),
+      api.entities.Papelera.list("-created_date"),
+      api.entities.FeedbackApp.list("-created_date"),
+      api.entities.AppConfig.filter({ clave: DISABLED_PAGES_CONFIG_KEY }),
     ]);
     setIntegrantes(ints.sort((a, b) => a.nombre.localeCompare(b.nombre)));
     setDisabledPages(appCfg[0]?.valor ? JSON.parse(appCfg[0].valor) : []);
@@ -139,11 +138,11 @@ export default function Admin() {
       ? disabledPages.filter(p => p !== page)
       : [...disabledPages, page];
     setSavingMenu(true);
-    const existing = await base44.entities.AppConfig.filter({ clave: DISABLED_PAGES_CONFIG_KEY });
+    const existing = await api.entities.AppConfig.filter({ clave: DISABLED_PAGES_CONFIG_KEY });
     if (existing.length > 0) {
-      await base44.entities.AppConfig.update(existing[0].id, { valor: JSON.stringify(newDisabled) });
+      await api.entities.AppConfig.update(existing[0].id, { valor: JSON.stringify(newDisabled) });
     } else {
-      await base44.entities.AppConfig.create({ clave: DISABLED_PAGES_CONFIG_KEY, valor: JSON.stringify(newDisabled) });
+      await api.entities.AppConfig.create({ clave: DISABLED_PAGES_CONFIG_KEY, valor: JSON.stringify(newDisabled) });
     }
     setDisabledPages(newDisabled);
     setSavingMenu(false);
@@ -167,10 +166,10 @@ export default function Admin() {
       return;
     }
     if (existing) {
-      await base44.entities.SesionUsuario.update(existing.id, { contrasena: formUser.contrasena, usuario });
+      await api.entities.SesionUsuario.update(existing.id, { contrasena: formUser.contrasena, usuario });
       await registrarLog({ accion: "editar", entidad: "SesionUsuario", descripcion: `Acceso actualizado para ${intNombre} (usuario: ${usuario})`, autorNombre: sesion?.nombre });
     } else {
-      await base44.entities.SesionUsuario.create({ integrante_id: formUser.integranteId, usuario, contrasena: formUser.contrasena });
+      await api.entities.SesionUsuario.create({ integrante_id: formUser.integranteId, usuario, contrasena: formUser.contrasena });
       await registrarLog({ accion: "crear", entidad: "SesionUsuario", descripcion: `Acceso creado para ${intNombre} (usuario: ${usuario})`, autorNombre: sesion?.nombre });
     }
     setFormUser(null);
@@ -183,9 +182,9 @@ export default function Admin() {
     const existing = sesiones.find(s => s.integrante_id === integranteId);
     const intNombre = integrantes.find(i => i.id === integranteId)?.nombre || integranteId;
     if (existing) {
-      await base44.entities.SesionUsuario.update(existing.id, { contrasena: nueva });
+      await api.entities.SesionUsuario.update(existing.id, { contrasena: nueva });
     } else {
-      await base44.entities.SesionUsuario.create({ integrante_id: integranteId, usuario: intNombre, contrasena: nueva });
+      await api.entities.SesionUsuario.create({ integrante_id: integranteId, usuario: intNombre, contrasena: nueva });
     }
     await registrarLog({ accion: "editar", entidad: "SesionUsuario", descripcion: `Contraseña reseteada para ${intNombre}`, autorNombre: sesion?.nombre });
     alert(`Nueva contraseña: ${nueva}`);
@@ -196,7 +195,7 @@ export default function Admin() {
     const s = sesiones.find(s => s.integrante_id === integranteId);
     const intNombre = integrantes.find(i => i.id === integranteId)?.nombre || integranteId;
     if (s) {
-      await base44.entities.SesionUsuario.delete(s.id);
+      await api.entities.SesionUsuario.delete(s.id);
       await registrarLog({ accion: "eliminar", entidad: "SesionUsuario", descripcion: `Acceso revocado para ${intNombre}`, autorNombre: sesion?.nombre });
     }
     cargar();
@@ -207,27 +206,27 @@ export default function Admin() {
     if (!s) return;
     const intNombre = integrantes.find(i => i.id === integranteId)?.nombre || integranteId;
     const nuevoEstado = !s.disabled;
-    await base44.entities.SesionUsuario.update(s.id, { disabled: nuevoEstado });
+    await api.entities.SesionUsuario.update(s.id, { disabled: nuevoEstado });
     await registrarLog({ accion: "editar", entidad: "SesionUsuario", descripcion: `${intNombre} ${nuevoEstado ? "desactivado" : "activado"}`, autorNombre: sesion?.nombre });
     cargar();
   };
 
   const deleteMsgsSequentially = async (msgs) => {
-    for (const m of msgs) await base44.entities.ChatMensaje.delete(m.id);
+    for (const m of msgs) await api.entities.ChatMensaje.delete(m.id);
   };
 
   const handleEliminarGrupo = async (grupoId) => {
     const grupo = grupos.find(g => g.id === grupoId);
-    const msgs = await base44.entities.ChatMensaje.filter({ grupo_id: grupoId });
+    const msgs = await api.entities.ChatMensaje.filter({ grupo_id: grupoId });
     await deleteMsgsSequentially(msgs);
-    await base44.entities.ChatGrupo.delete(grupoId);
+    await api.entities.ChatGrupo.delete(grupoId);
     await registrarLog({ accion: "eliminar", entidad: "ChatGrupo", descripcion: `Grupo eliminado: ${grupo?.nombre || grupoId}`, autorNombre: sesion?.nombre });
     cargar();
   };
 
   const handleEliminarMensajesGrupo = async (grupoId) => {
     const grupo = grupos.find(g => g.id === grupoId);
-    const msgs = await base44.entities.ChatMensaje.filter({ grupo_id: grupoId });
+    const msgs = await api.entities.ChatMensaje.filter({ grupo_id: grupoId });
     await deleteMsgsSequentially(msgs);
     await registrarLog({ accion: "eliminar", entidad: "ChatMensaje", descripcion: `Mensajes borrados: ${grupo?.nombre || grupoId} (${msgs.length})`, autorNombre: sesion?.nombre });
     alert("Mensajes eliminados");
@@ -236,7 +235,7 @@ export default function Admin() {
 
   const handleEliminarNotif = async (id) => {
     const notif = notifs.find(n => n.id === id);
-    await base44.entities.Notificacion.delete(id);
+    await api.entities.Notificacion.delete(id);
     await registrarLog({ accion: "eliminar", entidad: "Notificacion", descripcion: `Notificación eliminada: "${notif?.titulo || id}"`, autorNombre: sesion?.nombre });
     cargar();
   };
@@ -377,11 +376,6 @@ export default function Admin() {
                                 ? <span className="text-xs text-red-500 font-semibold">Desactivado</span>
                                 : <>
                                     <span className="text-xs text-gray-500 font-semibold">@{s.usuario || int.nombre}</span>
-                                    <span className="text-xs text-gray-300">·</span>
-                                    <p className="text-xs text-gray-400 font-mono">{showPass[int.id] ? s.contrasena : "••••••"}</p>
-                                    <button onClick={() => setShowPass(p => ({ ...p, [int.id]: !p[int.id] }))} className="text-gray-300 hover:text-gray-500">
-                                      {showPass[int.id] ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                                    </button>
                                   </>
                               }
                             </div>
@@ -526,7 +520,7 @@ export default function Admin() {
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-gray-400">Últimas 100 acciones</p>
                     {logs.length > 0 && (
-                      <button onClick={async () => { if (!confirm("¿Vaciar el log?")) return; await Promise.all(logs.map(l => base44.entities.AdminLog.delete(l.id))); cargar(); }}
+                      <button onClick={async () => { if (!confirm("¿Vaciar el log?")) return; await Promise.all(logs.map(l => api.entities.AdminLog.delete(l.id))); cargar(); }}
                         className="text-xs text-red-400 hover:text-red-600 underline">Vaciar</button>
                     )}
                   </div>
@@ -554,7 +548,7 @@ export default function Admin() {
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-gray-400">{feedbacks.length} mensaje(s)</p>
                     {feedbacks.length > 0 && (
-                      <button onClick={async () => { if (!confirm("¿Borrar todos?")) return; await Promise.all(feedbacks.map(f => base44.entities.FeedbackApp.delete(f.id))); cargar(); }}
+                      <button onClick={async () => { if (!confirm("¿Borrar todos?")) return; await Promise.all(feedbacks.map(f => api.entities.FeedbackApp.delete(f.id))); cargar(); }}
                         className="text-xs text-red-400 hover:text-red-600 underline">Borrar todos</button>
                     )}
                   </div>
@@ -570,9 +564,9 @@ export default function Admin() {
                           </div>
                           <div className="flex gap-1">
                             {!fb.leido && (
-                              <button onClick={() => base44.entities.FeedbackApp.update(fb.id, { leido: true }).then(cargar)} className="text-xs text-gray-300 hover:text-green-500" title="Marcar leído">✓</button>
+                              <button onClick={() => api.entities.FeedbackApp.update(fb.id, { leido: true }).then(cargar)} className="text-xs text-gray-300 hover:text-green-500" title="Marcar leído">✓</button>
                             )}
-                            <button onClick={() => base44.entities.FeedbackApp.delete(fb.id).then(cargar)} className="p-1 rounded hover:bg-red-50 text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => api.entities.FeedbackApp.delete(fb.id).then(cargar)} className="p-1 rounded hover:bg-red-50 text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
                           </div>
                         </div>
                         <p className="text-sm text-gray-700">{fb.mensaje}</p>
@@ -622,7 +616,7 @@ export default function Admin() {
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-gray-400">{papelera.length} elemento(s) en la papelera</p>
                     {papelera.length > 0 && (
-                      <button onClick={async () => { if (!confirm("¿Vaciar papelera?")) return; await Promise.all(papelera.map(p => base44.entities.Papelera.delete(p.id))); cargar(); }}
+                      <button onClick={async () => { if (!confirm("¿Vaciar papelera?")) return; await Promise.all(papelera.map(p => api.entities.Papelera.delete(p.id))); cargar(); }}
                         className="text-xs text-red-400 hover:text-red-600 underline">Vaciar</button>
                     )}
                   </div>
@@ -650,12 +644,12 @@ export default function Admin() {
                                 </div>
                                 <div className="flex gap-0.5 flex-shrink-0">
                                   <button onClick={async () => {
-                                    try { const datos = JSON.parse(item.datos_json); const { id, created_date, updated_date, created_by, ...rest } = datos; await base44.entities[item.entidad]?.create(rest); await base44.entities.Papelera.delete(item.id); cargar(); }
+                                    try { const datos = JSON.parse(item.datos_json); const { id, created_date, updated_date, created_by, ...rest } = datos; await api.entities[item.entidad]?.create(rest); await api.entities.Papelera.delete(item.id); cargar(); }
                                     catch (e) { alert("No se pudo restaurar: " + e.message); }
                                   }} title="Restaurar" className="p-1.5 rounded-lg hover:bg-green-50 text-green-400 transition-colors">
                                     <RotateCcw className="w-3.5 h-3.5" />
                                   </button>
-                                  <button onClick={async () => { if (!confirm("¿Eliminar definitivamente?")) return; await base44.entities.Papelera.delete(item.id); cargar(); }}
+                                  <button onClick={async () => { if (!confirm("¿Eliminar definitivamente?")) return; await api.entities.Papelera.delete(item.id); cargar(); }}
                                     title="Eliminar" className="p-1.5 rounded-lg hover:bg-red-50 text-red-300 hover:text-red-500 transition-colors">
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>

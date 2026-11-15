@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { useAuth } from "../components/auth/AuthContext";
 import { Plus, TrendingUp, TrendingDown, Filter, Trash2 } from "lucide-react";
 import HelpIcon from "../components/layout/HelpIcon";
@@ -26,7 +26,7 @@ export default function LibroCaja() {
   const [form, setForm] = useState({ fecha: new Date().toISOString().split("T")[0], concepto: "", categoria: "otros", cantidad: "" });
 
   const cargar = async () => {
-    const data = await base44.entities.MovimientoCaja.list("-fecha");
+    const data = await api.entities.MovimientoCaja.list("-fecha");
     setMovimientos(data);
     setLoading(false);
   };
@@ -35,7 +35,7 @@ export default function LibroCaja() {
 
   const guardar = async () => {
     if (!form.concepto || !form.cantidad || !form.fecha) return;
-    await base44.entities.MovimientoCaja.create({ ...form, cantidad: parseFloat(form.cantidad) });
+    await api.entities.MovimientoCaja.create({ ...form, cantidad: parseFloat(form.cantidad) });
     setForm({ fecha: new Date().toISOString().split("T")[0], concepto: "", categoria: "otros", cantidad: "" });
     setShowForm(false);
     cargar();
@@ -43,7 +43,7 @@ export default function LibroCaja() {
 
   const eliminar = async (id) => {
     if (!window.confirm("¿Eliminar este movimiento?")) return;
-    await base44.entities.MovimientoCaja.delete(id);
+    await api.entities.MovimientoCaja.delete(id);
     cargar();
   };
 

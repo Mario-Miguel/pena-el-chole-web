@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, ThumbsUp, Check, X, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ export default function SugerenciasActividades({ sesion, puedeGestionar }) {
   const [form, setForm] = useState(null);
 
   const load = async () => {
-    const data = await base44.entities.SugerenciaActividad.list("-created_date");
+    const data = await api.entities.SugerenciaActividad.list("-created_date");
     setSugerencias(data);
     setLoading(false);
   };
@@ -21,7 +21,7 @@ export default function SugerenciasActividades({ sesion, puedeGestionar }) {
 
   const handleEnviar = async () => {
     if (!form?.titulo?.trim()) return;
-    await base44.entities.SugerenciaActividad.create({
+    await api.entities.SugerenciaActividad.create({
       titulo: form.titulo,
       descripcion: form.descripcion || "",
       autor_id: sesion.integranteId,
@@ -37,17 +37,17 @@ export default function SugerenciasActividades({ sesion, puedeGestionar }) {
     const uid = sesion.integranteId;
     const votos = s.votos_ids || [];
     const nuevos = votos.includes(uid) ? votos.filter(v => v !== uid) : [...votos, uid];
-    await base44.entities.SugerenciaActividad.update(s.id, { votos_ids: nuevos });
+    await api.entities.SugerenciaActividad.update(s.id, { votos_ids: nuevos });
     load();
   };
 
   const handleEstado = async (s, estado) => {
-    await base44.entities.SugerenciaActividad.update(s.id, { estado });
+    await api.entities.SugerenciaActividad.update(s.id, { estado });
     load();
   };
 
   const handleEliminar = async (s) => {
-    await base44.entities.SugerenciaActividad.delete(s.id);
+    await api.entities.SugerenciaActividad.delete(s.id);
     load();
   };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { BookOpen, Plus, RefreshCw, Users, ListFilter, BarChart3 } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { useAuth } from "@/components/auth/AuthContext";
 import ResumenGeneral from "@/components/contabilidad/ResumenGeneral";
 import MovimientosConsolidados from "@/components/contabilidad/MovimientosConsolidados";
@@ -30,16 +30,16 @@ export default function Contabilidad() {
         movCaja, tickets, cuotas, cervezasEntrada, cervezasPago,
         pagosRegistrados, lotesCerveza, deudasProveedor, loteria, talonarios
       ] = await Promise.all([
-        base44.entities.MovimientoCaja.list("-fecha", 500),
-        base44.entities.TicketFactura.list("-created_date", 200),
-        base44.entities.Cuota.list("-created_date", 500),
-        base44.entities.CervezaEntrada.list("-created_date", 500),
-        base44.entities.CervezaPago.list("-fecha", 500),
-        base44.entities.PagoRegistrado.list("-created_date", 500),
-        base44.entities.LoteCerveza.list("-fecha", 200),
-        base44.entities.DeudaProveedor.list("-fecha", 200),
-        base44.entities.Loteria.list("-created_date", 50),
-        base44.entities.TalonarioLoteria.list("-created_date", 500),
+        api.entities.MovimientoCaja.list("-fecha", 500),
+        api.entities.TicketFactura.list("-created_date", 200),
+        api.entities.Cuota.list("-created_date", 500),
+        api.entities.CervezaEntrada.list("-created_date", 500),
+        api.entities.CervezaPago.list("-fecha", 500),
+        api.entities.PagoRegistrado.list("-created_date", 500),
+        api.entities.LoteCerveza.list("-fecha", 200),
+        api.entities.DeudaProveedor.list("-fecha", 200),
+        api.entities.Loteria.list("-created_date", 50),
+        api.entities.TalonarioLoteria.list("-created_date", 500),
       ]);
 
       const movs = [];
@@ -113,7 +113,7 @@ export default function Contabilidad() {
       // Obtener precio de cerveza de AppConfig
       let precioCerveza = 1;
       try {
-        const cfgPrecio = await base44.entities.AppConfig.filter({ clave: "cerveza_precio" });
+        const cfgPrecio = await api.entities.AppConfig.filter({ clave: "cerveza_precio" });
         if (cfgPrecio[0]?.valor) precioCerveza = parseFloat(cfgPrecio[0].valor) || 1;
       } catch {}
 

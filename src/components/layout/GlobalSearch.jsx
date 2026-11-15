@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, X, Eraser, Users, FileText, LayoutGrid } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { createPageUrl } from "@/utils";
 import { ALL_PAGES } from "../../lib/menuConfig";
 import { motion, AnimatePresence } from "framer-motion";
@@ -33,8 +33,8 @@ export default function GlobalSearch() {
     if (integrantes.length > 0) return;
     setLoading(true);
     const [ints, docs] = await Promise.all([
-      base44.entities.Integrante.list(),
-      base44.entities.Documento.list(),
+      api.entities.Integrante.list(),
+      api.entities.Documento.list(),
     ]);
     setIntegrantes(ints);
     setDocumentos(docs);

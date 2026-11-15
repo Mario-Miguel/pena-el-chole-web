@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus } from "lucide-react";
 import HelpIcon from "../components/layout/HelpIcon";
 import { Button } from "@/components/ui/button";
@@ -17,8 +17,8 @@ export default function Memoria() {
 
   const loadData = useCallback(async () => {
     const [foldersData, allMedia] = await Promise.all([
-      base44.entities.Carpeta.list("-created_date"),
-      base44.entities.MediaItem.list(),
+      api.entities.Carpeta.list("-created_date"),
+      api.entities.MediaItem.list(),
     ]);
     setCarpetas(foldersData);
     const counts = {};
@@ -32,13 +32,13 @@ export default function Memoria() {
   useEffect(() => { loadData(); }, [loadData]);
 
   const handleCreate = async ({ nombre, anio }) => {
-    const nueva = await base44.entities.Carpeta.create({ nombre, anio: anio || null });
+    const nueva = await api.entities.Carpeta.create({ nombre, anio: anio || null });
     setCarpetas(prev => [nueva, ...prev]);
     setDialogOpen(false);
   };
 
   const handleDelete = async (id) => {
-    await base44.entities.Carpeta.delete(id);
+    await api.entities.Carpeta.delete(id);
     setCarpetas(prev => prev.filter(c => c.id !== id));
   };
 

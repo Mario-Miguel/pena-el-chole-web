@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Trash2, Edit2, ChevronDown, ChevronUp, RefreshCw, Save, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,7 +80,7 @@ export default function GestorDatos() {
     setLoading(true);
     setEditando(null);
     setBuscar("");
-    const data = await base44.entities[key].list("-created_date", 200);
+    const data = await api.entities[key].list("-created_date", 200);
     setRegistros(data);
     setEntidadActiva(key);
     setLoading(false);
@@ -88,13 +88,13 @@ export default function GestorDatos() {
 
   const handleEliminar = async (id) => {
     if (!confirm("¿Eliminar este registro definitivamente?")) return;
-    await base44.entities[entidadActiva].delete(id);
+    await api.entities[entidadActiva].delete(id);
     setRegistros(prev => prev.filter(r => r.id !== id));
   };
 
   const handleGuardar = async (data) => {
     const { id, created_date, updated_date, created_by, ...rest } = data;
-    await base44.entities[entidadActiva].update(id, rest);
+    await api.entities[entidadActiva].update(id, rest);
     setRegistros(prev => prev.map(r => r.id === id ? data : r));
     setEditando(null);
   };

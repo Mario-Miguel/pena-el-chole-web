@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, CheckCircle2, ChevronDown, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AnimatePresence, motion } from "framer-motion";
@@ -17,7 +17,7 @@ export default function TareasContent() {
   const [busqueda, setBusqueda] = useState("");
 
   const loadTareas = useCallback(async () => {
-    const data = await base44.entities.Tarea.list("-created_date");
+    const data = await api.entities.Tarea.list("-created_date");
     setTareas(data);
     setLoading(false);
   }, []);
@@ -26,9 +26,9 @@ export default function TareasContent() {
 
   const handleSave = async (form) => {
     if (selectedTarea) {
-      await base44.entities.Tarea.update(selectedTarea.id, form);
+      await api.entities.Tarea.update(selectedTarea.id, form);
     } else {
-      await base44.entities.Tarea.create({ ...form, completada: false });
+      await api.entities.Tarea.create({ ...form, completada: false });
     }
     setDialogOpen(false);
     loadTareas();
@@ -36,7 +36,7 @@ export default function TareasContent() {
 
   const handleDelete = async () => {
     if (!selectedTarea) return;
-    await base44.entities.Tarea.delete(selectedTarea.id);
+    await api.entities.Tarea.delete(selectedTarea.id);
     setDialogOpen(false);
     loadTareas();
   };
@@ -47,7 +47,7 @@ export default function TareasContent() {
       ? { completada: false, fecha_completada: null }
       : { completada: true, fecha_completada: ahora };
     setTareas(prev => prev.map(t => t.id === tarea.id ? { ...t, ...update } : t));
-    await base44.entities.Tarea.update(tarea.id, update);
+    await api.entities.Tarea.update(tarea.id, update);
   };
 
   const q = busqueda.trim().toLowerCase();

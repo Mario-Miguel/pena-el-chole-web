@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { RefreshCw } from "lucide-react";
 
 const ACCION_COLORS = {
@@ -21,7 +21,7 @@ export default function HistorialAuditoria() {
 
   const cargar = useCallback(async () => {
     setLoading(true);
-    const data = await base44.entities.AdminLog.list("-created_date", 100);
+    const data = await api.entities.AdminLog.list("-created_date", 100);
     setHistorial(data);
     setLoading(false);
   }, []);

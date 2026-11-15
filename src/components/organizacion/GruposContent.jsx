@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Trash2, Users, UserPlus, UserMinus, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -37,7 +37,7 @@ export default function GruposContent() {
   const [fColor, setFColor] = useState("bg-blue-500");
 
   const cargar = async () => {
-    const [g, i] = await Promise.all([base44.entities.GrupoTrabajo.list(), base44.entities.Integrante.list()]);
+    const [g, i] = await Promise.all([api.entities.GrupoTrabajo.list(), api.entities.Integrante.list()]);
     setGrupos(g);
     setIntegrantes(i.sort((a, b) => a.nombre.localeCompare(b.nombre)));
     setLoading(false);
@@ -47,7 +47,7 @@ export default function GruposContent() {
 
   const crearGrupo = async () => {
     if (!fNombre.trim()) return;
-    await base44.entities.GrupoTrabajo.create({ nombre: fNombre.trim(), descripcion: fDesc.trim(), emoji: fEmoji, color: fColor, miembros: [] });
+    await api.entities.GrupoTrabajo.create({ nombre: fNombre.trim(), descripcion: fDesc.trim(), emoji: fEmoji, color: fColor, miembros: [] });
     setFNombre(""); setFDesc(""); setFEmoji("👷"); setFColor("bg-blue-500");
     setShowForm(false); cargar();
   };
@@ -59,13 +59,13 @@ export default function GruposContent() {
     if (!integrante) return;
     const miembros = grupo.miembros || [];
     if (miembros.find(m => m.id === integrante.id)) return;
-    await base44.entities.GrupoTrabajo.update(grupoId, { miembros: [...miembros, { id: integrante.id, nombre: integrante.nombre }] });
+    await api.entities.GrupoTrabajo.update(grupoId, { miembros: [...miembros, { id: integrante.id, nombre: integrante.nombre }] });
     setIntegranteSeleccionado(""); setAddMiembroGrupoId(null); cargar();
   };
 
   const quitarMiembro = async (grupo, miembroId) => {
     const miembros = (grupo.miembros || []).filter(m => m.id !== miembroId);
-    await base44.entities.GrupoTrabajo.update(grupo.id, { miembros });
+    await api.entities.GrupoTrabajo.update(grupo.id, { miembros });
     cargar();
   };
 
@@ -199,7 +199,7 @@ export default function GruposContent() {
         open={!!confirmDelete}
         mensaje="¿Eliminar este grupo de trabajo? Esta acción no se puede deshacer."
         textoConfirmar="Eliminar"
-        onConfirm={async () => { await base44.entities.GrupoTrabajo.delete(confirmDelete); setConfirmDelete(null); cargar(); }}
+        onConfirm={async () => { await api.entities.GrupoTrabajo.delete(confirmDelete); setConfirmDelete(null); cargar(); }}
         onCancel={() => setConfirmDelete(null)}
       />
     </div>

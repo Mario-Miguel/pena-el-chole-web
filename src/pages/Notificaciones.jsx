@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Trash2, Check, EyeOff, Users, Archive, Clock, Search, ChevronDown } from "lucide-react";
 import HelpIcon from "../components/layout/HelpIcon";
 import { Button } from "@/components/ui/button";
@@ -85,9 +85,9 @@ export default function Notificaciones() {
 
   const loadData = useCallback(async () => {
     const [ns, ints, vs] = await Promise.all([
-      base44.entities.Notificacion.list("-created_date"),
-      base44.entities.Integrante.list(),
-      base44.entities.Votacion.filter({ completada: false }),
+      api.entities.Notificacion.list("-created_date"),
+      api.entities.Integrante.list(),
+      api.entities.Votacion.filter({ completada: false }),
     ]);
     // Mostrar votaciones activas en el feed como "notificaciones" virtuales
     const votacionesComoNotifs = vs.map(v => ({
@@ -103,9 +103,9 @@ export default function Notificaciones() {
     // Auto-archivar las que ya pasaron su fecha_archivo
     const paraArchivar = ns.filter(n => !n.archivada && n.fecha_archivo && isPast(new Date(n.fecha_archivo)));
     if (paraArchivar.length > 0) {
-      await Promise.all(paraArchivar.map(n => base44.entities.Notificacion.update(n.id, { archivada: true })));
+      await Promise.all(paraArchivar.map(n => api.entities.Notificacion.update(n.id, { archivada: true })));
     }
-    const nsFinales = paraArchivar.length > 0 ? await base44.entities.Notificacion.list("-created_date") : ns;
+    const nsFinales = paraArchivar.length > 0 ? await api.entities.Notificacion.list("-created_date") : ns;
     // Notifs activas (publicadas): sin fecha_publicacion o ya pasó
     const activas = nsFinales.filter(n => !n.archivada && (!n.fecha_publicacion || isPast(new Date(n.fecha_publicacion))));
     // Notifs programadas (futuras): solo visibles para quien puede configurar
@@ -122,7 +122,7 @@ export default function Notificaciones() {
 
   const handleCrear = async () => {
     if (!form?.titulo?.trim()) return;
-    await base44.entities.Notificacion.create({
+    await api.entities.Notificacion.create({
       titulo: form.titulo,
       mensaje: form.mensaje || "",
       tipo: form.tipo || "otro",
@@ -136,17 +136,17 @@ export default function Notificaciones() {
   };
 
   const handleEliminar = async (id) => {
-    await base44.entities.Notificacion.delete(id);
+    await api.entities.Notificacion.delete(id);
     loadData();
   };
 
   const handleArchivar = async (notif) => {
-    await base44.entities.Notificacion.update(notif.id, { archivada: true });
+    await api.entities.Notificacion.update(notif.id, { archivada: true });
     loadData();
   };
 
   const handleDesarchivar = async (notif) => {
-    await base44.entities.Notificacion.update(notif.id, { archivada: false });
+    await api.entities.Notificacion.update(notif.id, { archivada: false });
     loadData();
   };
 
@@ -154,14 +154,14 @@ export default function Notificaciones() {
     if (!usuarioId) return;
     const leidaPor = notif.leida_por || [];
     if (leidaPor.includes(usuarioId)) return;
-    await base44.entities.Notificacion.update(notif.id, { leida_por: [...leidaPor, usuarioId] });
+    await api.entities.Notificacion.update(notif.id, { leida_por: [...leidaPor, usuarioId] });
     loadData();
   };
 
   const handleMarcarNoLeida = async (notif) => {
     if (!usuarioId) return;
     const leidaPor = (notif.leida_por || []).filter(id => id !== usuarioId);
-    await base44.entities.Notificacion.update(notif.id, { leida_por: leidaPor });
+    await api.entities.Notificacion.update(notif.id, { leida_por: leidaPor });
     loadData();
   };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Truck, CheckCircle, Circle, Trash2, AlertTriangle, ClipboardList, Wrench, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -57,10 +57,10 @@ export default function Vehiculos() {
 
   const cargar = async () => {
     const [v, p, r, t] = await Promise.all([
-      base44.entities.Vehiculo.list(),
-      base44.entities.VehiculoPieza.list(),
-      base44.entities.VehiculoRevision.list(),
-      base44.entities.VehiculoTarea.list(),
+      api.entities.Vehiculo.list(),
+      api.entities.VehiculoPieza.list(),
+      api.entities.VehiculoRevision.list(),
+      api.entities.VehiculoTarea.list(),
     ]);
     setVehiculos(v);
     setPiezas(p);
@@ -74,7 +74,7 @@ export default function Vehiculos() {
 
   const crearVehiculo = async () => {
     if (!fNombreVehiculo.trim()) return;
-    const v = await base44.entities.Vehiculo.create({ nombre: fNombreVehiculo.trim(), tipo: fTipoVehiculo });
+    const v = await api.entities.Vehiculo.create({ nombre: fNombreVehiculo.trim(), tipo: fTipoVehiculo });
     setVehiculoActivo(v.id);
     setFNombreVehiculo(""); setShowFormVehiculo(false);
     cargar();
@@ -82,7 +82,7 @@ export default function Vehiculos() {
 
   const crearPieza = async () => {
     if (!fNombrePieza.trim()) return;
-    await base44.entities.VehiculoPieza.create({
+    await api.entities.VehiculoPieza.create({
       vehiculo_id: vehiculoActivo,
       vehiculo_nombre: vehiculos.find(v => v.id === vehiculoActivo)?.nombre,
       nombre: fNombrePieza.trim(), referencia: fRefPieza, estado: fEstadoPieza, notas: fNotasPieza,
@@ -93,7 +93,7 @@ export default function Vehiculos() {
 
   const crearRevision = async () => {
     if (!fTituloRevision.trim()) return;
-    await base44.entities.VehiculoRevision.create({
+    await api.entities.VehiculoRevision.create({
       vehiculo_id: vehiculoActivo,
       vehiculo_nombre: vehiculos.find(v => v.id === vehiculoActivo)?.nombre,
       titulo: fTituloRevision.trim(), fecha_ultima: fFechaUltima, fecha_proxima: fFechaProxima, notas: fNotasRevision,
@@ -104,7 +104,7 @@ export default function Vehiculos() {
 
   const crearTarea = async () => {
     if (!fNombreTarea.trim()) return;
-    await base44.entities.VehiculoTarea.create({
+    await api.entities.VehiculoTarea.create({
       vehiculo_id: vehiculoActivo,
       vehiculo_nombre: vehiculos.find(v => v.id === vehiculoActivo)?.nombre,
       nombre: fNombreTarea.trim(), descripcion: fDescTarea,
@@ -114,7 +114,7 @@ export default function Vehiculos() {
   };
 
   const toggleTarea = async (t) => {
-    await base44.entities.VehiculoTarea.update(t.id, {
+    await api.entities.VehiculoTarea.update(t.id, {
       completada: !t.completada,
       fecha_completada: !t.completada ? new Date().toISOString() : null,
     });
@@ -122,13 +122,13 @@ export default function Vehiculos() {
   };
 
   const toggleRevision = async (r) => {
-    await base44.entities.VehiculoRevision.update(r.id, { completada: !r.completada });
+    await api.entities.VehiculoRevision.update(r.id, { completada: !r.completada });
     cargar();
   };
 
   const handleDelete = async () => {
     if (!confirmDelete) return;
-    await base44.entities[confirmDelete.entity].delete(confirmDelete.id);
+    await api.entities[confirmDelete.entity].delete(confirmDelete.id);
     setConfirmDelete(null);
     cargar();
   };

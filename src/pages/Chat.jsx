@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, ArrowLeft, Send, Upload, X, Users, Info, FileText, Link2, Camera, Paperclip, Image, Archive, Bot, Lock, MessageSquare, Trash2, Reply, SmilePlus } from "lucide-react";
 import ConfirmDialog from "../components/ConfirmDialog";
 import HelpIcon from "../components/layout/HelpIcon";
@@ -59,14 +59,14 @@ export default function Chat() {
 
   const loadGrupos = useCallback(async () => {
     const [gs, ints] = await Promise.all([
-      base44.entities.ChatGrupo.list("-created_date"),
-      base44.entities.Integrante.list(),
+      api.entities.ChatGrupo.list("-created_date"),
+      api.entities.Integrante.list(),
     ]);
     let lista = gs;
 
     // Crear Chat General si no existe
     if (!gs.find((g) => g.es_general)) {
-      const general = await base44.entities.ChatGrupo.create({
+      const general = await api.entities.ChatGrupo.create({
         nombre: "Chat general",
         descripcion: "Grupo con todos los integrantes",
         es_general: true,
@@ -78,7 +78,7 @@ export default function Chat() {
     // El bot se trata como un grupo privado con el userId en participantes
     const botDelUsuario = gs.find(g => g.es_bot && g.participantes?.includes(sesion?.integranteId || ""));
     if (!botDelUsuario && sesion?.integranteId) {
-      const bot = await base44.entities.ChatGrupo.create({
+      const bot = await api.entities.ChatGrupo.create({
         nombre: BOT_NOMBRE,
         descripcion: "Asistente de la Peña El Chole",
         es_bot: true,
@@ -102,7 +102,7 @@ export default function Chat() {
 
   useEffect(() => { loadGrupos(); }, [loadGrupos]);
   useEffect(() => {
-    base44.entities.SesionUsuario.list().then(setSesiones);
+    api.entities.SesionUsuario.list().then(setSesiones);
   }, []);
 
   // Navegar al grupo si viene desde notificación de Inicio
@@ -118,9 +118,9 @@ export default function Chat() {
 
   useEffect(() => {
     if (!grupoActivo) return;
-    base44.entities.ChatMensaje.filter({ grupo_id: grupoActivo.id }, "created_date")
+    api.entities.ChatMensaje.filter({ grupo_id: grupoActivo.id }, "created_date")
       .then(msgs => setMensajes([...msgs].sort((a, b) => new Date(a.created_date) - new Date(b.created_date))));
-    const unsub = base44.entities.ChatMensaje.subscribe((event) => {
+    const unsub = api.entities.ChatMensaje.subscribe((event) => {
       if (event.data?.grupo_id !== grupoActivo.id) return;
       if (event.type === "create") {
         setMensajes((prev) => {
@@ -152,7 +152,7 @@ export default function Chat() {
     if (!files.length) return;
     setSubiendo(true);
     const nuevos = await Promise.all(files.map(async (file) => {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await api.uploadFile({ file });
       let tipo = "documento";
       if (file.type.startsWith("image/")) tipo = "imagen";
       else if (file.type.startsWith("video/")) tipo = "video";
@@ -196,7 +196,7 @@ export default function Chat() {
     // Bot Cholín
     if (grupoActivo.es_bot) {
       setMensajes(prev => prev.filter(m => m.id !== tempId));
-      await base44.entities.ChatMensaje.create({
+      await api.entities.ChatMensaje.create({
         grupo_id: grupoActivo.id,
         autor_id: usuarioId,
         autor_nombre: autorNombre,
@@ -204,13 +204,13 @@ export default function Chat() {
       });
       try {
         setBotCargando(true);
-        const respuesta = await base44.integrations.Core.InvokeLLM({
+        const respuesta = await api.invokeLLM({
           prompt: `Eres Cholín, el asistente simpático y cercano de la "Peña El Chole", una peña festiva española. 
 Ayudas a los miembros con preguntas sobre la app, la peña, y el funcionamiento de las diferentes secciones (Cuentas, Cervezas, Calendario, Obra, Concurso, Integrantes, Votaciones, Chat, Notificaciones, Tareas, Almacén, Notas, Sugerencias, Galería/Memoria). 
 Responde siempre en español, de forma amigable y concisa. Usa emojis ocasionalmente. Responde SOLO a lo que se te pregunta, sin inventar datos.
 Mensaje del usuario: ${textoEnviar}`,
         });
-        await base44.entities.ChatMensaje.create({
+        await api.entities.ChatMensaje.create({
           grupo_id: grupoActivo.id,
           autor_id: BOT_ID,
           autor_nombre: BOT_NOMBRE,
@@ -223,7 +223,7 @@ Mensaje del usuario: ${textoEnviar}`,
       if (adjuntosEnviar.length > 0) {
         for (let i = 0; i < adjuntosEnviar.length; i++) {
           const adj = adjuntosEnviar[i];
-          await base44.entities.ChatMensaje.create({
+          await api.entities.ChatMensaje.create({
             grupo_id: grupoActivo.id,
             autor_id: usuarioId,
             autor_nombre: autorNombre,
@@ -234,7 +234,7 @@ Mensaje del usuario: ${textoEnviar}`,
           });
         }
       } else {
-        await base44.entities.ChatMensaje.create({
+        await api.entities.ChatMensaje.create({
           grupo_id: grupoActivo.id,
           autor_id: usuarioId,
           autor_nombre: autorNombre,
@@ -251,7 +251,7 @@ Mensaje del usuario: ${textoEnviar}`,
 
   const handleCrearGrupo = async () => {
     if (!formGrupo?.nombre?.trim()) return;
-    await base44.entities.ChatGrupo.create({
+    await api.entities.ChatGrupo.create({
       nombre: formGrupo.nombre,
       descripcion: formGrupo.descripcion || "",
       es_general: false,
@@ -271,7 +271,7 @@ Mensaje del usuario: ${textoEnviar}`,
       setMostrarNuevoPrivado(false);
       return;
     }
-    const nuevo = await base44.entities.ChatGrupo.create({
+    const nuevo = await api.entities.ChatGrupo.create({
       nombre: `${sesion?.nombre} & ${integrante.nombre}`,
       es_privado: true,
       participantes: [usuarioId, integrante.id],
@@ -285,8 +285,8 @@ Mensaje del usuario: ${textoEnviar}`,
     const file = e.target.files[0];
     if (!file || !grupoActivo) return;
     setSubiendoAvatar(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    await base44.entities.ChatGrupo.update(grupoActivo.id, { avatar_url: file_url });
+    const { file_url } = await api.uploadFile({ file });
+    await api.entities.ChatGrupo.update(grupoActivo.id, { avatar_url: file_url });
     const updated = { ...grupoActivo, avatar_url: file_url };
     setGrupoActivo(updated);
     setGrupos((prev) => prev.map((g) => g.id === grupoActivo.id ? updated : g));
@@ -301,7 +301,7 @@ Mensaje del usuario: ${textoEnviar}`,
       ? usuarios.filter(u => u !== usuarioId)
       : [...usuarios, usuarioId];
     const nuevasReacciones = { ...reaccionesActuales, [emoji]: nuevos };
-    await base44.entities.ChatMensaje.update(msg.id, { reacciones: nuevasReacciones });
+    await api.entities.ChatMensaje.update(msg.id, { reacciones: nuevasReacciones });
     setMensajes(prev => prev.map(m => m.id === msg.id ? { ...m, reacciones: nuevasReacciones } : m));
   };
 
@@ -620,9 +620,9 @@ Mensaje del usuario: ${textoEnviar}`,
   const confirmarEliminarPrivado = async () => {
     if (!confirmEliminarPrivado) return;
     const { grupo } = confirmEliminarPrivado;
-    const msgs = await base44.entities.ChatMensaje.filter({ grupo_id: grupo.id });
-    await Promise.all(msgs.map(m => base44.entities.ChatMensaje.delete(m.id)));
-    await base44.entities.ChatGrupo.delete(grupo.id);
+    const msgs = await api.entities.ChatMensaje.filter({ grupo_id: grupo.id });
+    await Promise.all(msgs.map(m => api.entities.ChatMensaje.delete(m.id)));
+    await api.entities.ChatGrupo.delete(grupo.id);
     setGrupos(prev => prev.filter(g => g.id !== grupo.id));
     setConfirmEliminarPrivado(null);
   };

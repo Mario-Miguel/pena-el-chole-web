@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Trash2, AlertTriangle, Package, Edit2, Check, X, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,7 +34,7 @@ export default function InventarioCerveza({ puedeGestionar, consumoPorTipo = {},
   // consumido_manual: ajuste manual del consumido (independiente del consumo por tipo real)
 
   const cargar = useCallback(async () => {
-    const data = await base44.entities.LoteCerveza.list("-fecha");
+    const data = await api.entities.LoteCerveza.list("-fecha");
     setLotes(data);
     setLoading(false);
     // Notificar tipos disponibles al padre
@@ -46,7 +46,7 @@ export default function InventarioCerveza({ puedeGestionar, consumoPorTipo = {},
 
   const handleAñadirLote = async () => {
     if (!form?.tipo?.trim() || !form.cantidad || !form.fecha) return;
-    const nuevo = await base44.entities.LoteCerveza.create({
+    const nuevo = await api.entities.LoteCerveza.create({
       tipo: form.tipo.trim(),
       cantidad: parseFloat(form.cantidad),
       coste: parseFloat(form.coste) || 0,
@@ -63,7 +63,7 @@ export default function InventarioCerveza({ puedeGestionar, consumoPorTipo = {},
 
   const handleEliminar = async (id) => {
     if (!confirm("¿Eliminar este lote?")) return;
-    await base44.entities.LoteCerveza.delete(id);
+    await api.entities.LoteCerveza.delete(id);
     const nuevosLotes = lotes.filter(l => l.id !== id);
     setLotes(nuevosLotes);
     const tipos = [...new Set(nuevosLotes.map(l => l.tipo))];
@@ -75,7 +75,7 @@ export default function InventarioCerveza({ puedeGestionar, consumoPorTipo = {},
     const valor = parseFloat(editingMinimo.valor) || 0;
     // Actualizar el stock_minimo en todos los lotes de este tipo
     const lotesDelTipo = lotes.filter(l => l.tipo === tipo);
-    await Promise.all(lotesDelTipo.map(l => base44.entities.LoteCerveza.update(l.id, { stock_minimo: valor })));
+    await Promise.all(lotesDelTipo.map(l => api.entities.LoteCerveza.update(l.id, { stock_minimo: valor })));
     setLotes(prev => prev.map(l => l.tipo === tipo ? { ...l, stock_minimo: valor } : l));
     setEditingMinimo(null);
   };
@@ -96,7 +96,7 @@ export default function InventarioCerveza({ puedeGestionar, consumoPorTipo = {},
     const nuevaCantidad = parseFloat(editingLote.cantidad) || 0;
     const nuevoAjuste = parseFloat(editingLote.consumido_ajuste) || 0;
     const nuevoCoste = parseFloat(editingLote.coste) || 0;
-    await base44.entities.LoteCerveza.update(editingLote.id, {
+    await api.entities.LoteCerveza.update(editingLote.id, {
       tipo: editingLote.tipo.trim(),
       cantidad: nuevaCantidad,
       coste: nuevoCoste,

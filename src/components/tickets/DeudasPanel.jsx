@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Trash2, Check, X, Euro, AlertCircle, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -14,19 +14,19 @@ export default function DeudasPanel({ puedeGestionar }) {
 
   const { data: deudas = [] } = useQuery({
     queryKey: ["deudas_proveedor"],
-    queryFn: () => base44.entities.DeudaProveedor.list("-created_date"),
+    queryFn: () => api.entities.DeudaProveedor.list("-created_date"),
   });
 
   const createMut = useMutation({
-    mutationFn: (d) => base44.entities.DeudaProveedor.create(d),
+    mutationFn: (d) => api.entities.DeudaProveedor.create(d),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["deudas_proveedor"] }),
   });
   const updateMut = useMutation({
-    mutationFn: ({ id, ...d }) => base44.entities.DeudaProveedor.update(id, d),
+    mutationFn: ({ id, ...d }) => api.entities.DeudaProveedor.update(id, d),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["deudas_proveedor"] }),
   });
   const deleteMut = useMutation({
-    mutationFn: (id) => base44.entities.DeudaProveedor.delete(id),
+    mutationFn: (id) => api.entities.DeudaProveedor.delete(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["deudas_proveedor"] }),
   });
 

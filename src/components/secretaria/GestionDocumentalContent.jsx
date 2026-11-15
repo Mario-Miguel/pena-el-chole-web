@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { useAuth } from "../auth/AuthContext";
 import { Plus, FileText, Trash2, ExternalLink, Search, Copy, Pencil, X, ArrowLeft, Download, Save, FolderOpen } from "lucide-react";
 import ConfirmDialog from "../ConfirmDialog";
@@ -71,7 +71,7 @@ export default function GestionDocumentalContent({ puedeEditar: puedeEditarProp 
   const [confirmEliminar, setConfirmEliminar] = useState(null);
 
   const cargar = async () => {
-    const data = await base44.entities.Documento.list("-fecha");
+    const data = await api.entities.Documento.list("-fecha");
     setDocumentos(data);
     setLoading(false);
   };
@@ -82,7 +82,7 @@ export default function GestionDocumentalContent({ puedeEditar: puedeEditarProp 
     const file = e.target.files[0];
     if (!file) return;
     setSubiendo(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    const { file_url } = await api.uploadFile({ file });
     setCrearForm(f => ({ ...f, url: file_url }));
     setSubiendo(false);
   };
@@ -90,7 +90,7 @@ export default function GestionDocumentalContent({ puedeEditar: puedeEditarProp 
   const guardarNuevo = async () => {
     if (!crearForm.nombre) return;
     const tipo = carpetaActiva || crearForm.tipo;
-    await base44.entities.Documento.create({ ...crearForm, tipo });
+    await api.entities.Documento.create({ ...crearForm, tipo });
     setCrearForm({ ...FORM_VACIO, tipo: carpetaActiva || "otros" });
     setShowCrear(false);
     cargar();
@@ -112,7 +112,7 @@ export default function GestionDocumentalContent({ puedeEditar: puedeEditarProp 
   const guardarEdicion = async () => {
     if (!editForm.nombre) return;
     setGuardandoEdit(true);
-    await base44.entities.Documento.update(editandoDoc.id, editForm);
+    await api.entities.Documento.update(editandoDoc.id, editForm);
     setGuardandoEdit(false);
     setEditandoDoc(null);
     cargar();
@@ -120,7 +120,7 @@ export default function GestionDocumentalContent({ puedeEditar: puedeEditarProp 
 
   const eliminar = (id) => setConfirmEliminar(id);
   const confirmarEliminar = async () => {
-    await base44.entities.Documento.delete(confirmEliminar);
+    await api.entities.Documento.delete(confirmEliminar);
     setConfirmEliminar(null);
     cargar();
   };

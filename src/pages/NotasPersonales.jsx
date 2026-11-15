@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Trash2, Save, X } from "lucide-react";
 import HelpIcon from "../components/layout/HelpIcon";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ export default function NotasPersonales() {
 
   const loadData = useCallback(async () => {
     if (!usuarioId || sesion?.esAdmin) {setLoading(false);return;}
-    const ns = await base44.entities.NotaPersonal.filter({ integrante_id: usuarioId });
+    const ns = await api.entities.NotaPersonal.filter({ integrante_id: usuarioId });
     setNotas(ns.sort((a, b) => new Date(b.updated_date) - new Date(a.updated_date)));
     setLoading(false);
   }, [usuarioId, sesion]);
@@ -27,16 +27,16 @@ export default function NotasPersonales() {
   const handleGuardar = async () => {
     if (!editando?.titulo?.trim() || !usuarioId) return;
     if (editando.id) {
-      await base44.entities.NotaPersonal.update(editando.id, { titulo: editando.titulo, contenido: editando.contenido });
+      await api.entities.NotaPersonal.update(editando.id, { titulo: editando.titulo, contenido: editando.contenido });
     } else {
-      await base44.entities.NotaPersonal.create({ integrante_id: usuarioId, titulo: editando.titulo, contenido: editando.contenido || "" });
+      await api.entities.NotaPersonal.create({ integrante_id: usuarioId, titulo: editando.titulo, contenido: editando.contenido || "" });
     }
     setEditando(null);
     loadData();
   };
 
   const handleEliminar = async (id) => {
-    await base44.entities.NotaPersonal.delete(id);
+    await api.entities.NotaPersonal.delete(id);
     loadData();
   };
 

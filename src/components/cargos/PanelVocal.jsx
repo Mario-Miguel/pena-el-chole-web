@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ChevronDown, ChevronUp, Plus } from "lucide-react";
@@ -16,9 +16,9 @@ export default function PanelVocal() {
 
   const cargar = useCallback(async () => {
     const [tareas, sugerencias, integrantes] = await Promise.all([
-      base44.entities.Tarea.list(),
-      base44.entities.Sugerencia.list("-created_date", 10),
-      base44.entities.Integrante.list(),
+      api.entities.Tarea.list(),
+      api.entities.Sugerencia.list("-created_date", 10),
+      api.entities.Integrante.list(),
     ]);
     setDatos({ tareas, sugerencias, integrantes });
     setLoading(false);
@@ -33,7 +33,7 @@ export default function PanelVocal() {
   const tareasCompletadas = tareas.filter(t => t.completada);
 
   const handleCompletarTarea = async (tarea) => {
-    await base44.entities.Tarea.update(tarea.id, {
+    await api.entities.Tarea.update(tarea.id, {
       completada: !tarea.completada,
       fecha_completada: !tarea.completada ? new Date().toISOString() : null,
     });
@@ -43,7 +43,7 @@ export default function PanelVocal() {
   const handleCrearTarea = async () => {
     if (!nuevaTarea.trim()) return;
     setGuardando(true);
-    await base44.entities.Tarea.create({ nombre: nuevaTarea.trim(), categoria: "otros", completada: false });
+    await api.entities.Tarea.create({ nombre: nuevaTarea.trim(), categoria: "otros", completada: false });
     setNuevaTarea("");
     setGuardando(false);
     cargar();

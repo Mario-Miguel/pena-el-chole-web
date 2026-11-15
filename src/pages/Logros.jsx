@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { useAuth } from "../components/auth/AuthContext";
 import { motion } from "framer-motion";
 import { Trophy, Medal, Lock, Star } from "lucide-react";
@@ -18,9 +18,9 @@ export default function Logros() {
 
   const cargar = useCallback(async () => {
     const [cfg, lg, ints] = await Promise.all([
-      base44.entities.AppConfig.filter({ clave: GAMIF_KEY }),
-      base44.entities.Logro.list(),
-      base44.entities.Integrante.list(),
+      api.entities.AppConfig.filter({ clave: GAMIF_KEY }),
+      api.entities.Logro.list(),
+      api.entities.Integrante.list(),
     ]);
     setActivada(cfg[0]?.valor === "true");
     setLogros(lg);

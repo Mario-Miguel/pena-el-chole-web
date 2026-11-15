@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { useAuth } from "../auth/AuthContext";
 import { Plus, CheckSquare, Square, Trash2, ChevronDown, ChevronUp, Check, Pencil, FolderOpen } from "lucide-react";
 import ConfirmDialog from "../ConfirmDialog";
@@ -31,8 +31,8 @@ export default function ActasReunionContent() {
 
   const cargar = async () => {
     const [data, ints] = await Promise.all([
-      base44.entities.ActaReunion.list("-fecha"),
-      base44.entities.Integrante.list(),
+      api.entities.ActaReunion.list("-fecha"),
+      api.entities.Integrante.list(),
     ]);
     setActas(data);
     setIntegrantes(ints.sort((a, b) => a.nombre.localeCompare(b.nombre)));
@@ -55,14 +55,14 @@ export default function ActasReunionContent() {
   };
 
   const guardarEdicion = async () => {
-    await base44.entities.ActaReunion.update(editandoId, { ...editForm, asistentes: editAsistentes.join(", ") });
+    await api.entities.ActaReunion.update(editandoId, { ...editForm, asistentes: editAsistentes.join(", ") });
     setEditandoId(null);
     cargar();
   };
 
   const guardar = async () => {
     if (!form.fecha || !form.puntos) return;
-    await base44.entities.ActaReunion.create({ ...form, asistentes: asistentesSeleccionados.join(", ") });
+    await api.entities.ActaReunion.create({ ...form, asistentes: asistentesSeleccionados.join(", ") });
     notificarNuevaActa(form.fecha, form.puntos);
     setForm({ fecha: new Date().toISOString().split("T")[0], asistentes: "", puntos: "", acuerdos: "", tareas_derivadas: "", firmada: false });
     setAsistentesSeleccionados([]);
@@ -72,13 +72,13 @@ export default function ActasReunionContent() {
   };
 
   const toggleFirmada = async (acta) => {
-    await base44.entities.ActaReunion.update(acta.id, { firmada: !acta.firmada });
+    await api.entities.ActaReunion.update(acta.id, { firmada: !acta.firmada });
     cargar();
   };
 
   const eliminar = (id) => setConfirmEliminar(id);
   const confirmarEliminar = async () => {
-    await base44.entities.ActaReunion.delete(confirmEliminar);
+    await api.entities.ActaReunion.delete(confirmEliminar);
     setConfirmEliminar(null);
     cargar();
   };

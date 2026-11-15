@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { Plus, Trash2, X, Settings2, GripVertical, Loader2, Upload, Sparkles, Pencil, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 export default function GestorCategoriasAlmacen({ categorias, onCambiadas }) {
@@ -22,12 +22,12 @@ export default function GestorCategoriasAlmacen({ categorias, onCambiadas }) {
 
   const guardar = async (lista) => {
     setGuardando(true);
-    const configs = await base44.entities.AppConfig.filter({ clave: "almacen_categorias" });
+    const configs = await api.entities.AppConfig.filter({ clave: "almacen_categorias" });
     const valor = JSON.stringify(lista);
     if (configs.length > 0) {
-      await base44.entities.AppConfig.update(configs[0].id, { valor });
+      await api.entities.AppConfig.update(configs[0].id, { valor });
     } else {
-      await base44.entities.AppConfig.create({ clave: "almacen_categorias", valor });
+      await api.entities.AppConfig.create({ clave: "almacen_categorias", valor });
     }
     setGuardando(false);
     onCambiadas(lista);
@@ -38,7 +38,7 @@ export default function GestorCategoriasAlmacen({ categorias, onCambiadas }) {
     if (!file) return;
     setIconoPreview(URL.createObjectURL(file));
     setSubiendo(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    const { file_url } = await api.uploadFile({ file });
     setIconoUrl(file_url);
     setSubiendo(false);
   };
@@ -47,7 +47,7 @@ export default function GestorCategoriasAlmacen({ categorias, onCambiadas }) {
     if (!nueva.trim()) return;
     setGenerandoIA(true);
     try {
-      const { url } = await base44.integrations.Core.GenerateImage({
+      const { url } = await api.generateImage({
         prompt: `Simple flat icon for a warehouse category called "${nueva.trim()}". Minimalist, colorful, clean design on white background, suitable as a small category icon.`,
       });
       setIconoPreview(url);
@@ -65,7 +65,7 @@ export default function GestorCategoriasAlmacen({ categorias, onCambiadas }) {
 
     let emoji = "📦";
     try {
-      const res = await base44.integrations.Core.InvokeLLM({
+      const res = await api.invokeLLM({
         prompt: `Elige UN SOLO emoji que represente mejor la categoría de almacén llamada "${trimmed}". Responde ÚNICAMENTE con el emoji, sin texto adicional.`,
         response_json_schema: { type: "object", properties: { emoji: { type: "string" } } },
       });
@@ -103,7 +103,7 @@ export default function GestorCategoriasAlmacen({ categorias, onCambiadas }) {
     if (!file) return;
     setEditando(prev => ({ ...prev, iconoPreview: URL.createObjectURL(file) }));
     setSubiendoEdit(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    const { file_url } = await api.uploadFile({ file });
     setEditando(prev => ({ ...prev, icono_url: file_url, iconoPreview: file_url, emoji: null }));
     setSubiendoEdit(false);
     e.target.value = "";
@@ -113,7 +113,7 @@ export default function GestorCategoriasAlmacen({ categorias, onCambiadas }) {
     if (!editando?.label?.trim()) return;
     setGenerandoIAEdit(true);
     try {
-      const { url } = await base44.integrations.Core.GenerateImage({
+      const { url } = await api.generateImage({
         prompt: `Simple flat icon for a warehouse category called "${editando.label.trim()}". Minimalist, colorful, clean design on white background, suitable as a small category icon.`,
       });
       setEditando(prev => ({ ...prev, icono_url: url, iconoPreview: url, emoji: null }));

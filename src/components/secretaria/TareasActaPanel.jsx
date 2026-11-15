@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { useAuth } from "../auth/AuthContext";
 import { Plus, Trash2, CheckCircle2, Circle, Clock, User, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,8 +23,8 @@ export default function TareasActaPanel({ actaId, actaFecha }) {
   const cargar = async () => {
     try {
       const [data, ints] = await Promise.all([
-        base44.entities.TareaReunion.filter({ acta_id: actaId }),
-        base44.entities.Integrante.list(),
+        api.entities.TareaReunion.filter({ acta_id: actaId }),
+        api.entities.Integrante.list(),
       ]);
       setTareas(data.sort((a, b) => (a.created_date || "").localeCompare(b.created_date || "")));
       setIntegrantes(ints.sort((a, b) => a.nombre.localeCompare(b.nombre)));
@@ -39,7 +39,7 @@ export default function TareasActaPanel({ actaId, actaFecha }) {
   const crear = async () => {
     if (!form.descripcion.trim()) return;
     const int = integrantes.find(i => i.id === form.integrante_id);
-    await base44.entities.TareaReunion.create({
+    await api.entities.TareaReunion.create({
       acta_id: actaId,
       acta_fecha: actaFecha,
       descripcion: form.descripcion.trim(),
@@ -54,12 +54,12 @@ export default function TareasActaPanel({ actaId, actaFecha }) {
   };
 
   const cambiarEstado = async (tarea, nuevoEstado) => {
-    await base44.entities.TareaReunion.update(tarea.id, { estado: nuevoEstado });
+    await api.entities.TareaReunion.update(tarea.id, { estado: nuevoEstado });
     cargar();
   };
 
   const eliminar = async (id) => {
-    await base44.entities.TareaReunion.delete(id);
+    await api.entities.TareaReunion.delete(id);
     cargar();
   };
 

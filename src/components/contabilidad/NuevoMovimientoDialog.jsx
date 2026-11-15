@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { X, Plus } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { useAuth } from "@/components/auth/AuthContext";
 
 const CATEGORIAS = ["cuota", "compra", "subvencion", "evento", "deuda", "cerveza", "loteria", "ticket", "otros"];
@@ -20,7 +20,7 @@ export default function NuevoMovimientoDialog({ open, onClose, onSaved }) {
     if (!concepto.trim() || !cantidad) return;
     setSaving(true);
     try {
-      await base44.entities.MovimientoCaja.create({
+      await api.entities.MovimientoCaja.create({
         tipo,
         cantidad: parseFloat(cantidad) || 0,
         concepto: concepto.trim(),

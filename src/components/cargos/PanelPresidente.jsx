@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Users, Bell, BarChart2, ShoppingCart, Beer, CheckSquare, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -19,12 +19,12 @@ export default function PanelPresidente() {
 
   const cargar = useCallback(async () => {
     const [integrantes, items, tareas, votaciones, notifs, cervezas] = await Promise.all([
-      base44.entities.Integrante.list(),
-      base44.entities.ItemCompra.list(),
-      base44.entities.Tarea.list(),
-      base44.entities.Votacion.list(),
-      base44.entities.Notificacion.list("-created_date", 5),
-      base44.entities.CervezaEntrada.list(),
+      api.entities.Integrante.list(),
+      api.entities.ItemCompra.list(),
+      api.entities.Tarea.list(),
+      api.entities.Votacion.list(),
+      api.entities.Notificacion.list("-created_date", 5),
+      api.entities.CervezaEntrada.list(),
     ]);
     setDatos({ integrantes, items, tareas, votaciones, notifs, cervezas });
     setLoading(false);

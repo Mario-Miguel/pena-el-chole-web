@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Check, X, ChevronDown, ChevronUp, Search } from "lucide-react";
 
 const CATEGORIAS = ["cargos", "socios", "contribuyentes", "socios_honorificos", "patitas"];
@@ -31,8 +31,8 @@ export default function GestionSocios() {
 
   const cargar = useCallback(async () => {
     const [ints, cs] = await Promise.all([
-      base44.entities.Integrante.list(),
-      base44.entities.Cuota.list(),
+      api.entities.Integrante.list(),
+      api.entities.Cuota.list(),
     ]);
     setIntegrantes(ints.sort((a, b) => a.nombre.localeCompare(b.nombre)));
     setCuotas(cs);
@@ -60,10 +60,10 @@ export default function GestionSocios() {
       categoria: form.categoria,
       ...(form.categoria === "cargos" && form.cargo ? { cargo: form.cargo } : {}),
     };
-    const integrante = await base44.entities.Integrante.create(intData);
+    const integrante = await api.entities.Integrante.create(intData);
     // Crear cuota inicial si tiene concepto
     if (form.concepto.trim()) {
-      await base44.entities.Cuota.create({
+      await api.entities.Cuota.create({
         integrante_id: integrante.id,
         integrante_nombre: integrante.nombre,
         concepto: form.concepto.trim(),
@@ -79,7 +79,7 @@ export default function GestionSocios() {
   };
 
   const toggleCuota = async (cuota) => {
-    await base44.entities.Cuota.update(cuota.id, {
+    await api.entities.Cuota.update(cuota.id, {
       pagada: !cuota.pagada,
       fecha_pago: !cuota.pagada ? new Date().toISOString().split("T")[0] : "",
     });

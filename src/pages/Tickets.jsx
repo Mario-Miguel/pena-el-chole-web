@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import {
   Plus, Receipt, Upload, X, Search, ChevronDown, ChevronRight,
   ShoppingCart, Image, Trash2, User, PackagePlus, Store,
@@ -89,7 +89,7 @@ function TicketModal({ ticket, integrantes, carpetas, proveedores = [], onCrearP
     if (!files.length) return;
     setUploading(true);
     const urls = [];
-    for (const file of files) { const { file_url } = await base44.integrations.Core.UploadFile({ file }); urls.push(file_url); }
+    for (const file of files) { const { file_url } = await api.uploadFile({ file }); urls.push(file_url); }
     setForm(f => ({ ...f, fotos: [...(f.fotos || []), ...urls] }));
     setUploading(false);
   };
@@ -536,7 +536,7 @@ function CompraTicketModal({ item, onClose }) {
   const fileRef = useRef();
   const qc = useQueryClient();
   const updateMut = useMutation({
-    mutationFn: (data) => base44.entities.ItemCompra.update(item.id, data),
+    mutationFn: (data) => api.entities.ItemCompra.update(item.id, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["compras_con_ticket"] }),
   });
   const handleFile = async (e) => {
@@ -544,7 +544,7 @@ function CompraTicketModal({ item, onClose }) {
     if (!files.length) return;
     setUploading(true);
     const urls = [];
-    for (const file of files) { const { file_url } = await base44.integrations.Core.UploadFile({ file }); urls.push(file_url); }
+    for (const file of files) { const { file_url } = await api.uploadFile({ file }); urls.push(file_url); }
     const next = [...fotos, ...urls];
     setFotos(next); updateMut.mutate({ fotos_ticket: next });
     setUploading(false);
@@ -611,40 +611,40 @@ export default function Tickets() {
 
   const { data: tickets = [] } = useQuery({
     queryKey: ["tickets"],
-    queryFn: () => base44.entities.TicketFactura.list("-created_date"),
+    queryFn: () => api.entities.TicketFactura.list("-created_date"),
   });
   const { data: compras = [] } = useQuery({
     queryKey: ["compras_con_ticket"],
-    queryFn: () => base44.entities.ItemCompra.list("-created_date"),
+    queryFn: () => api.entities.ItemCompra.list("-created_date"),
     select: (data) => data.filter(c => Array.isArray(c.fotos_ticket) && c.fotos_ticket.length > 0),
   });
   const { data: integrantes = [] } = useQuery({
     queryKey: ["integrantes_tickets"],
-    queryFn: () => base44.entities.Integrante.list("nombre"),
+    queryFn: () => api.entities.Integrante.list("nombre"),
   });
   const { data: proveedoresCatalogo = [] } = useQuery({
     queryKey: ["proveedores_catalogo"],
-    queryFn: () => base44.entities.Proveedor.list("nombre"),
+    queryFn: () => api.entities.Proveedor.list("nombre"),
   });
   const crearProvMut = useMutation({
-    mutationFn: (data) => base44.entities.Proveedor.create(typeof data === "string" ? { nombre: data } : data),
+    mutationFn: (data) => api.entities.Proveedor.create(typeof data === "string" ? { nombre: data } : data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["proveedores_catalogo"] }),
   });
   const deleteProvMut = useMutation({
-    mutationFn: (id) => base44.entities.Proveedor.delete(id),
+    mutationFn: (id) => api.entities.Proveedor.delete(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["proveedores_catalogo"] }),
   });
 
   const createMut = useMutation({
-    mutationFn: (d) => base44.entities.TicketFactura.create(d),
+    mutationFn: (d) => api.entities.TicketFactura.create(d),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["tickets"] }),
   });
   const updateMut = useMutation({
-    mutationFn: ({ id, ...d }) => base44.entities.TicketFactura.update(id, d),
+    mutationFn: ({ id, ...d }) => api.entities.TicketFactura.update(id, d),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["tickets"] }),
   });
   const deleteMut = useMutation({
-    mutationFn: (id) => base44.entities.TicketFactura.delete(id),
+    mutationFn: (id) => api.entities.TicketFactura.delete(id),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["tickets"] }); setEditTicket(null); },
   });
 

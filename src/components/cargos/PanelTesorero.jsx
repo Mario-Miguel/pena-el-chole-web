@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ChevronDown, ChevronUp, Download } from "lucide-react";
@@ -14,8 +14,8 @@ export default function PanelTesorero({ soloLectura = false }) {
 
   const cargar = useCallback(async () => {
     const [its, pgs] = await Promise.all([
-      base44.entities.ItemCompra.list(),
-      base44.entities.PagoRegistrado.list(),
+      api.entities.ItemCompra.list(),
+      api.entities.PagoRegistrado.list(),
     ]);
     setItems(its);
     setPagos(pgs);

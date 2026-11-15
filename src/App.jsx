@@ -5,8 +5,6 @@ import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { Suspense, lazy, useEffect } from 'react';
 import PageNotFound from './lib/PageNotFound';
-import { AuthProvider, useAuth } from '@/lib/AuthContext';
-import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 import Layout from './Layout';
 import { prefetchAllPages, setupHoverPrefetch } from './lib/pagePrefetch';
@@ -87,9 +85,7 @@ const LayoutWrapper = ({ children, currentPageName }) => (
   </Layout>
 );
 
-const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
-
+const AppRoutes = () => {
   // Prefetch all lazy page chunks after initial load + hover/touch prefetch on nav links
   useEffect(() => {
     const timer = setTimeout(prefetchAllPages, 2000);
@@ -99,19 +95,6 @@ const AuthenticatedApp = () => {
       cleanupHover();
     };
   }, []);
-
-  if (isLoadingPublicSettings || isLoadingAuth) {
-    return <PageLoader />;
-  }
-
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      navigateToLogin();
-      return null;
-    }
-  }
 
   return (
     <Suspense fallback={<PageLoader />}>
@@ -176,14 +159,12 @@ const AuthenticatedApp = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
-        <Router>
-          <AuthenticatedApp />
-        </Router>
-        <Toaster />
-      </QueryClientProvider>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <AppRoutes />
+      </Router>
+      <Toaster />
+    </QueryClientProvider>
   );
 }
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { useAuth } from "../components/auth/AuthContext";
 import { Plus, CheckSquare, Square, Trash2, ChevronDown, ChevronUp, Check } from "lucide-react";
 import HelpIcon from "../components/layout/HelpIcon";
@@ -27,8 +27,8 @@ export default function ActasReunion() {
 
   const cargar = async () => {
     const [data, ints] = await Promise.all([
-      base44.entities.ActaReunion.list("-fecha"),
-      base44.entities.Integrante.list(),
+      api.entities.ActaReunion.list("-fecha"),
+      api.entities.Integrante.list(),
     ]);
     setActas(data);
     setIntegrantes(ints.sort((a, b) => a.nombre.localeCompare(b.nombre)));
@@ -45,7 +45,7 @@ export default function ActasReunion() {
 
   const guardar = async () => {
     if (!form.fecha || !form.puntos) return;
-    await base44.entities.ActaReunion.create({ ...form, asistentes: asistentesSeleccionados.join(", ") });
+    await api.entities.ActaReunion.create({ ...form, asistentes: asistentesSeleccionados.join(", ") });
     setForm({ fecha: new Date().toISOString().split("T")[0], asistentes: "", puntos: "", acuerdos: "", tareas_derivadas: "", firmada: false });
     setAsistentesSeleccionados([]);
     setShowForm(false);
@@ -53,13 +53,13 @@ export default function ActasReunion() {
   };
 
   const toggleFirmada = async (acta) => {
-    await base44.entities.ActaReunion.update(acta.id, { firmada: !acta.firmada });
+    await api.entities.ActaReunion.update(acta.id, { firmada: !acta.firmada });
     cargar();
   };
 
   const eliminar = async (id) => {
     if (!window.confirm("¿Eliminar esta acta?")) return;
-    await base44.entities.ActaReunion.delete(id);
+    await api.entities.ActaReunion.delete(id);
     cargar();
   };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Wallet, Plus, Check, Edit2, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +21,7 @@ export default function CuentasCerveza({ entradas, precio, puedeGestionar, onUpd
 
   const cargarPagos = async () => {
     setLoadingPagos(true);
-    const pagos = await base44.entities.CervezaPago.filter({ archivado: false });
+    const pagos = await api.entities.CervezaPago.filter({ archivado: false });
     const mapa = {};
     pagos.forEach(p => {
       if (!mapa[p.integrante_nombre]) mapa[p.integrante_nombre] = [];
@@ -72,12 +72,12 @@ export default function CuentasCerveza({ entradas, precio, puedeGestionar, onUpd
       nuevoPagado = val;
     }
     nuevoPagado = Math.round(nuevoPagado * 100) / 100;
-    await base44.entities.CervezaEntrada.update(selected.id, { pagado: nuevoPagado });
+    await api.entities.CervezaEntrada.update(selected.id, { pagado: nuevoPagado });
     onUpdate(selected.id, { pagado: nuevoPagado });
 
     // Registrar pago en historial (solo si es "sumar" o "set" y hay importe real)
     if (modo === "sumar" && val > 0) {
-      await base44.entities.CervezaPago.create({
+      await api.entities.CervezaPago.create({
         integrante_nombre: selected.nombre,
         importe: val,
         fecha: new Date().toISOString(),
@@ -88,7 +88,7 @@ export default function CuentasCerveza({ entradas, precio, puedeGestionar, onUpd
       // En modo set, calculamos la diferencia y registramos si es positiva
       const diff = nuevoPagado - (selected.pagado || 0);
       if (diff > 0) {
-        await base44.entities.CervezaPago.create({
+        await api.entities.CervezaPago.create({
           integrante_nombre: selected.nombre,
           importe: diff,
           fecha: new Date().toISOString(),

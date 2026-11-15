@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Search, RefreshCw, Filter } from "lucide-react";
 
 const ENTIDADES = [
@@ -29,7 +29,7 @@ export default function AuditoriaPanel() {
 
   const cargar = useCallback(async () => {
     setLoading(true);
-    const data = await base44.entities.AdminLog.list("-created_date", 200);
+    const data = await api.entities.AdminLog.list("-created_date", 200);
     setLogs(data);
     setLoading(false);
   }, []);

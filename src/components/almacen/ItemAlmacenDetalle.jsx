@@ -6,7 +6,7 @@ import NuevoItemDialog from "./NuevoItemDialog";
 import HistorialMovimientos from "./HistorialMovimientos";
 import WhatsAppStockAlerta from "./WhatsAppStockAlerta";
 import QrGenerador from "./QrGenerador";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 
 export default function ItemAlmacenDetalle({ item, categorias, onClose, integrantes, puedePagar, onActualizado }) {
   const [imgIdx, setImgIdx] = useState(0);
@@ -43,7 +43,7 @@ export default function ItemAlmacenDetalle({ item, categorias, onClose, integran
   };
 
   const handleCrearCompra = async (form) => {
-    await base44.entities.ItemCompra.create({
+    await api.entities.ItemCompra.create({
       nombre: form.nombre,
       descripcion: form.descripcion,
       thumbnail_url: form.thumbnail_url,

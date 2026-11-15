@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus } from "lucide-react";
 import HelpIcon from "../components/layout/HelpIcon";
 import { Button } from "@/components/ui/button";
@@ -24,10 +24,10 @@ export default function Calendario() {
 
   const cargarDatos = useCallback(async () => {
     const [dias, plazosData, actividadesData, tareasData] = await Promise.all([
-      base44.entities.DiaCalendario.list(),
-      base44.entities.PlazoCalendario.list("-created_date"),
-      base44.entities.Actividad.list("-fecha"),
-      base44.entities.TareaReunion.list("-created_date"),
+      api.entities.DiaCalendario.list(),
+      api.entities.PlazoCalendario.list("-created_date"),
+      api.entities.Actividad.list("-fecha"),
+      api.entities.TareaReunion.list("-created_date"),
     ]);
     // Solo marcar días que tengan fotos O notas con contenido real
     const set = new Set(dias.filter(d => (d.fotos && d.fotos.length > 0) || (d.notas && d.notas.trim() !== "")).map(d => d.fecha));
@@ -40,12 +40,12 @@ export default function Calendario() {
   useEffect(() => { cargarDatos(); }, [cargarDatos]);
 
   const handleCrearPlazo = async (data) => {
-    await base44.entities.PlazoCalendario.create(data);
+    await api.entities.PlazoCalendario.create(data);
     cargarDatos();
   };
 
   const handleEliminarPlazo = async (id) => {
-    await base44.entities.PlazoCalendario.delete(id);
+    await api.entities.PlazoCalendario.delete(id);
     cargarDatos();
   };
 

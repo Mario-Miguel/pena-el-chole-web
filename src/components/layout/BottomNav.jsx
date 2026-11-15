@@ -3,7 +3,7 @@ import { Settings } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import { buildNavOptions, getNavItems, BOTTOM_NAV_KEY } from "./bottomNavOptions";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import AppDrawer from "./AppDrawer";
 import { getPref } from "../../lib/uiPrefs";
 
@@ -45,7 +45,7 @@ export function BottomNav() {
   };
 
   useEffect(() => {
-    base44.entities.AppConfig.filter({ clave: "menu_desactivado" }).
+    api.entities.AppConfig.filter({ clave: "menu_desactivado" }).
     then((configs) => {
       const disabled = configs[0]?.valor ? JSON.parse(configs[0].valor) : [];
       reloadItems(disabled);

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Minus, Trash2, Package, ShoppingCart, AlertTriangle, Wrench } from "lucide-react";
 import { getEstadoMantenimiento } from "./MantenimientoPanel";
 import { useAuth } from "../auth/AuthContext";
@@ -16,11 +16,11 @@ export default function ItemAlmacenCard({ item, onUpdate, onDelete, onAbrirDetal
     const anterior = cantidad;
     const v = Math.max(0, newVal);
     setCantidad(v);
-    await base44.entities.ItemAlmacen.update(item.id, { cantidad: v });
+    await api.entities.ItemAlmacen.update(item.id, { cantidad: v });
     if (v !== anterior) {
       const diff = Math.abs(v - anterior);
       const tipo = v > anterior ? "entrada" : "salida";
-      await base44.entities.MovimientoAlmacen.create({
+      await api.entities.MovimientoAlmacen.create({
         item_id: item.id,
         item_nombre: item.nombre,
         tipo,
@@ -31,7 +31,7 @@ export default function ItemAlmacenCard({ item, onUpdate, onDelete, onAbrirDetal
       });
       // Notificar admins si movimiento grande (≥10) o si es un artículo nuevo con entrada
       if (diff >= 10) {
-        await base44.entities.Notificacion.create({
+        await api.entities.Notificacion.create({
           titulo: `⚠️ Movimiento alto en almacén`,
           mensaje: `${sesion?.nombre || "Alguien"} ${tipo === "entrada" ? "añadió" : "retiró"} ${diff} unidades de "${item.nombre}". Stock: ${anterior} → ${v}.`,
           tipo: "otro",

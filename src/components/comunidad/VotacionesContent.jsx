@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AnimatePresence, motion } from "framer-motion";
@@ -19,8 +19,8 @@ export default function VotacionesContent() {
 
   const loadData = useCallback(async () => {
     const [data, miembros] = await Promise.all([
-      base44.entities.Votacion.list("-created_date"),
-      base44.entities.Integrante.list()
+      api.entities.Votacion.list("-created_date"),
+      api.entities.Integrante.list()
     ]);
     setVotaciones(data);
     setIntegrantes(miembros.sort((a, b) => a.nombre.localeCompare(b.nombre)));
@@ -30,27 +30,27 @@ export default function VotacionesContent() {
   useEffect(() => { loadData(); }, [loadData]);
 
   const handleCreate = async ({ tema, descripcion, opciones }) => {
-    await base44.entities.Votacion.create({ tema, descripcion, opciones, completada: false });
+    await api.entities.Votacion.create({ tema, descripcion, opciones, completada: false });
     setDialogOpen(false);
     loadData();
   };
 
   const handleComplete = async (id) => {
-    await base44.entities.Votacion.update(id, { completada: true, fecha_completada: new Date().toISOString() });
+    await api.entities.Votacion.update(id, { completada: true, fecha_completada: new Date().toISOString() });
     loadData();
   };
 
   const handleEliminar = async (id) => {
-    const votos = await base44.entities.VotoRespuesta.filter({ votacion_id: id });
-    await Promise.all(votos.map(v => base44.entities.VotoRespuesta.delete(v.id)));
-    await base44.entities.Votacion.delete(id);
+    const votos = await api.entities.VotoRespuesta.filter({ votacion_id: id });
+    await Promise.all(votos.map(v => api.entities.VotoRespuesta.delete(v.id)));
+    await api.entities.Votacion.delete(id);
     loadData();
   };
 
   const handleRepetir = async (votacion) => {
-    const votos = await base44.entities.VotoRespuesta.filter({ votacion_id: votacion.id });
-    await Promise.all(votos.map(v => base44.entities.VotoRespuesta.delete(v.id)));
-    await base44.entities.Votacion.update(votacion.id, { completada: false, fecha_completada: null });
+    const votos = await api.entities.VotoRespuesta.filter({ votacion_id: votacion.id });
+    await Promise.all(votos.map(v => api.entities.VotoRespuesta.delete(v.id)));
+    await api.entities.Votacion.update(votacion.id, { completada: false, fecha_completada: null });
     integrantes.forEach(i => localStorage.removeItem(`voto_${votacion.id}_${i.id}`));
     loadData();
   };

@@ -11,7 +11,7 @@ import {
   Ticket, Receipt, Calculator, Compass
 } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { getSavedMenuOrder, ALL_PAGES, getDisabledPages } from "../../lib/menuConfig";
 import { getStoredLabels } from "../../lib/appConfig";
 import ThemeToggle from "./ThemeToggle";
@@ -73,7 +73,7 @@ export default function Sidebar({ collapsed, onToggle }) {
 
   const cargarDesactivadas = async () => {
     try {
-      const configs = await base44.entities.AppConfig.filter({ clave: "menu_desactivado" });
+      const configs = await api.entities.AppConfig.filter({ clave: "menu_desactivado" });
       const disabled = configs[0]?.valor ? JSON.parse(configs[0].valor) : [];
       setDisabledPages(disabled);
       setMenuItems(buildMenuItems(disabled, getStoredLabels()));

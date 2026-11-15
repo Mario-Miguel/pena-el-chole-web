@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { GripVertical, Plus, X, Smartphone, Grid, Zap } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { buildNavOptions, BOTTOM_NAV_KEY, DEFAULT_NAV, getNavItems } from "./bottomNavOptions";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { getPref, setPref } from "../../lib/uiPrefs";
 
 const LS_WIDGETS_ACTIVOS = "pena_widgets_activos_v2";
@@ -59,7 +59,7 @@ export default function BottomNavConfig() {
   };
 
   useEffect(() => {
-    base44.entities.AppConfig.filter({ clave: "menu_desactivado" })
+    api.entities.AppConfig.filter({ clave: "menu_desactivado" })
       .then(configs => {
         const disabled = configs[0]?.valor ? JSON.parse(configs[0].valor) : [];
         const opts = buildNavOptions(disabled);

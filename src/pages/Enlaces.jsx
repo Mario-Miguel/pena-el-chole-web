@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Trash2, ExternalLink, FolderOpen, Link as LinkIcon, Edit2, Check, X, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -42,7 +42,7 @@ export default function Enlaces() {
   const [editCarpetaNombre, setEditCarpetaNombre] = useState("");
 
   const cargar = async () => {
-    const data = await base44.entities.EnlaceUtil.list("-created_date");
+    const data = await api.entities.EnlaceUtil.list("-created_date");
     setEnlaces(data);
     setLoading(false);
   };
@@ -55,7 +55,7 @@ export default function Enlaces() {
     if (!fTitulo.trim() || !fUrl.trim()) return;
     let url = fUrl.trim();
     if (!url.startsWith("http")) url = "https://" + url;
-    await base44.entities.EnlaceUtil.create({
+    await api.entities.EnlaceUtil.create({
       titulo: fTitulo.trim(), url, descripcion: fDesc.trim(),
       carpeta: fCarpeta || "General", icono: fIcono,
     });
@@ -73,7 +73,7 @@ export default function Enlaces() {
 
   const handleDelete = async () => {
     if (!confirmDelete) return;
-    await base44.entities.EnlaceUtil.delete(confirmDelete);
+    await api.entities.EnlaceUtil.delete(confirmDelete);
     setConfirmDelete(null);
     cargar();
   };
@@ -91,7 +91,7 @@ export default function Enlaces() {
     if (!eTitulo.trim() || !eUrl.trim()) return;
     let url = eUrl.trim();
     if (!url.startsWith("http")) url = "https://" + url;
-    await base44.entities.EnlaceUtil.update(editEnlace.id, {
+    await api.entities.EnlaceUtil.update(editEnlace.id, {
       titulo: eTitulo.trim(), url, descripcion: eDesc.trim(),
       carpeta: eCarpeta || "General", icono: eIcono,
     });
@@ -105,7 +105,7 @@ export default function Enlaces() {
       return;
     }
     const afectados = enlaces.filter(e => (e.carpeta || "General") === editCarpeta);
-    await Promise.all(afectados.map(e => base44.entities.EnlaceUtil.update(e.id, { carpeta: editCarpetaNombre.trim() })));
+    await Promise.all(afectados.map(e => api.entities.EnlaceUtil.update(e.id, { carpeta: editCarpetaNombre.trim() })));
     if (carpetaSeleccionada === editCarpeta) setCarpetaSeleccionada(editCarpetaNombre.trim());
     setEditCarpeta(null);
     setEditCarpetaNombre("");
@@ -114,7 +114,7 @@ export default function Enlaces() {
 
   const eliminarCarpeta = async () => {
     const afectados = enlaces.filter(e => (e.carpeta || "General") === confirmDeleteCarpeta);
-    await Promise.all(afectados.map(e => base44.entities.EnlaceUtil.delete(e.id)));
+    await Promise.all(afectados.map(e => api.entities.EnlaceUtil.delete(e.id)));
     if (carpetaSeleccionada === confirmDeleteCarpeta) setCarpetaSeleccionada(null);
     setConfirmDeleteCarpeta(null);
     cargar();

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Calendar, Lightbulb, Bell } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,7 @@ export default function Actividades() {
   const [notifEnviada, setNotifEnviada] = useState(false);
 
   const load = useCallback(async () => {
-    const data = await base44.entities.Actividad.list("-fecha");
+    const data = await api.entities.Actividad.list("-fecha");
     setActividades(data);
     setLoading(false);
   }, []);
@@ -37,7 +37,7 @@ export default function Actividades() {
   useEffect(() => { load(); }, [load]);
 
   const handleDelete = async () => {
-    await base44.entities.Actividad.delete(confirmDelete.id);
+    await api.entities.Actividad.delete(confirmDelete.id);
     setConfirmDelete(null);
     load();
   };
@@ -47,20 +47,20 @@ export default function Actividades() {
     if (!uid) return;
     const inscritos = actividad.inscritos_ids || [];
     const nuevos = inscritos.includes(uid) ? inscritos.filter(i => i !== uid) : [...inscritos, uid];
-    await base44.entities.Actividad.update(actividad.id, { inscritos_ids: nuevos });
+    await api.entities.Actividad.update(actividad.id, { inscritos_ids: nuevos });
     load();
   };
 
   const handleNotificar = async (actividad) => {
     // Crea una notificación en el sistema para todos los usuarios
-    await base44.entities.Notificacion.create({
+    await api.entities.Notificacion.create({
       titulo: `📅 Nueva actividad: ${actividad.titulo}`,
       mensaje: `${actividad.lugar ? `📍 ${actividad.lugar} · ` : ""}${actividad.fecha ? new Date(actividad.fecha).toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" }) : ""}`,
       tipo: "evento",
       leida_por: [],
       archivada: false,
     });
-    await base44.entities.Actividad.update(actividad.id, { notificacion_enviada: true });
+    await api.entities.Actividad.update(actividad.id, { notificacion_enviada: true });
     setNotifEnviada(true);
     setTimeout(() => setNotifEnviada(false), 3000);
     load();

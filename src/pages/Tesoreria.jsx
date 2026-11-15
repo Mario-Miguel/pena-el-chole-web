@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { useAuth } from "../components/auth/AuthContext";
 import { TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight, ChevronDown, ChevronUp } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
@@ -29,9 +29,9 @@ export default function Tesoreria() {
 
   useEffect(() => {
     Promise.all([
-      base44.entities.Cuota.filter({ pagada: true }),
-      base44.entities.ItemCompra.filter({ comprado: true }),
-      base44.entities.MovimientoCaja.list("-created_date"),
+      api.entities.Cuota.filter({ pagada: true }),
+      api.entities.ItemCompra.filter({ comprado: true }),
+      api.entities.MovimientoCaja.list("-created_date"),
     ]).then(([c, co, m]) => {
       setCuotas(c);
       setCompras(co);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { User, Calendar, Trash2, Filter } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
@@ -20,8 +20,8 @@ export default function KanbanTareas() {
 
   const cargar = useCallback(async () => {
     const [tareasData, ints] = await Promise.all([
-      base44.entities.TareaReunion.list("-created_date"),
-      base44.entities.Integrante.list(),
+      api.entities.TareaReunion.list("-created_date"),
+      api.entities.Integrante.list(),
     ]);
     setTareas(tareasData);
     setIntegrantes(ints.sort((a, b) => a.nombre.localeCompare(b.nombre)));
@@ -37,11 +37,11 @@ export default function KanbanTareas() {
     const tarea = tareas.find(t => t.id === taskId);
     if (!tarea || tarea.estado === nuevoEstado) return;
     setTareas(prev => prev.map(t => t.id === taskId ? { ...t, estado: nuevoEstado } : t));
-    await base44.entities.TareaReunion.update(taskId, { estado: nuevoEstado });
+    await api.entities.TareaReunion.update(taskId, { estado: nuevoEstado });
   };
 
   const eliminar = async (id) => {
-    await base44.entities.TareaReunion.delete(id);
+    await api.entities.TareaReunion.delete(id);
     cargar();
   };
 

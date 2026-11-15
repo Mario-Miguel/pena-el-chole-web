@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trophy, Plus, Trash2, Sparkles, ToggleLeft, ToggleRight, RefreshCw, Medal } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,9 +24,9 @@ export default function GamificacionesPanel({ sesion }) {
 
   const cargar = useCallback(async () => {
     const [cfg, lg, ints] = await Promise.all([
-      base44.entities.AppConfig.filter({ clave: GAMIF_KEY }),
-      base44.entities.Logro.list(),
-      base44.entities.Integrante.list(),
+      api.entities.AppConfig.filter({ clave: GAMIF_KEY }),
+      api.entities.Logro.list(),
+      api.entities.Integrante.list(),
     ]);
     setActivada(cfg[0]?.valor === "true");
     setLogros(lg.sort((a, b) => (a.categoria || "").localeCompare(b.categoria || "")));
@@ -39,11 +39,11 @@ export default function GamificacionesPanel({ sesion }) {
   const toggleActivacion = async () => {
     const nuevo = !activada;
     setGuardando(true);
-    const existing = await base44.entities.AppConfig.filter({ clave: GAMIF_KEY });
+    const existing = await api.entities.AppConfig.filter({ clave: GAMIF_KEY });
     if (existing.length > 0) {
-      await base44.entities.AppConfig.update(existing[0].id, { valor: String(nuevo) });
+      await api.entities.AppConfig.update(existing[0].id, { valor: String(nuevo) });
     } else {
-      await base44.entities.AppConfig.create({ clave: GAMIF_KEY, valor: String(nuevo) });
+      await api.entities.AppConfig.create({ clave: GAMIF_KEY, valor: String(nuevo) });
     }
     setActivada(nuevo);
     setGuardando(false);
@@ -54,7 +54,7 @@ export default function GamificacionesPanel({ sesion }) {
   const generarPorDefecto = async () => {
     if (!confirm("Esto creará los logros sugeridos según el contenido de la app. ¿Continuar?")) return;
     setGuardando(true);
-    await base44.entities.Logro.bulkCreate(LOGROS_POR_DEFECTO);
+    await api.entities.Logro.bulkCreate(LOGROS_POR_DEFECTO);
     await registrarLog({ accion: "crear", entidad: "Logro", descripcion: `Generados ${LOGROS_POR_DEFECTO.length} logros por defecto`, autorNombre: sesion?.nombre });
     setGuardando(false);
     cargar();
@@ -64,9 +64,9 @@ export default function GamificacionesPanel({ sesion }) {
     if (!editLogro?.nombre || !editLogro?.categoria || !editLogro?.umbral) return;
     setGuardando(true);
     if (editLogro.id) {
-      await base44.entities.Logro.update(editLogro.id, { ...editLogro });
+      await api.entities.Logro.update(editLogro.id, { ...editLogro });
     } else {
-      await base44.entities.Logro.create({ ...editLogro });
+      await api.entities.Logro.create({ ...editLogro });
     }
     await registrarLog({ accion: editLogro.id ? "editar" : "crear", entidad: "Logro", descripcion: `Logro "${editLogro.nombre}"`, autorNombre: sesion?.nombre });
     setGuardando(false);
@@ -76,13 +76,13 @@ export default function GamificacionesPanel({ sesion }) {
 
   const eliminarLogro = async (id) => {
     if (!confirm("¿Eliminar este logro?")) return;
-    await base44.entities.Logro.delete(id);
+    await api.entities.Logro.delete(id);
     await registrarLog({ accion: "eliminar", entidad: "Logro", descripcion: `Logro eliminado`, autorNombre: sesion?.nombre });
     cargar();
   };
 
   const toggleLogro = async (logro) => {
-    await base44.entities.Logro.update(logro.id, { activo: !logro.activo });
+    await api.entities.Logro.update(logro.id, { activo: !logro.activo });
     cargar();
   };
 

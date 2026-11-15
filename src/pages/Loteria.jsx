@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { useAuth } from "../components/auth/AuthContext";
 import {
   Ticket, Plus, ChevronDown, ChevronUp, Save, X, Users,
@@ -121,7 +121,7 @@ function Badge({ children, color = "gray" }) {
 
 /** Envía notificación a admin y todos los cargos */
 async function notificarAdminYCargos(integrantes, titulo, mensaje) {
-  base44.entities.Notificacion.create({ titulo, mensaje, tipo: "otro" }).catch(() => {});
+  api.entities.Notificacion.create({ titulo, mensaje, tipo: "otro" }).catch(() => {});
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -142,7 +142,7 @@ function FormLoteria({ initial, onSave, onCancel }) {
     const file = e.target.files?.[0];
     if (!file) return;
     setSubiendoImagen(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    const { file_url } = await api.uploadFile({ file });
     set("imagen_papeleta_url", file_url);
     setSubiendoImagen(false);
   };
@@ -301,12 +301,12 @@ function ConfigTalonarios({ loteria, talonarios, integrantes, onGuardado }) {
         inicio = fin + 1;
       }
     }
-    await Promise.all(rows.map(r => base44.entities.TalonarioLoteria.create(r)));
+    await Promise.all(rows.map(r => api.entities.TalonarioLoteria.create(r)));
     // Notificar a cada socio asignado
     for (const integ of elegibles) {
       const nTal = getTal(integ.id);
       if (nTal > 0) {
-        base44.entities.Notificacion.create({
+        api.entities.Notificacion.create({
           titulo: `🎫 Te han asignado talonario de lotería`,
           mensaje: `Se te han asignado ${nTal} talonario(s) de ${nTal * ppp} papeletas para la lotería "${loteria.nombre}".`,
           tipo: "otro",
@@ -323,7 +323,7 @@ function ConfigTalonarios({ loteria, talonarios, integrantes, onGuardado }) {
     const { integrante_id, numeros_inicio, numeros_fin } = formManual;
     const cantidad = Math.max(0, parseInt(numeros_fin) - parseInt(numeros_inicio) + 1);
     const integ = integrantes.find(i => i.id === integrante_id);
-    await base44.entities.TalonarioLoteria.create({
+    await api.entities.TalonarioLoteria.create({
       loteria_id: loteriaId, integrante_id,
       integrante_nombre: integ?.nombre || "",
       numeros_inicio: parseInt(numeros_inicio),
@@ -331,7 +331,7 @@ function ConfigTalonarios({ loteria, talonarios, integrantes, onGuardado }) {
       cantidad_asignada: cantidad, cantidad_vendida: 0,
     });
     // Notificar al socio
-    base44.entities.Notificacion.create({
+    api.entities.Notificacion.create({
       titulo: `🎫 Te han asignado un talonario de lotería`,
       mensaje: `Se te ha asignado el talonario de números ${numeros_inicio}–${numeros_fin} (${cantidad} papeletas) para la lotería "${loteria.nombre}".`,
       tipo: "otro",
@@ -544,7 +544,7 @@ function HistorialEntregas({ loterias }) {
   const [filtroLoteria, setFiltroLoteria] = useState("todas");
 
   useEffect(() => {
-    base44.entities.EntregaTalonario.list("-fecha_entrega", 200).then(data => {
+    api.entities.EntregaTalonario.list("-fecha_entrega", 200).then(data => {
       setEntregas(data);
       setLoading(false);
     });
@@ -765,7 +765,7 @@ function TalonarioRow({ talonario, precio, puedeEditar, onUpdate, onDelete, todo
                   const nuevoEstado = !talonario.entregado;
                   await onUpdate(talonario.id, { entregado: nuevoEstado });
                   if (nuevoEstado) {
-                    base44.entities.EntregaTalonario.create({
+                    api.entities.EntregaTalonario.create({
                       loteria_id: loteria?.id || talonario.loteria_id,
                       loteria_nombre: loteria?.nombre || "",
                       talonario_id: talonario.id,
@@ -1108,11 +1108,11 @@ function PanelLoteria({ loteria, talonarios, integrantes, puedeEditar, onRefresh
   const sobrePasado = limite > 0 && totalAsignadas > limite;
 
   const updateTalonario = async (id, data) => {
-    await base44.entities.TalonarioLoteria.update(id, data);
+    await api.entities.TalonarioLoteria.update(id, data);
     onRefresh();
   };
   const deleteTalonario = async (id) => {
-    await base44.entities.TalonarioLoteria.delete(id);
+    await api.entities.TalonarioLoteria.delete(id);
     onRefresh();
   };
 
@@ -1120,7 +1120,7 @@ function PanelLoteria({ loteria, talonarios, integrantes, puedeEditar, onRefresh
     const socioTals = talLoteria.filter(t => t.integrante_id === integranteId);
     const ppp = socioTals.length > 0 ? (socioTals[0].cantidad_asignada || 20) : 20;
     const nextStart = talLoteria.length > 0 ? Math.max(...talLoteria.map(t => t.numeros_fin || 0)) + 1 : 1;
-    await base44.entities.TalonarioLoteria.create({
+    await api.entities.TalonarioLoteria.create({
       loteria_id: loteria.id,
       integrante_id: integranteId,
       integrante_nombre: integranteNombre,
@@ -1142,7 +1142,7 @@ function PanelLoteria({ loteria, talonarios, integrantes, puedeEditar, onRefresh
 
   const doRemoveTalonario = async () => {
     if (!confirmRemove) return;
-    await base44.entities.TalonarioLoteria.delete(confirmRemove.talonarioId);
+    await api.entities.TalonarioLoteria.delete(confirmRemove.talonarioId);
     setConfirmRemove(null);
     onRefresh();
   };
@@ -1334,7 +1334,7 @@ function PanelLoteria({ loteria, talonarios, integrantes, puedeEditar, onRefresh
                 <Edit2 className="w-3.5 h-3.5" /> Editar
               </button>
               <button onClick={async () => {
-                await base44.entities.Loteria.update(loteria.id, { estado: loteria.estado === "activa" ? "cerrada" : "activa" });
+                await api.entities.Loteria.update(loteria.id, { estado: loteria.estado === "activa" ? "cerrada" : "activa" });
                 onRefresh();
               }} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 font-semibold hover:underline">
                 {loteria.estado === "activa" ? "🔒 Cerrar" : "🔓 Reabrir"}
@@ -1402,12 +1402,12 @@ function MiTalonarioCard({ talonario, loteria, precio, vencida, integrante }) {
 
   const guardar = async () => {
     setGuardando(true);
-    await base44.entities.TalonarioLoteria.update(talonario.id, { cantidad_vendida: vendidas });
+    await api.entities.TalonarioLoteria.update(talonario.id, { cantidad_vendida: vendidas });
     // Notificar al admin si acaba de vender todos
     const asignadas = talonario.cantidad_asignada || 0;
     const yaEraCompleto = (talonario.cantidad_vendida || 0) >= asignadas;
     if (!yaEraCompleto && vendidas >= asignadas && asignadas > 0) {
-      base44.entities.Notificacion.create({
+      api.entities.Notificacion.create({
         titulo: `🎫 ${talonario.integrante_nombre} ha vendido todos sus números`,
         mensaje: `${talonario.integrante_nombre} ha completado la venta de las ${asignadas} participaciones (Nº ${talonario.numeros_inicio}–${talonario.numeros_fin}) de la lotería "${loteria?.nombre || ""}".`,
         tipo: "otro",
@@ -1540,9 +1540,9 @@ export default function Loteria() {
 
   const cargar = useCallback(async () => {
     const [lots, tals, ints] = await Promise.all([
-      base44.entities.Loteria.list("-created_date"),
-      base44.entities.TalonarioLoteria.list(),
-      integrantesCtx?.length ? Promise.resolve(integrantesCtx) : base44.entities.Integrante.list(),
+      api.entities.Loteria.list("-created_date"),
+      api.entities.TalonarioLoteria.list(),
+      integrantesCtx?.length ? Promise.resolve(integrantesCtx) : api.entities.Integrante.list(),
     ]);
     setLoterias(lots);
     setTalonarios(tals);
@@ -1557,18 +1557,18 @@ export default function Loteria() {
   const confirmarEliminarLoteria = async () => {
     if (!confirmEliminar) return;
     const talsLoteria = talonarios.filter(t => t.loteria_id === confirmEliminar.id);
-    await Promise.all(talsLoteria.map(t => base44.entities.TalonarioLoteria.delete(t.id)));
-    await base44.entities.Loteria.delete(confirmEliminar.id);
+    await Promise.all(talsLoteria.map(t => api.entities.TalonarioLoteria.delete(t.id)));
+    await api.entities.Loteria.delete(confirmEliminar.id);
     setConfirmEliminar(null);
     cargar();
   };
 
   const guardarLoteria = async (form) => {
     if (editandoLoteria) {
-      await base44.entities.Loteria.update(editandoLoteria.id, form);
+      await api.entities.Loteria.update(editandoLoteria.id, form);
       setEditandoLoteria(null);
     } else {
-      await base44.entities.Loteria.create(form);
+      await api.entities.Loteria.create(form);
       setCrearLoteria(false);
     }
     cargar();

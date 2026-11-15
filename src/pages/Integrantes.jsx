@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Trash2, ChevronDown, Search, ArrowRightLeft } from "lucide-react";
 import HelpIcon from "../components/layout/HelpIcon";
 import { Button } from "@/components/ui/button";
@@ -45,23 +45,23 @@ export default function Integrantes() {
   const [categoriaNueva, setCategoriaNueva] = useState("");
 
   const loadIntegrantes = async () => {
-    const data = await base44.entities.Integrante.list();
+    const data = await api.entities.Integrante.list();
     setIntegrantes(data);
     setLoading(false);
   };
 
   useEffect(() => {
     loadIntegrantes();
-    base44.entities.SesionUsuario.list().then(setSesiones);
+    api.entities.SesionUsuario.list().then(setSesiones);
     const interval = setInterval(() => {
       loadIntegrantes();
-      base44.entities.SesionUsuario.list().then(setSesiones);
+      api.entities.SesionUsuario.list().then(setSesiones);
     }, 30000);
     return () => clearInterval(interval);
   }, []);
 
   const handleAdd = async ({ nombre, cargo }) => {
-    await base44.entities.Integrante.create({
+    await api.entities.Integrante.create({
       nombre,
       categoria: dialogCategoria,
       cargo: cargo || null,
@@ -72,14 +72,14 @@ export default function Integrantes() {
   };
 
   const handleDelete = async (id) => {
-    await base44.entities.Integrante.delete(id);
+    await api.entities.Integrante.delete(id);
     setConfirmEliminar(null);
     loadIntegrantes();
   };
 
   const handleMoverCategoria = async () => {
     if (!moverDialog || !categoriaNueva) return;
-    await base44.entities.Integrante.update(moverDialog.id, {
+    await api.entities.Integrante.update(moverDialog.id, {
       categoria: categoriaNueva,
       cargo: ["socios", "contribuyentes", "socios_honorificos", "patitas"].includes(categoriaNueva) ? null : moverDialog.cargo,
     });

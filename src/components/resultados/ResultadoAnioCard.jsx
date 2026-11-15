@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { ChevronDown, ChevronUp, Trash2, Plus, ImageIcon, FileSpreadsheet, FileText, Download, X, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../auth/AuthContext";
@@ -55,7 +55,7 @@ export default function ResultadoAnioCard({ resultado, onDelete }) {
     setGuardando(true);
     const imagenesUrls = todosUrls.filter(f => f.tipo === "imagen").map(f => f.url);
     const excelUrls = todosUrls.filter(f => f.tipo !== "imagen").map(f => f.url);
-    await base44.entities.ResultadoAnio.update(resultado.id, { filas, imagenes_urls: imagenesUrls, excel_urls: excelUrls });
+    await api.entities.ResultadoAnio.update(resultado.id, { filas, imagenes_urls: imagenesUrls, excel_urls: excelUrls });
     setGuardando(false);
   };
 
@@ -64,7 +64,7 @@ export default function ResultadoAnioCard({ resultado, onDelete }) {
     if (!files.length) return;
     setSubiendo(true);
     const nuevos = await Promise.all(files.map(async f => {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: f });
+      const { file_url } = await api.uploadFile({ file: f });
       const tipo = tipoForzado || getFileType(file_url) || getFileType(f.name);
       return { url: file_url, tipo, nombre: f.name };
     }));
@@ -72,7 +72,7 @@ export default function ResultadoAnioCard({ resultado, onDelete }) {
     setTodosUrls(actualizado);
     const imagenesUrls = actualizado.filter(f => f.tipo === "imagen").map(f => f.url);
     const excelUrls = actualizado.filter(f => f.tipo !== "imagen").map(f => f.url);
-    await base44.entities.ResultadoAnio.update(resultado.id, { imagenes_urls: imagenesUrls, excel_urls: excelUrls });
+    await api.entities.ResultadoAnio.update(resultado.id, { imagenes_urls: imagenesUrls, excel_urls: excelUrls });
     setSubiendo(false);
     e.target.value = "";
   };
@@ -83,8 +83,8 @@ export default function ResultadoAnioCard({ resultado, onDelete }) {
     setTodosUrls(nuevos);
     const imagenesUrls = nuevos.filter(f => f.tipo === "imagen").map(f => f.url);
     const excelUrls = nuevos.filter(f => f.tipo !== "imagen").map(f => f.url);
-    await base44.entities.ResultadoAnio.update(resultado.id, { imagenes_urls: imagenesUrls, excel_urls: excelUrls });
-    await base44.entities.Papelera.create({
+    await api.entities.ResultadoAnio.update(resultado.id, { imagenes_urls: imagenesUrls, excel_urls: excelUrls });
+    await api.entities.Papelera.create({
       entidad: "ResultadoAnio",
       descripcion: `Archivo de ${titulo}`,
       datos_json: JSON.stringify({ url: item.url, tipo: item.tipo, anio: resultado.anio }),

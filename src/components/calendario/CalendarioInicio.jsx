@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { format } from "date-fns";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,8 +21,8 @@ export default function CalendarioInicio({ cuentasAtras = [] }) {
 
   const cargarDatos = useCallback(async () => {
     const [diasData, plazosData] = await Promise.all([
-      base44.entities.DiaCalendario.list(),
-      base44.entities.PlazoCalendario.list(),
+      api.entities.DiaCalendario.list(),
+      api.entities.PlazoCalendario.list(),
     ]);
     setDias(diasData);
 
@@ -46,13 +46,13 @@ export default function CalendarioInicio({ cuentasAtras = [] }) {
   const diasConDatos = new Set(dias.filter(d => d.fotos?.length > 0 || d.notas).map(d => d.fecha));
 
   const handleCrearPlazo = async (datos) => {
-    await base44.entities.PlazoCalendario.create(datos);
+    await api.entities.PlazoCalendario.create(datos);
     cargarDatos();
   };
 
   const handleEliminarPlazo = async (id) => {
     if (String(id).startsWith("ca_")) return; // No se pueden eliminar las de cuenta atrás desde aquí
-    await base44.entities.PlazoCalendario.delete(id);
+    await api.entities.PlazoCalendario.delete(id);
     cargarDatos();
   };
 

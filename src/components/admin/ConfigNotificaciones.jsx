@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Button } from "@/components/ui/button";
 import { Bell, Mail, Smartphone } from "lucide-react";
 
@@ -21,7 +21,7 @@ export default function ConfigNotificaciones() {
   const [loading, setLoading]   = useState(true);
 
   useEffect(() => {
-    base44.entities.AppConfig.filter({ clave: CONFIG_KEY }).then(data => {
+    api.entities.AppConfig.filter({ clave: CONFIG_KEY }).then(data => {
       if (data.length > 0) {
         setConfigId(data[0].id);
         try { setConfig(JSON.parse(data[0].valor)); } catch {}
@@ -39,9 +39,9 @@ export default function ConfigNotificaciones() {
     setGuardando(true);
     const valor = JSON.stringify(config);
     if (configId) {
-      await base44.entities.AppConfig.update(configId, { valor });
+      await api.entities.AppConfig.update(configId, { valor });
     } else {
-      const created = await base44.entities.AppConfig.create({ clave: CONFIG_KEY, valor });
+      const created = await api.entities.AppConfig.create({ clave: CONFIG_KEY, valor });
       setConfigId(created.id);
     }
     setGuardando(false);

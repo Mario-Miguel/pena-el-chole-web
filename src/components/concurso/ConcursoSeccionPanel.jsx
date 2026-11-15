@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Upload, Loader2, Trash2, FileText, ExternalLink, Save, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../auth/AuthContext";
@@ -20,7 +20,7 @@ export default function ConcursoSeccionPanel({ tipo }) {
   const [guardadoOk, setGuardadoOk] = useState(false);
 
   useEffect(() => {
-    base44.entities.ConcursoSeccion.filter({ tipo }).then((res) => {
+    api.entities.ConcursoSeccion.filter({ tipo }).then((res) => {
       if (res.length > 0) {
         setSeccion(res[0]);
         setContenido(res[0].contenido || "");
@@ -31,10 +31,10 @@ export default function ConcursoSeccionPanel({ tipo }) {
   const handleGuardar = async () => {
     setGuardando(true);
     if (seccion) {
-      const updated = await base44.entities.ConcursoSeccion.update(seccion.id, { contenido });
+      const updated = await api.entities.ConcursoSeccion.update(seccion.id, { contenido });
       setSeccion(updated);
     } else {
-      const created = await base44.entities.ConcursoSeccion.create({ tipo, contenido, archivos: [] });
+      const created = await api.entities.ConcursoSeccion.create({ tipo, contenido, archivos: [] });
       setSeccion(created);
     }
     setGuardando(false);
@@ -48,16 +48,16 @@ export default function ConcursoSeccionPanel({ tipo }) {
     setSubiendo(true);
     const urls = [];
     for (const file of files) {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await api.uploadFile({ file });
       urls.push({ nombre: file.name, url: file_url });
     }
     const archivosActuales = seccion?.archivos || [];
     const nuevosArchivos = [...archivosActuales, ...urls.map((u) => JSON.stringify(u))];
     if (seccion) {
-      const updated = await base44.entities.ConcursoSeccion.update(seccion.id, { archivos: nuevosArchivos });
+      const updated = await api.entities.ConcursoSeccion.update(seccion.id, { archivos: nuevosArchivos });
       setSeccion(updated);
     } else {
-      const created = await base44.entities.ConcursoSeccion.create({ tipo, contenido, archivos: nuevosArchivos });
+      const created = await api.entities.ConcursoSeccion.create({ tipo, contenido, archivos: nuevosArchivos });
       setSeccion(created);
     }
     setSubiendo(false);
@@ -66,7 +66,7 @@ export default function ConcursoSeccionPanel({ tipo }) {
 
   const handleDeleteArchivo = async (idx) => {
     const nuevos = (seccion.archivos || []).filter((_, i) => i !== idx);
-    const updated = await base44.entities.ConcursoSeccion.update(seccion.id, { archivos: nuevos });
+    const updated = await api.entities.ConcursoSeccion.update(seccion.id, { archivos: nuevos });
     setSeccion(updated);
   };
 

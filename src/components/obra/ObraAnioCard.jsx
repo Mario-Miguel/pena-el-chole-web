@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import ObraSeccion from "./ObraSeccion";
 import GuionJurado from "./GuionJurado";
 import { useAuth } from "../auth/AuthContext";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Input } from "@/components/ui/input";
 
 export default function ObraAnioCard({ obraAnio, onDelete }) {
@@ -15,7 +15,7 @@ export default function ObraAnioCard({ obraAnio, onDelete }) {
   const [titulo, setTitulo] = useState(obraAnio.titulo || "");
 
   const handleGuardar = async () => {
-    await base44.entities.ObraAnio.update(obraAnio.id, { titulo: titulo.trim() || `Obra ${obraAnio.anio}` });
+    await api.entities.ObraAnio.update(obraAnio.id, { titulo: titulo.trim() || `Obra ${obraAnio.anio}` });
     setEditando(false);
   };
 

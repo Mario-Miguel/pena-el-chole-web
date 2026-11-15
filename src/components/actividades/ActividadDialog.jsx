@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { notificarNuevaActividad } from "../../lib/notificaciones";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -39,7 +39,7 @@ export default function ActividadDialog({ open, onClose, actividad, onSaved }) {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    const { file_url } = await api.uploadFile({ file });
     set("imagen_url", file_url);
     setUploading(false);
   };
@@ -48,9 +48,9 @@ export default function ActividadDialog({ open, onClose, actividad, onSaved }) {
     if (!form.titulo.trim() || !form.fecha) return;
     setSaving(true);
     const data = { ...form, fecha: localToISO(form.fecha), aforo_maximo: Number(form.aforo_maximo) || 0, precio: Number(form.precio) || 0 };
-    if (actividad?.id) await base44.entities.Actividad.update(actividad.id, data);
+    if (actividad?.id) await api.entities.Actividad.update(actividad.id, data);
     else {
-      await base44.entities.Actividad.create({ ...data, inscritos_ids: [], notificacion_enviada: true });
+      await api.entities.Actividad.create({ ...data, inscritos_ids: [], notificacion_enviada: true });
       notificarNuevaActividad(form.titulo, data.fecha, form.lugar);
     }
     setSaving(false);

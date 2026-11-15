@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { X, Cake } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import CumpleanosPanel from "../integrantes/CumpleanosPanel";
@@ -85,7 +85,7 @@ export default function CumpleanosModal({ open, onClose }) {
   useEffect(() => {
     if (!open) return;
     setLoading(true);
-    base44.entities.Integrante.list().then(data => {
+    api.entities.Integrante.list().then(data => {
       setIntegrantes(data.filter(i => i.categoria !== "patitas"));
       setLoading(false);
     });

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import { es } from "date-fns/locale";
@@ -19,8 +19,8 @@ export default function EstadisticasAlmacen({ items, onClose, onArchivar }) {
 
   const cargarDatos = () => {
     return Promise.all([
-      base44.entities.MovimientoAlmacen.list("-created_date", 500),
-      base44.entities.AppConfig.list(),
+      api.entities.MovimientoAlmacen.list("-created_date", 500),
+      api.entities.AppConfig.list(),
     ]).then(([movs, configs]) => {
       setMovimientos(movs);
       const archivados = configs
@@ -40,13 +40,13 @@ export default function EstadisticasAlmacen({ items, onClose, onArchivar }) {
     setConfirmArchivar(false);
     const año = new Date().getFullYear();
     const resumen = items.map(i => ({ nombre: i.nombre, categoria: i.categoria, cantidad: i.cantidad ?? 0 }));
-    await base44.entities.AppConfig.create({
+    await api.entities.AppConfig.create({
       clave: `almacen_archivo_${año}_${Date.now()}`,
       valor: JSON.stringify({ año, fecha: new Date().toISOString(), items: resumen, total: items.length }),
     });
     // Borrar todos los movimientos para resetear estadísticas
-    const movs = await base44.entities.MovimientoAlmacen.list("-created_date", 1000);
-    await Promise.all(movs.map(m => base44.entities.MovimientoAlmacen.delete(m.id)));
+    const movs = await api.entities.MovimientoAlmacen.list("-created_date", 1000);
+    await Promise.all(movs.map(m => api.entities.MovimientoAlmacen.delete(m.id)));
 
     setArchivando(false);
     setArchivoOk(true);
@@ -58,7 +58,7 @@ export default function EstadisticasAlmacen({ items, onClose, onArchivar }) {
 
   const handleBorrarArchivo = async (e, archivo) => {
     e.stopPropagation();
-    await base44.entities.AppConfig.delete(archivo.id);
+    await api.entities.AppConfig.delete(archivo.id);
     setArchivos(prev => prev.filter(a => a.id !== archivo.id));
     if (archivoExpandido === archivo.id) setArchivoExpandido(null);
   };

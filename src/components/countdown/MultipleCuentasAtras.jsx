@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Pin, Trash2, ChevronDown, ChevronUp, Settings, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -129,7 +129,7 @@ export default function MultipleCuentasAtras({ puedeConfigurar }) {
   const [editando, setEditando] = useState(null); // cuenta a editar
 
   const cargar = async () => {
-    const todas = await base44.entities.CuentaAtras.list("-created_date");
+    const todas = await api.entities.CuentaAtras.list("-created_date");
     setCuentas(todas);
     // La fijada: preferencia en localStorage, o la primera
     const storedFijada = localStorage.getItem("pena_cuenta_fijada");
@@ -163,20 +163,20 @@ export default function MultipleCuentasAtras({ puedeConfigurar }) {
   };
 
   const crear = async (datos) => {
-    const nueva = await base44.entities.CuentaAtras.create(datos);
+    const nueva = await api.entities.CuentaAtras.create(datos);
     await cargar();
     fijar(nueva.id);
     setFormOpen(false);
   };
 
   const actualizar = async (datos) => {
-    await base44.entities.CuentaAtras.update(editando.id, datos);
+    await api.entities.CuentaAtras.update(editando.id, datos);
     setEditando(null);
     await cargar();
   };
 
   const eliminar = async (id) => {
-    await base44.entities.CuentaAtras.delete(id);
+    await api.entities.CuentaAtras.delete(id);
     const restantes = cuentas.filter(c => c.id !== id);
     if (fijadaId === id) {
       const nueva = restantes[0];

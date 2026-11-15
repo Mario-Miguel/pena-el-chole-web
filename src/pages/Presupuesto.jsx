@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Trash2, ChevronDown, ChevronUp, PiggyBank, TrendingUp, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../components/auth/AuthContext";
@@ -116,7 +116,7 @@ function PresupuestoCard({ ppto, onDelete }) {
 
   const handleGuardar = async () => {
     setGuardando(true);
-    await base44.entities.Presupuesto.update(ppto.id, { partidas, ingresos });
+    await api.entities.Presupuesto.update(ppto.id, { partidas, ingresos });
     setGuardando(false);
   };
 
@@ -222,7 +222,7 @@ export default function Presupuesto() {
   const [nuevoAnio, setNuevoAnio] = useState("");
 
   const cargar = useCallback(async () => {
-    const data = await base44.entities.Presupuesto.list("-anio");
+    const data = await api.entities.Presupuesto.list("-anio");
     setPresupuestos(data);
     setLoading(false);
   }, []);
@@ -232,13 +232,13 @@ export default function Presupuesto() {
   const handleCreate = async () => {
     const anio = parseInt(nuevoAnio, 10);
     if (!anio) return;
-    await base44.entities.Presupuesto.create({ anio, partidas: [], ingresos: [] });
+    await api.entities.Presupuesto.create({ anio, partidas: [], ingresos: [] });
     setNuevoAnio("");
     cargar();
   };
 
   const handleDelete = async (id) => {
-    await base44.entities.Presupuesto.delete(id);
+    await api.entities.Presupuesto.delete(id);
     cargar();
   };
 

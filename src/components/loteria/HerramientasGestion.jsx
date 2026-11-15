@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import {
   CheckCircle2, Euro, AlertTriangle, Users, RotateCcw,
   Bell, ClipboardList, Download, TrendingUp
@@ -91,7 +91,7 @@ export default function HerramientasGestion({ loterias, talonarios, onRefresh })
     setAccionando(true);
     const talsAMarcar = sociosSinEntregar.flatMap(s => s.talonarios.filter(t => !t.entregado));
     await Promise.all(talsAMarcar.map(t =>
-      base44.entities.TalonarioLoteria.update(t.id, { entregado: true })
+      api.entities.TalonarioLoteria.update(t.id, { entregado: true })
     ));
     setAccionando(false);
     onRefresh();
@@ -102,7 +102,7 @@ export default function HerramientasGestion({ loterias, talonarios, onRefresh })
     setAccionando(true);
     for (const socio of sociosPendientes) {
       const pend = socio.totalAsignado - socio.totalVendido - socio.totalDevuelto;
-      base44.entities.Notificacion.create({
+      api.entities.Notificacion.create({
         titulo: `🎫 Recuerda entregar el dinero de lotería`,
         mensaje: `Tienes ${pend} papeletas pendientes de vender o devolver. Por favor, gestiona tu talonario cuanto antes.`,
         tipo: "otro",

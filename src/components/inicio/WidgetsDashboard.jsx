@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -522,24 +522,24 @@ export default function WidgetsDashboard({ sesion }) {
     const ahora = new Date();
 
     const peticiones = [
-      necesita(["compras"])                          ? base44.entities.ItemCompra.list("-created_date", 10) : Promise.resolve([]),
-      necesita(["caja", "fondos"])                   ? base44.entities.MovimientoCaja.list("-created_date", 5) : Promise.resolve([]),
-      necesita(["votaciones", "kpis"])               ? base44.entities.Votacion.filter({ completada: false }) : Promise.resolve([]),
-      necesita(["sugerencias"])                      ? base44.entities.Sugerencia.filter({ archivada: false }) : Promise.resolve([]),
-      necesita(["tareas", "kpis"])                   ? base44.entities.Tarea.filter({ completada: false }) : Promise.resolve([]),
-      necesita(["stockbajo", "kpis"])                ? base44.entities.ItemAlmacen.list("-created_date", 50) : Promise.resolve([]),
-      necesita(["kpis", "chat"])                     ? base44.entities.ChatMensaje.list("-created_date", 20) : Promise.resolve([]),
-      necesita(["notifs"])                           ? base44.entities.Notificacion.filter({ archivada: false }) : Promise.resolve([]),
-      necesita(["cerveza"])                          ? base44.entities.CervezaEntrada.list("-cervezas", 3) : Promise.resolve([]),
-      necesita(["integrantes"])                      ? base44.entities.Integrante.list() : Promise.resolve([]),
-      necesita(["vehiculos"])                        ? base44.entities.Vehiculo.list() : Promise.resolve([]),
-      necesita(["actividades"])                      ? base44.entities.Actividad.filter({ estado: "programada" }) : Promise.resolve([]),
-      necesita(["cumpleanos"]) && !necesita(["integrantes"]) ? base44.entities.Integrante.list() : Promise.resolve([]),
+      necesita(["compras"])                          ? api.entities.ItemCompra.list("-created_date", 10) : Promise.resolve([]),
+      necesita(["caja", "fondos"])                   ? api.entities.MovimientoCaja.list("-created_date", 5) : Promise.resolve([]),
+      necesita(["votaciones", "kpis"])               ? api.entities.Votacion.filter({ completada: false }) : Promise.resolve([]),
+      necesita(["sugerencias"])                      ? api.entities.Sugerencia.filter({ archivada: false }) : Promise.resolve([]),
+      necesita(["tareas", "kpis"])                   ? api.entities.Tarea.filter({ completada: false }) : Promise.resolve([]),
+      necesita(["stockbajo", "kpis"])                ? api.entities.ItemAlmacen.list("-created_date", 50) : Promise.resolve([]),
+      necesita(["kpis", "chat"])                     ? api.entities.ChatMensaje.list("-created_date", 20) : Promise.resolve([]),
+      necesita(["notifs"])                           ? api.entities.Notificacion.filter({ archivada: false }) : Promise.resolve([]),
+      necesita(["cerveza"])                          ? api.entities.CervezaEntrada.list("-cervezas", 3) : Promise.resolve([]),
+      necesita(["integrantes"])                      ? api.entities.Integrante.list() : Promise.resolve([]),
+      necesita(["vehiculos"])                        ? api.entities.Vehiculo.list() : Promise.resolve([]),
+      necesita(["actividades"])                      ? api.entities.Actividad.filter({ estado: "programada" }) : Promise.resolve([]),
+      necesita(["cumpleanos"]) && !necesita(["integrantes"]) ? api.entities.Integrante.list() : Promise.resolve([]),
       // Fondos: cuotas, talonarios lotería, lotes cerveza
-      necesita(["fondos"])                           ? base44.entities.Cuota.filter({ pagada: true }) : Promise.resolve([]),
-      necesita(["fondos"])                           ? base44.entities.TalonarioLoteria.list() : Promise.resolve([]),
-      necesita(["fondos"])                           ? base44.entities.Loteria.list() : Promise.resolve([]),
-      necesita(["fondos"])                           ? base44.entities.MovimientoCaja.list() : Promise.resolve([]),
+      necesita(["fondos"])                           ? api.entities.Cuota.filter({ pagada: true }) : Promise.resolve([]),
+      necesita(["fondos"])                           ? api.entities.TalonarioLoteria.list() : Promise.resolve([]),
+      necesita(["fondos"])                           ? api.entities.Loteria.list() : Promise.resolve([]),
+      necesita(["fondos"])                           ? api.entities.MovimientoCaja.list() : Promise.resolve([]),
     ];
 
     Promise.all(peticiones).then(([comprasRaw, movimientos, votaciones, sugerenciasRaw, tareas, almacen, msgs, notifs, cervezasTop, integrantesRaw, vehiculos, actividadesRaw, cumpleanosIntegrantesRaw, cuotasPagadas, talonarios, loteriasCampanas, todosMovimientos]) => {

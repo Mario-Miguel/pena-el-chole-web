@@ -14,8 +14,8 @@ export function usePushNotifications() {
   const showNotification = useCallback((titulo, opciones = {}) => {
     if (!hasNotification() || window.Notification.permission !== "granted") return;
     new window.Notification(titulo, {
-      icon: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69b172515293447819f485fc/28e5a7606_LogoApp.jpg",
-      badge: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69b172515293447819f485fc/28e5a7606_LogoApp.jpg",
+      icon: "/logo.jpg",
+      badge: "/logo.jpg",
       ...opciones,
     });
   }, []);

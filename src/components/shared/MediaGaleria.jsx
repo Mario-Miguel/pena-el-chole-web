@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Upload, Loader2, Trash2, Link as LinkIcon, Youtube, Video, X, Download, Plus, ExternalLink, FileText, Play } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 
@@ -33,7 +33,7 @@ export default function MediaGaleria({ parentId, seccion, puedeEditar: puedeEdit
   const [youtubeUrl, setYoutubeUrl] = useState("");
 
   const cargar = useCallback(async () => {
-    const data = await base44.entities.ObraDocumento.filter({ obra_anio_id: parentId, seccion });
+    const data = await api.entities.ObraDocumento.filter({ obra_anio_id: parentId, seccion });
     setDocs(data);
   }, [parentId, seccion]);
 
@@ -44,9 +44,9 @@ export default function MediaGaleria({ parentId, seccion, puedeEditar: puedeEdit
     if (!files.length) return;
     setSubiendo(true);
     for (const file of files) {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await api.uploadFile({ file });
       const tipo = detectTipo(file);
-      await base44.entities.ObraDocumento.create({ obra_anio_id: parentId, seccion, nombre: file.name, url: file_url, tipo });
+      await api.entities.ObraDocumento.create({ obra_anio_id: parentId, seccion, nombre: file.name, url: file_url, tipo });
     }
     await cargar();
     setSubiendo(false);
@@ -57,7 +57,7 @@ export default function MediaGaleria({ parentId, seccion, puedeEditar: puedeEdit
     if (!linkUrl.trim()) return;
     let url = linkUrl.trim();
     if (!/^https?:\/\//i.test(url)) url = "https://" + url;
-    await base44.entities.ObraDocumento.create({ obra_anio_id: parentId, seccion, nombre: linkTitle.trim() || url, url, tipo: "link" });
+    await api.entities.ObraDocumento.create({ obra_anio_id: parentId, seccion, nombre: linkTitle.trim() || url, url, tipo: "link" });
     setLinkUrl(""); setLinkTitle(""); setShowLink(false);
     await cargar();
   };
@@ -66,13 +66,13 @@ export default function MediaGaleria({ parentId, seccion, puedeEditar: puedeEdit
     const videoId = getYoutubeId(youtubeUrl.trim());
     if (!videoId) { alert("URL de YouTube no válida. Ejemplo: https://www.youtube.com/watch?v=..."); return; }
     const embedUrl = `https://www.youtube.com/embed/${videoId}`;
-    await base44.entities.ObraDocumento.create({ obra_anio_id: parentId, seccion, nombre: youtubeUrl.trim(), url: embedUrl, tipo: "youtube" });
+    await api.entities.ObraDocumento.create({ obra_anio_id: parentId, seccion, nombre: youtubeUrl.trim(), url: embedUrl, tipo: "youtube" });
     setYoutubeUrl(""); setShowYoutube(false);
     await cargar();
   };
 
   const handleDelete = async (id) => {
-    await base44.entities.ObraDocumento.delete(id);
+    await api.entities.ObraDocumento.delete(id);
     setDocs(prev => prev.filter(d => d.id !== id));
   };
 

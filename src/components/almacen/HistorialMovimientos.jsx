@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { ArrowDown, ArrowUp, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -10,7 +10,7 @@ export default function HistorialMovimientos({ itemId }) {
 
   useEffect(() => {
     if (!itemId) return;
-    base44.entities.MovimientoAlmacen.filter({ item_id: itemId }, "-created_date", 20)
+    api.entities.MovimientoAlmacen.filter({ item_id: itemId }, "-created_date", 20)
       .then(data => { setMovimientos(data); setLoading(false); })
       .catch(() => setLoading(false));
   }, [itemId]);

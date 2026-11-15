@@ -1,4 +1,4 @@
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 
 /**
  * Crea una notificación visible por todos los miembros en la campana de notificaciones.
@@ -8,7 +8,7 @@ import { base44 } from "@/api/base44Client";
  */
 export async function notificarMiembros(titulo, mensaje, tipo = "otro") {
   try {
-    await base44.entities.Notificacion.create({
+    await api.entities.Notificacion.create({
       titulo,
       mensaje,
       tipo,

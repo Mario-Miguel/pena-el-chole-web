@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { useAuth, ADMIN_ID } from "../components/auth/AuthContext";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, LogIn, ChevronRight, Shield, Users } from "lucide-react";
@@ -8,8 +8,7 @@ import { createPageUrl } from "@/utils";
 
 export default function Acceso() {
   const { login } = useAuth();
-  const [integrantes, setIntegrantes] = useState([]);
-  const [sesiones, setSesiones] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
   const [usuario, setUsuario] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -20,25 +19,15 @@ export default function Acceso() {
   const [mode, setMode] = useState("form");
   const passRef = useRef(null);
 
+  // Endpoint público: solo usuarios activos con acceso, sin datos sensibles
   useEffect(() => {
-    Promise.all([
-      base44.entities.Integrante.list(),
-      base44.entities.SesionUsuario.list(),
-    ]).then(([ints, sess]) => {
-      setIntegrantes(ints.sort((a, b) => a.nombre.localeCompare(b.nombre)));
-      setSesiones(sess);
-      setCargando(false);
-    });
+    api.auth.usuariosAcceso()
+      .then(us => setUsuarios([...us].sort((a, b) => a.nombre.localeCompare(b.nombre))))
+      .catch(() => {})
+      .finally(() => setCargando(false));
   }, []);
 
-  const accesibles = integrantes.filter(i => {
-    if (i.categoria === "patitas") return false;
-    const s = sesiones.find(s => s.integrante_id === i.id);
-    return s && !s.disabled;
-  }).map(int => {
-    const s = sesiones.find(s => s.integrante_id === int.id);
-    return { ...int, usuarioLogin: s.usuario || int.nombre };
-  }).filter(int =>
+  const accesibles = usuarios.filter(int =>
     !busqueda || int.nombre.toLowerCase().includes(busqueda.toLowerCase()) || int.usuarioLogin.toLowerCase().includes(busqueda.toLowerCase())
   );
 
@@ -88,7 +77,7 @@ export default function Acceso() {
         >
           <div className="w-24 h-24 rounded-3xl overflow-hidden border-4 border-white/20 shadow-2xl mb-3 bg-white/10">
             <img
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69b172515293447819f485fc/28e5a7606_LogoApp.jpg"
+              src="/logo.jpg"
               alt="logo"
               className="w-full h-full object-cover"
             />

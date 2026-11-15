@@ -14,7 +14,7 @@ import Sidebar from "./components/layout/Sidebar";
 import Breadcrumbs from "./components/layout/Breadcrumbs";
 import GlobalSearch from "./components/layout/GlobalSearch";
 import SocialButton from "./components/social/SocialButton";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import ThemeToggle from "./components/layout/ThemeToggle";
 import TourOverlay from "./components/tour/TourOverlay";
 import { PanelLeft, CalendarDays, Compass, Eye } from "lucide-react";
@@ -90,7 +90,7 @@ function AppContent({ children, currentPageName }) {
     window.addEventListener("sidebarVisibilityChanged", onSidebar);
     window.addEventListener("startTour", onStartTour);
     // Sincronizar desde DB al montar
-    syncAppConfigFromDB(base44);
+    syncAppConfigFromDB(api);
     return () => {
       window.removeEventListener("appColorChanged", onColor);
       window.removeEventListener("appNombreChanged", onNombre);
@@ -113,19 +113,19 @@ function AppContent({ children, currentPageName }) {
   // Push notifications
   useEffect(() => {
     if (!sesion || typeof Notification === "undefined" || Notification.permission !== "granted") return;
-    const unsubTarea = base44.entities.Tarea.subscribe(event => {
+    const unsubTarea = api.entities.Tarea.subscribe(event => {
       if (event.type === "create" && event.data?.nombre)
         new Notification("📋 Nueva tarea en la peña", { body: event.data.nombre });
     });
-    const unsubVotacion = base44.entities.Votacion.subscribe(event => {
+    const unsubVotacion = api.entities.Votacion.subscribe(event => {
       if (event.type === "create" && event.data?.tema)
         new Notification("🗳️ Nueva votación", { body: event.data.tema });
     });
-    const unsubActa = base44.entities.ActaReunion.subscribe(event => {
+    const unsubActa = api.entities.ActaReunion.subscribe(event => {
       if (event.type === "create" && event.data?.fecha)
         new Notification("📋 Nueva acta de reunión", { body: `Reunión del ${event.data.fecha}` });
     });
-    const unsubActividad = base44.entities.Actividad.subscribe(event => {
+    const unsubActividad = api.entities.Actividad.subscribe(event => {
       if (event.type === "create" && event.data?.titulo)
         new Notification("🎯 Nueva actividad", { body: event.data.titulo });
     });
@@ -179,7 +179,7 @@ function AppContent({ children, currentPageName }) {
           {/* Logo + título */}
           <Link to={createPageUrl("Inicio")} className="flex items-center gap-2 text-white">
             <img
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69b172515293447819f485fc/28e5a7606_LogoApp.jpg"
+              src="/logo.jpg"
               alt="logo"
               className="w-12 h-12 object-cover flex-shrink-0 rounded-lg shadow-md"
             />

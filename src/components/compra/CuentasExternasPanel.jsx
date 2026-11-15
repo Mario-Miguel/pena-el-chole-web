@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { useAuth } from "../auth/AuthContext";
 import { Send, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ export default function CuentasExternasPanel({ items = [], integrantes = [], onP
   const nombresIntegrantes = useMemo(() => integrantes.map(i => i.nombre), [integrantes]);
 
   useEffect(() => {
-    base44.entities.PagoRegistrado.list().then(todos => {
+    api.entities.PagoRegistrado.list().then(todos => {
       setPagosRegistrados(todos.filter(p => !nombresIntegrantes.includes(p.persona)));
     });
   }, [nombresIntegrantes]);
@@ -76,7 +76,7 @@ export default function CuentasExternasPanel({ items = [], integrantes = [], onP
   const handleRegistrarPago = async () => {
     if (!nombreEfectivo || nuevoPago <= 0) return;
     setPagando(true);
-    const nuevoPagoRecord = await base44.entities.PagoRegistrado.create({
+    const nuevoPagoRecord = await api.entities.PagoRegistrado.create({
       persona: nombreEfectivo,
       importe: nuevoPago,
       registrado_por: sesion?.nombre || "Admin",
@@ -86,7 +86,7 @@ export default function CuentasExternasPanel({ items = [], integrantes = [], onP
     if (totalPagadoTras >= deudaActual && deudaActual > 0) {
       const itemsDePersona = itemsExternos.filter(i => i.comprador_nombre === nombreEfectivo && !i.pagado);
       await Promise.all(itemsDePersona.map(i =>
-        base44.entities.ItemCompra.update(i.id, { pagado: true, fecha_pagado: new Date().toISOString() })
+        api.entities.ItemCompra.update(i.id, { pagado: true, fecha_pagado: new Date().toISOString() })
       ));
     }
     if (onPagosActualizados) await onPagosActualizados();

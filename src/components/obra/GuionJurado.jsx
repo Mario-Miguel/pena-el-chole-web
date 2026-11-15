@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Loader2, Save, Pencil, Gavel, ScrollText } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import MediaGaleria from "../shared/MediaGaleria";
@@ -20,7 +20,7 @@ export default function GuionJurado({ obraAnioId, obraAnio, titulo, descripcion,
 
   const handleSave = async () => {
     setGuardando(true);
-    await base44.entities.ObraAnio.update(obraAnioId, { [campoTexto]: texto });
+    await api.entities.ObraAnio.update(obraAnioId, { [campoTexto]: texto });
     setGuardando(false);
     setEditando(false);
   };

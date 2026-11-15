@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Save, Download, Plus, Trash2, ChevronDown } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 
 // ── Multi-select desplegable ─────────────────────────────────────
 function MultiSelect({ label, options, selected, onChange }) {
@@ -304,7 +304,7 @@ export default function RellenarPlantillaEstructurada({ plantilla, integrantes =
 
   const guardar = async () => {
     setGuardando(true);
-    await base44.entities.Documento.create({
+    await api.entities.Documento.create({
       nombre,
       tipo: plantilla.tipo,
       contenido: textoFinal,

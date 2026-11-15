@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/client";
 import { Plus, Trash2, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -30,9 +30,9 @@ export default function CuotasContent() {
 
   const loadData = useCallback(async () => {
     const [members, cuotasData, configs] = await Promise.all([
-      base44.entities.Integrante.list(),
-      base44.entities.Cuota.list("-created_date"),
-      base44.entities.AppConfig.filter({ clave: IMPORTE_CONFIG_KEY }),
+      api.entities.Integrante.list(),
+      api.entities.Cuota.list("-created_date"),
+      api.entities.AppConfig.filter({ clave: IMPORTE_CONFIG_KEY }),
     ]);
     const miembrosConCuota = members.filter(m => m.categoria === "socios" || m.categoria === "cargos");
     setIntegrantes(miembrosConCuota.sort((a, b) => a.nombre.localeCompare(b.nombre)));
@@ -46,11 +46,11 @@ export default function CuotasContent() {
   const handleSaveImporte = async (val) => {
     if (!esAdmin) return;
     setImporte(val);
-    const existing = await base44.entities.AppConfig.filter({ clave: IMPORTE_CONFIG_KEY });
+    const existing = await api.entities.AppConfig.filter({ clave: IMPORTE_CONFIG_KEY });
     if (existing.length > 0) {
-      await base44.entities.AppConfig.update(existing[0].id, { valor: val.toString() });
+      await api.entities.AppConfig.update(existing[0].id, { valor: val.toString() });
     } else {
-      await base44.entities.AppConfig.create({ clave: IMPORTE_CONFIG_KEY, valor: val.toString() });
+      await api.entities.AppConfig.create({ clave: IMPORTE_CONFIG_KEY, valor: val.toString() });
     }
   };
 
@@ -59,10 +59,10 @@ export default function CuotasContent() {
     setGuardando(true);
     const seleccionados = fSeleccionarTodos ? integrantes : integrantes.filter(i => fIntegrantes.includes(i.id));
     await Promise.all(seleccionados.map(i =>
-      base44.entities.Cuota.create({ integrante_id: i.id, integrante_nombre: i.nombre, concepto: fConcepto.trim(), importe: fImporte, pagada: false })
+      api.entities.Cuota.create({ integrante_id: i.id, integrante_nombre: i.nombre, concepto: fConcepto.trim(), importe: fImporte, pagada: false })
     ));
     if (fEnviarNotif) {
-      await base44.entities.Notificacion.create({
+      await api.entities.Notificacion.create({
         titulo: `💰 Cuota pendiente: ${fConcepto.trim()}`,
         mensaje: `Importe a pagar: ${fImporte.toFixed(2)}€. Afecta a ${seleccionados.length} socio${seleccionados.length !== 1 ? "s" : ""}: ${seleccionados.map(i => i.nombre).join(", ")}.`,
         tipo: "otro",
@@ -78,13 +78,13 @@ export default function CuotasContent() {
   const handleTogglePagada = async (cuota) => {
     const update = { pagada: !cuota.pagada, fecha_pago: !cuota.pagada ? new Date().toISOString() : null };
     setCuotas(prev => prev.map(c => c.id === cuota.id ? { ...c, ...update } : c));
-    await base44.entities.Cuota.update(cuota.id, update);
+    await api.entities.Cuota.update(cuota.id, update);
   };
 
   const handleDelete = async (id) => {
     if (!confirm("¿Eliminar esta cuota?")) return;
     setCuotas(prev => prev.filter(c => c.id !== id));
-    await base44.entities.Cuota.delete(id);
+    await api.entities.Cuota.delete(id);
   };
 
   const cuotasVista = esAdmin ? cuotas : cuotas.filter(c => {
