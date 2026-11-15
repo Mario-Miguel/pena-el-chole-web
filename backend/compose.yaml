@@ -1,0 +1,15 @@
+# Base de datos local para desarrollo: docker compose up -d
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: pena
+      POSTGRES_USER: pena
+      POSTGRES_PASSWORD: pena
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

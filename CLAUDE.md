@@ -17,7 +17,7 @@ pnpm run build      # production build -> dist/ (also the main correctness check
 pnpm run preview
 ```
 
-Backend (Spring Boot 4.1, Java 21, Maven wrapper): `cd backend && ./mvnw spring-boot:run`.
+Backend (Spring Boot 4.1, Java 21, Maven wrapper), see `backend/README.md`: `cd backend && docker compose up -d && ./mvnw spring-boot:run`; tests with `./mvnw test` (single test: `./mvnw test -Dtest=IntegranteControllerTest`), which need Docker for Testcontainers. Code is organized by feature package (`integrante/` = entity, repository, service, controller, DTO); the schema is managed by Flyway migrations with `ddl-auto=validate`.
 
 There is no frontend test suite. `lint`/`typecheck` scripts exist in `package.json`, but eslint/typescript are not installed and there is no config for them.
 
