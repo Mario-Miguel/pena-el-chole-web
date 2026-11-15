@@ -1,0 +1,356 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Evitar zoom en inputs en iOS */
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+
+  /* Safe area insets para iPhone con notch/dynamic island */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  /* Scrolling suave en iOS */
+  .overflow-y-auto, .overflow-y-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Evitar selección de texto accidental en botones */
+  button {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* ===== MODO OSCURO ===== */
+html.dark {
+  color-scheme: dark;
+  background-color: #141414;
+}
+
+.dark,
+.dark body,
+.dark #root {
+  background-color: #141414 !important;
+  color: #f0f0f0 !important;
+}
+
+/* Fondo principal de la app */
+.dark .min-h-screen,
+.dark .bg-\[#faf8f6\] {
+  background-color: #141414 !important;
+}
+
+/* Tarjetas y contenedores blancos */
+.dark .bg-white {
+  background-color: #1e1e1e !important;
+}
+
+/* Fondos grises */
+.dark .bg-gray-50 { background-color: #252525 !important; }
+.dark .bg-gray-100 { background-color: #2a2a2a !important; }
+.dark .bg-gray-200 { background-color: #333 !important; }
+
+/* Textos — aclarar para que se vean sobre fondo oscuro */
+.dark .text-gray-900 { color: #f0f0f0 !important; }
+.dark .text-gray-800 { color: #e8e8e8 !important; }
+.dark .text-gray-700 { color: #d4d4d4 !important; }
+.dark .text-gray-600 { color: #b8b8b8 !important; }
+.dark .text-gray-500 { color: #999 !important; }
+.dark .text-gray-400 { color: #777 !important; }
+.dark .text-gray-300 { color: #555 !important; }
+
+/* Bordes */
+.dark .border-gray-50  { border-color: #222 !important; }
+.dark .border-gray-100 { border-color: #2a2a2a !important; }
+.dark .border-gray-200 { border-color: #363636 !important; }
+
+/* Inputs, textareas, selects */
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.dark textarea,
+.dark select {
+  background-color: #252525 !important;
+  color: #f0f0f0 !important;
+  border-color: #363636 !important;
+}
+.dark input::placeholder,
+.dark textarea::placeholder { color: #666 !important; }
+
+/* Shadcn Selects y popovers */
+.dark [data-radix-popper-content-wrapper] > div,
+.dark [role="listbox"],
+.dark [role="option"] {
+  background-color: #1e1e1e !important;
+  color: #f0f0f0 !important;
+  border-color: #363636 !important;
+}
+.dark [role="option"]:hover,
+.dark [role="option"][data-highlighted] {
+  background-color: #2a2a2a !important;
+}
+
+/* Iconos SVG heredados */
+.dark .text-gray-700 svg,
+.dark .text-gray-600 svg,
+.dark .text-gray-500 svg,
+.dark .text-gray-400 svg {
+  color: inherit;
+}
+
+/* Scrollbar */
+.dark ::-webkit-scrollbar { width: 6px; height: 6px; }
+.dark ::-webkit-scrollbar-track { background: #1a1a1a; }
+.dark ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+/* Badges y chips */
+.dark .bg-\[#4B1924\]\/5  { background-color: rgba(75,25,36,0.25) !important; }
+.dark .bg-\[#4B1924\]\/10 { background-color: rgba(75,25,36,0.3) !important; }
+
+/* ===== MODO OSCURO — correcciones adicionales ===== */
+
+/* Textos slate / zinc que se pierden */
+.dark .text-slate-700, .dark .text-zinc-700 { color: #d4d4d4 !important; }
+.dark .text-slate-600, .dark .text-zinc-600 { color: #b8b8b8 !important; }
+.dark .text-slate-500, .dark .text-zinc-500 { color: #999 !important; }
+.dark .text-slate-400, .dark .text-zinc-400 { color: #777 !important; }
+.dark .text-slate-300, .dark .text-zinc-300 { color: #555 !important; }
+
+/* Fondos slate / zinc */
+.dark .bg-slate-50, .dark .bg-zinc-50   { background-color: #252525 !important; }
+.dark .bg-slate-100, .dark .bg-zinc-100 { background-color: #2a2a2a !important; }
+.dark .bg-slate-200, .dark .bg-zinc-200 { background-color: #333 !important; }
+
+/* Bordes slate / zinc */
+.dark .border-slate-200, .dark .border-zinc-200 { border-color: #363636 !important; }
+.dark .border-slate-100, .dark .border-zinc-100 { border-color: #2a2a2a !important; }
+
+/* Tarjetas con fondo explícito blanco */
+.dark .rounded-2xl.bg-white,
+.dark .rounded-xl.bg-white,
+.dark .rounded-lg.bg-white {
+  background-color: #1e1e1e !important;
+}
+
+/* Textos black / negro */
+.dark .text-black { color: #f0f0f0 !important; }
+
+/* Labels y pequeños textos de formulario */
+.dark label { color: #d4d4d4 !important; }
+
+/* Badges success/error/warning */
+.dark .bg-green-50   { background-color: rgba(22,163,74,0.12) !important; }
+.dark .bg-red-50     { background-color: rgba(220,38,38,0.12) !important; }
+.dark .bg-amber-50   { background-color: rgba(217,119,6,0.12) !important; }
+.dark .bg-blue-50    { background-color: rgba(37,99,235,0.12) !important; }
+.dark .text-green-700 { color: #4ade80 !important; }
+.dark .text-red-700   { color: #f87171 !important; }
+.dark .text-amber-700 { color: #fbbf24 !important; }
+.dark .text-blue-700  { color: #60a5fa !important; }
+
+/* Separator / divisores */
+.dark hr { border-color: #363636 !important; }
+.dark .divide-gray-100 > * + * { border-color: #2a2a2a !important; }
+
+/* Shadows / box-shadow en tarjetas */
+.dark .shadow-sm, .dark .shadow, .dark .shadow-md, .dark .shadow-lg, .dark .shadow-xl {
+  box-shadow: 0 1px 8px 0 rgba(0,0,0,0.5) !important;
+}
+
+/* Menú hamburguesa */
+.dark .bg-white.rounded-2xl { background-color: #1e1e1e !important; }
+.dark .hover\:bg-\[#630027\]\/5:hover { background-color: rgba(99,0,39,0.15) !important; }
+
+/* Selector de cargo en PanelCargos (Admin) */
+.dark select {
+  background-color: #252525 !important;
+  color: #f0f0f0 !important;
+  border-color: #363636 !important;
+}
+
+/* Placeholders en inputs oscuros */
+.dark input::placeholder { color: #555 !important; }
+.dark textarea::placeholder { color: #555 !important; }
+
+/* ===== MODO OSCURO — textos oscuros heredados que no se ven ===== */
+
+/* Textos con colores explícitos oscuros */
+.dark .text-\[\#630027\] { color: #e07090 !important; }
+.dark .text-\[\#4B1924\] { color: #e07090 !important; }
+.dark .text-\[\#3a1019\] { color: #e07090 !important; }
+
+/* ===== MODO OSCURO — granate reemplazado por berry legible sobre negro ===== */
+/* Rellenos sólidos granate → berry medio visible sobre negro */
+.dark .bg-\[\#630027\]   { background-color: #a8364f !important; }
+.dark .bg-\[\#4B1924\]   { background-color: #8a2a40 !important; }
+.dark .bg-\[\#3a1019\]   { background-color: #6f1f33 !important; }
+
+/* Tints granate (fondos de hover/activo) → rosa-berry translúcido */
+.dark .bg-\[\#630027\]\/5  { background-color: rgba(224,106,138,0.10) !important; }
+.dark .bg-\[\#630027\]\/10 { background-color: rgba(224,106,138,0.16) !important; }
+.dark .bg-\[\#630027\]\/20 { background-color: rgba(224,106,138,0.28) !important; }
+.dark .bg-\[\#4B1924\]\/5  { background-color: rgba(224,106,138,0.10) !important; }
+.dark .bg-\[\#4B1924\]\/10 { background-color: rgba(224,106,138,0.16) !important; }
+
+/* Hover granate → berry */
+.dark .hover\:bg-\[\#630027\]\/5:hover  { background-color: rgba(224,106,138,0.12) !important; }
+.dark .hover\:bg-\[\#630027\]\/10:hover { background-color: rgba(224,106,138,0.18) !important; }
+.dark .hover\:bg-\[\#630027\]\/20:hover { background-color: rgba(224,106,138,0.30) !important; }
+.dark .hover\:bg-\[\#630027\]\/30:hover { background-color: rgba(224,106,138,0.40) !important; }
+.dark .hover\:bg-\[\#4B1924\]\/5:hover  { background-color: rgba(224,106,138,0.12) !important; }
+.dark .hover\:bg-\[\#4B1924\]\/10:hover { background-color: rgba(224,106,138,0.18) !important; }
+
+/* Bordes granate → berry */
+.dark .border-\[\#630027\] { border-color: #e06a8a !important; }
+.dark .border-\[\#4B1924\] { border-color: #c04968 !important; }
+
+/* Gradientes/sombras granate (box-shadow del tour ya usa #630027) */
+.dark .tour-highlight {
+  box-shadow: 0 0 0 3px #e06a8a, 0 0 14px 5px rgba(224,106,138,0.45) !important;
+}
+
+/* Grises muy oscuros usados como texto principal */
+.dark p, .dark span, .dark li, .dark td, .dark th, .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  color: inherit;
+}
+
+/* Clases de fondo de input/textarea que pierden contraste */
+.dark .bg-\[\#4B1924\]\/5,
+.dark .bg-\[#4B1924\]\/5  { background-color: rgba(75,25,36,0.25) !important; }
+
+/* Tarjeta de selector Admin en PanelCargos */
+.dark .bg-amber-50 { background-color: rgba(217,119,6,0.12) !important; }
+.dark .border-amber-200 { border-color: rgba(217,119,6,0.3) !important; }
+.dark .text-amber-700 { color: #fbbf24 !important; }
+.dark .text-amber-500 { color: #f59e0b !important; }
+
+/* Textos que se pasan de oscuro con colores tailwind numéricos */
+.dark .text-gray-950 { color: #e8e8e8 !important; }
+.dark [class*="text-"][class*="900"]:not(.text-white):not([class*="bg-"]) { color: #e8e8e8 !important; }
+
+/* Fondo blanco en menú hamburguesa modo oscuro */
+.dark .bg-white.rounded-2xl,
+.dark .rounded-2xl.bg-white { background-color: #1e1e1e !important; }
+.dark .bg-white.rounded-xl,
+.dark .rounded-xl.bg-white { background-color: #1e1e1e !important; }
+.dark .border-gray-100 { border-color: #2a2a2a !important; }
+
+/* Links en el menú hamburguesa modo oscuro */
+.dark a.text-gray-700 { color: #d4d4d4 !important; }
+.dark a.text-gray-700:hover { color: #f0f0f0 !important; }
+
+/* ===== Tour guiado: resaltado de elementos ===== */
+.tour-highlight {
+  position: relative;
+  z-index: 345;
+  scroll-margin: 100px;
+  border-radius: 12px;
+  box-shadow: 0 0 0 3px #630027, 0 0 14px 5px rgba(99, 0, 39, 0.5) !important;
+  animation: tour-pulse 2s ease-in-out infinite;
+}
+
+@keyframes tour-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px #630027, 0 0 8px 2px rgba(99, 0, 39, 0.2) !important; }
+  50% { box-shadow: 0 0 0 4px #630027, 0 0 16px 6px rgba(99, 0, 39, 0.4) !important; }
+}

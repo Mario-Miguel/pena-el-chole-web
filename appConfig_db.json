@@ -1,0 +1,209 @@
+[
+  {
+    "valor": "{\"año\":2026,\"fecha\":\"2026-03-19T03:26:07.294Z\",\"items\":[],\"total\":0}",
+    "clave": "almacen_archivo_2026_1773890767294",
+    "id": "6a9b2a19aa5d8bab53fa1370",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "{\"año\":2026,\"fecha\":\"2026-03-19T03:43:11.732Z\",\"items\":[{\"nombre\":\"Tornillos Tor\",\"categoria\":\"tornillera\",\"cantidad\":4},{\"nombre\":\"Pintura verde\",\"categoria\":\"otros\",\"cantidad\":3}],\"total\":2}",
+    "clave": "almacen_archivo_2026_1773891791732",
+    "id": "6a9b2a19aa5d8bab53fa136f",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "{\"año\":2026,\"fecha\":\"2026-03-19T03:44:14.384Z\",\"items\":[{\"nombre\":\"Tornillos Tor\",\"categoria\":\"tornillera\",\"cantidad\":4},{\"nombre\":\"Pintura verde\",\"categoria\":\"otros\",\"cantidad\":3}],\"total\":2}",
+    "clave": "almacen_archivo_2026_1773891854384",
+    "id": "6a9b2a19aa5d8bab53fa136e",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "[{\"value\":\"metal\",\"label\":\"Metal\",\"emoji\":\"🪨\",\"icono_url\":null},{\"value\":\"madera\",\"label\":\"Madera\",\"emoji\":\"🪵\",\"icono_url\":null},{\"value\":\"tornillera\",\"label\":\"Tornillería\",\"emoji\":\"🔩\",\"icono_url\":null},{\"value\":\"espuma_y_silicona\",\"label\":\"Espuma y silicona\",\"emoji\":\"🧪\",\"icono_url\":null},{\"value\":\"herramientas\",\"label\":\"Herramientas\",\"emoji\":\"🛠️\",\"icono_url\":null},{\"value\":\"mobiliario\",\"label\":\"Mobiliario\",\"emoji\":\"🪑\",\"icono_url\":null},{\"value\":\"otros\",\"label\":\"Otros\",\"emoji\":\"🔧\",\"icono_url\":null},{\"value\":\"limpieza\",\"label\":\"Limpieza\",\"emoji\":\"📦\",\"icono_url\":null}]",
+    "clave": "almacen_categorias",
+    "id": "6a9b2a19aa5d8bab53fa1377",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "#630027",
+    "clave": "app_color_primario",
+    "id": "6a9b2a19aa5d8bab53fa1373",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "Peña El Chole",
+    "clave": "app_nombre",
+    "id": "6a9b2a19aa5d8bab53fa1374",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "{}",
+    "clave": "app_section_labels",
+    "id": "6a9b2a19aa5d8bab53fa1372",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "{\"anio\":\"2026\",\"total\":156,\"precio\":1,\"entradas\":[{\"nombre\":\"Gon\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Paula Roces\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Kinos\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Toyi\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Beki\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Ava\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Invitados\",\"cervezas\":2,\"pagado\":0},{\"nombre\":\"Iván\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Rosalía\",\"cervezas\":3,\"pagado\":0},{\"nombre\":\"Lidia\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Lucía\",\"cervezas\":13,\"pagado\":0},{\"nombre\":\"Claudia\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Licia\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Julio\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Marcos\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Guti\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Rubén\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Rebeca\",\"cervezas\":12,\"pagado\":0},{\"nombre\":\"Segundo\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Raquel\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Noelia\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Lurdes\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Jorge Vigil\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Lara\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Beja\",\"cervezas\":10,\"pagado\":0},{\"nombre\":\"Jorge Paredes\",\"cervezas\":4,\"pagado\":0},{\"nombre\":\"Laura\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Álvaro\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Óscar\",\"cervezas\":33,\"pagado\":0},{\"nombre\":\"Choche\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Jairo\",\"cervezas\":15,\"pagado\":0},{\"nombre\":\"Aitor\",\"cervezas\":8,\"pagado\":0},{\"nombre\":\"Marifeli\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Mario\",\"cervezas\":24,\"pagado\":0},{\"nombre\":\"Cosme\",\"cervezas\":0,\"pagado\":0},{\"nombre\":\"Mariomi\",\"cervezas\":3,\"pagado\":0},{\"nombre\":\"Omar\",\"cervezas\":29,\"pagado\":0}],\"pagos\":[]}",
+    "clave": "cerveza_archivo_2026_1787402165520",
+    "id": "6a9b2a19aa5d8bab53fa1360",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "{\"Estrella Galicia\":1}",
+    "clave": "cerveza_consumo_por_tipo",
+    "id": "6a9b2a19aa5d8bab53fa136d",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "1",
+    "clave": "cerveza_precio",
+    "id": "6a9b2a19aa5d8bab53fa137a",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "{\"correo\":false,\"sms\":false,\"push\":true}",
+    "clave": "config_notificaciones",
+    "id": "6a9b2a19aa5d8bab53fa1371",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "10",
+    "clave": "cuota_importe",
+    "id": "6a9b2a19aa5d8bab53fa1376",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "[\"Vehiculos\",\"Finanzas\"]",
+    "clave": "menu_desactivado",
+    "id": "6a9b2a19aa5d8bab53fa1375",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "Caja Rural",
+    "clave": "pena_banco",
+    "id": "6a9b2a19aa5d8bab53fa1368",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "Llorianes, 15",
+    "clave": "pena_domicilio",
+    "id": "6a9b2a19aa5d8bab53fa1365",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "2017",
+    "clave": "pena_fundacion",
+    "id": "6a9b2a19aa5d8bab53fa1366",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "Pondremosla???",
+    "clave": "pena_iban",
+    "id": "6a9b2a19aa5d8bab53fa1369",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "Llorianes, Valdesoto, Siero, Asturias",
+    "clave": "pena_localidad",
+    "id": "6a9b2a19aa5d8bab53fa1367",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "G27594076",
+    "clave": "pena_nif",
+    "id": "6a9b2a19aa5d8bab53fa136c",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "Peña El Chole",
+    "clave": "pena_nombre_oficial",
+    "id": "6a9b2a19aa5d8bab53fa136b",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "",
+    "clave": "pena_num_registro",
+    "id": "6a9b2a19aa5d8bab53fa136a",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "https://www.instagram.com/elchole_?igsh=MWhpdDB6dDZqZjNjbQ==",
+    "clave": "social_instagram_url",
+    "id": "6a9b2a19aa5d8bab53fa1379",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  },
+  {
+    "valor": "https://www.tiktok.com/@elchole_?_r=1&_t=ZN-94ilqRZmrMU",
+    "clave": "social_tiktok_url",
+    "id": "6a9b2a19aa5d8bab53fa1378",
+    "created_date": "2026-09-04T20:29:13.724000",
+    "updated_date": "2026-09-04T20:29:13.724000",
+    "created_by_id": "6a9b2921a356749a3a25cef2",
+    "is_sample": false
+  }
+]

@@ -1,0 +1,373 @@
+/**
+ * Fuente central de todas las páginas de la app.
+ * Se usa en: Ajustes, HamburgerMenu, Sidebar, BottomNav, Admin, Ayuda, HelpIcon
+ *
+ * Campos de ayuda (opcionales):
+ *   helpId    → id del anchor en la página Ayuda (ej: "inicio")
+ *   helpColor → clase Tailwind de color de texto  (ej: "text-blue-600")
+ *   helpBg    → clase Tailwind de fondo del icono (ej: "bg-blue-50")
+ *   helpDesc  → descripción corta visible en Ayuda
+ *   helpItems → array de strings con las funcionalidades detalladas
+ */
+
+export const ALL_PAGES = [
+  {
+    page: "Inicio", label: "Inicio", emoji: "🏠", fixedFirst: true,
+    helpId: "inicio", helpColor: "text-[#630027]", helpBg: "bg-[#630027]/10",
+    helpDesc: "La pantalla de inicio es el corazón de la app.",
+    helpItems: [
+      "Widgets de resumen: KPIs rápidos con tareas pendientes, stock bajo, votaciones activas y mensajes nuevos del chat.",
+      "Widget del tiempo en tiempo real con temperatura, viento y humedad para Valdesoto (Siero, Asturias).",
+      "Accesos directos a las 8 secciones más utilizadas de la app.",
+      "Panel de actividad reciente: últimas compras, movimientos de caja, votaciones activas y nuevas sugerencias.",
+      "Alerta automática si hay artículos del inventario con stock por debajo del mínimo.",
+      "Cuenta atrás al Desfile de Carrozas de Valdesoto con el tiempo exacto restante.",
+      "Notificaciones sin leer y mensajes nuevos del chat resaltados con indicador animado.",
+      "Desde aquí puedes acceder a cualquier sección a través del menú lateral (hamburguesa) o la barra de navegación inferior.",
+    ],
+  },
+  {
+    page: "Integrantes", label: "Integrantes", emoji: "👥",
+    helpId: "integrantes", helpColor: "text-blue-600", helpBg: "bg-blue-50",
+    helpDesc: "Gestión del directorio de miembros de la peña.",
+    helpItems: [
+      "Lista todos los integrantes organizados por categoría: Cargos, Socios, Contribuyentes, Socios Honoríficos y Patitas (mascotas).",
+      "Cada categoría es expandible/colapsable para facilitar la navegación.",
+      "Muestra el cargo de cada miembro de la junta directiva (presidente, vicepresidente, secretario, tesorero, vocal).",
+      "Los administradores pueden añadir nuevos integrantes, cambiar su categoría o cargo y eliminarlos.",
+      "Búsqueda rápida por nombre dentro del directorio.",
+      "Al añadir un integrante de categoría 'cargos', se puede asignar directamente su cargo en la junta directiva.",
+    ],
+  },
+
+  {
+    page: "Cerveza", label: "La despensa de Simón", emoji: "🍺",
+    helpId: "cerveza", helpColor: "text-yellow-600", helpBg: "bg-yellow-50",
+    helpDesc: "Control del consumo de cervezas de los integrantes.",
+    helpItems: [
+      "Registra cuántas cervezas ha consumido cada integrante con botones de + y -.",
+      "Ranking visual con barras de progreso mostrando el podio de consumidores.",
+      "El administrador configura el precio por cerveza para calcular automáticamente el importe total a pagar.",
+      "Pestaña de Inventario: gestiona el stock por tipo de cerveza (lotes, consumo, stock mínimo con alertas).",
+      "Historial de sesiones: archiva los registros de cada temporada y consulta el histórico.",
+      "Cuentas: visualiza lo que debe cada integrante y registra pagos parciales o totales.",
+      "Panel de cuentas externas para gestionar cobros de personas no registradas como integrantes.",
+    ],
+  },
+  {
+    page: "Organizacion", label: "Organización", emoji: "🗓️",
+    helpId: "organizacion", helpColor: "text-indigo-600", helpBg: "bg-indigo-50",
+    helpDesc: "Tareas, plazos y grupos de trabajo de la peña.",
+    helpItems: [
+      "Tareas: crea tareas con nombre, categoría (estructural, soldadura, pintura, decoración, enramado...), descripción y materiales necesarios.",
+      "Marca tareas como completadas; las completadas se archivan automáticamente con fecha.",
+      "Buscador de tareas por nombre o descripción.",
+      "Plazos: visualiza en una línea de tiempo los periodos clave del año (obras, compras, eventos, reuniones...).",
+      "Grupos de trabajo: crea equipos con nombre, emoji, color y miembros asignados.",
+      "Solo presidencia y administración pueden crear, editar o eliminar grupos de trabajo.",
+    ],
+  },
+
+  {
+    page: "TareasReunion", label: "Tareas reunión", emoji: "📋",
+    helpId: "tareasreunion", helpColor: "text-indigo-600", helpBg: "bg-indigo-50",
+    helpDesc: "Tablero Kanban de tareas derivadas de reuniones.",
+    helpItems: [
+      "Vista Kanban con tres columnas: Pendiente, En progreso y Completada.",
+      "Arrastra las tarjetas entre columnas para cambiar el estado de cada tarea.",
+      "Filtra por integrante para ver las responsabilidades de cada miembro.",
+      "Cada tarjeta muestra la descripción, el responsable, la fecha límite y el acta de origen.",
+    ],
+  },
+  {
+    page: "Almacen", label: "Inventario y compras", emoji: "📦",
+    helpId: "almacen", helpColor: "text-slate-600", helpBg: "bg-slate-50",
+    helpDesc: "Inventario completo de materiales y herramientas.",
+    helpItems: [
+      "Añade artículos con nombre, categoría, cantidad, stock mínimo, proveedor y contacto.",
+      "Cuando el stock baja del mínimo, aparece una alerta y un botón de WhatsApp para contactar al proveedor con un mensaje prefabricado.",
+      "Cada cambio de cantidad queda registrado automáticamente en el historial de movimientos.",
+      "Botón de escáner QR para identificar artículos rápidamente con la cámara.",
+      "Exporta el inventario y el historial a CSV (Excel) o PDF para reuniones.",
+      "Panel de estadísticas con gráficos mensuales, artículos más usados y distribución por categoría.",
+    ],
+  },
+  {
+    page: "Vehiculos", label: "Vehículos", emoji: "🚛",
+    helpId: "vehiculos", helpColor: "text-orange-600", helpBg: "bg-orange-50",
+    helpDesc: "Gestión del camión, plataforma y su mantenimiento.",
+    helpItems: [
+      "Registra vehículos (camión, plataforma) y gestiona sus piezas o repuestos con estado: OK, Revisar, Sustituir o Pedido.",
+      "Programa revisiones periódicas (ruedas, frenos, aceite…) con fechas de última y próxima revisión.",
+      "Alertas automáticas cuando una revisión está vencida o se acerca en los próximos 30 días.",
+      "Lista de tareas pendientes específicas de cada vehículo.",
+    ],
+  },
+  {
+    page: "Desfile", label: "Desfile", emoji: "🎪",
+    helpId: "desfile", helpColor: "text-yellow-500", helpBg: "bg-yellow-50",
+    helpDesc: "Obra, concurso y resultados históricos de la peña.",
+    helpItems: [
+      "Obra: archivos y documentación por temporada.",
+      "Resultados: historial de clasificaciones por año con premios y posiciones.",
+      "Concurso: bases, puntuaciones y penalizaciones de las ediciones actuales.",
+    ],
+  },
+  {
+    page: "Finanzas", label: "Finanzas", emoji: "💰",
+    helpId: "finanzas", helpColor: "text-emerald-600", helpBg: "bg-emerald-50",
+    helpDesc: "Libro de caja, cuotas y presupuesto anual en un mismo lugar.",
+    helpItems: [
+      "Libro de Caja: registra ingresos y gastos con categoría, importe y fecha. Filtra por mes o tipo.",
+      "Saldo actual calculado automáticamente a partir de todos los movimientos.",
+      "Cuotas: define cuotas por integrante, marca como pagadas y visualiza quién está al día y quién tiene pendientes.",
+      "Presupuesto: planifica el año con partidas de ingresos y gastos; compara estimado vs real en tiempo real.",
+      "El tesorero puede exportar un resumen de deudas y pagos desde su panel en el Área de Cargos.",
+      "Útil para presentar el informe económico en la Asamblea General Ordinaria anual.",
+    ],
+  },
+
+  {
+    page: "Enlaces", label: "Enlaces útiles", emoji: "🔗",
+    helpId: "enlaces", helpColor: "text-blue-600", helpBg: "bg-blue-50",
+    helpDesc: "Acceso rápido a links organizados por carpetas.",
+    helpItems: [
+      "Los cargos y administrador pueden añadir enlaces con título, URL, descripción e icono.",
+      "Organiza los enlaces en carpetas temáticas para tener todo ordenado.",
+      "Al pulsar un enlace se abre directamente en el navegador.",
+      "Filtra por carpeta para encontrar rápidamente lo que buscas.",
+    ],
+  },
+  {
+    page: "Seguridad", label: "Seguridad", emoji: "🚑",
+    helpId: "seguridad", helpColor: "text-red-600", helpBg: "bg-red-50",
+    helpDesc: "Primeros auxilios, prevención de riesgos y buenas prácticas de taller.",
+    helpItems: [
+      "Primeros auxilios: guía paso a paso para 10 situaciones de emergencia.",
+      "Prevención de riesgos: identifica peligros de soldadura, electricidad, altura, químicos y más.",
+      "Buenas prácticas: organización, mantenimiento, trabajo en equipo, residuos y control de calidad.",
+      "Botón directo al 112 siempre visible.",
+    ],
+  },
+  {
+    page: "Herramientas", label: "Herramientas", emoji: "🛠️",
+    helpId: "herramientas", helpColor: "text-[#630027]", helpBg: "bg-[#630027]/10",
+    helpDesc: "Calculadoras para la construcción de la carroza y manual de primeros auxilios.",
+    helpItems: [
+      "Calculadora de volumen, superficie y perímetro para bloques de materiales.",
+      "Calculadora de círculos y arcos para elementos circulares.",
+      "Estimación de peso según material (madera, acero, aluminio, foam…).",
+      "Cálculo de litros de pintura necesarios según superficie y capas.",
+      "Conversión de unidades de medida.",
+      "Manual de primeros auxilios con pasos detallados: cortes, quemaduras, descargas, RCP y más.",
+    ],
+  },
+  {
+    page: "Tickets", label: "Tickets", emoji: "🧾",
+    helpId: "tickets", helpColor: "text-blue-600", helpBg: "bg-blue-50",
+    helpDesc: "Registro de tickets y facturas de la peña.",
+    helpItems: [
+      "Sube fotos de tickets y facturas de compras.",
+      "Sincronizado con los tickets de compras del inventario.",
+      "Organiza por tipo: ticket, factura, albarán.",
+      "Búsqueda por nombre o proveedor.",
+      "Control del importe total registrado.",
+    ],
+  },
+  {
+    page: "Contabilidad", label: "Contabilidad", emoji: "📊",
+    helpId: "contabilidad", helpColor: "text-[#630027]", helpBg: "bg-[#630027]/10",
+    helpDesc: "Contabilidad general de la peña con gastos, ingresos y balances.",
+    helpItems: [
+      "Consolida automáticamente todos los movimientos: tickets, cervezas, cuotas, lotería, deudas y pagos.",
+      "Resumen con KPIs de ingresos, gastos y balance total, más gráfico por categorías.",
+      "Lista de movimientos consolidados con filtros por tipo, categoría, fuente y búsqueda de texto.",
+      "Balance por usuario: ve quién debe dinero (debe) y quién ha pagado (haber).",
+      "Los cargos y administradores pueden añadir movimientos manuales de ingreso o gasto.",
+      "Pulsa el botón de actualizar para recalcular todo en tiempo real.",
+    ],
+  },
+  {
+    page: "DatosPena", label: "Datos de la Peña", emoji: "🏛️",
+    helpId: "datospena", helpColor: "text-[#630027]", helpBg: "bg-[#630027]/10",
+    helpDesc: "Información oficial de la asociación.",
+    helpItems: [
+      "Consulta y edita los datos oficiales de la peña: NIF, IBAN, domicilio, teléfono, email...",
+      "Los cargos y administradores pueden editar cualquier campo pulsando el lápiz.",
+      "Añade campos adicionales personalizados para guardar cualquier dato relevante.",
+    ],
+  },
+  {
+    page: "Loteria", label: "Lotería", emoji: "🎫",
+    helpId: "loteria", helpColor: "text-[#630027]", helpBg: "bg-[#630027]/10",
+    helpDesc: "Gestión de talonarios de lotería y recaudación.",
+    helpItems: [
+      "Los cargos pueden crear campañas de lotería con precio por participación y fecha límite de entrega.",
+      "Asigna talonarios con rango de números a cada socio.",
+      "Los socios registran cuántas participaciones han vendido; el recaudado y beneficio se calculan automáticamente.",
+      "Vista gráfica del progreso de ventas frente a participaciones pendientes.",
+      "Marca talonarios como entregados cuando el socio devuelve el dinero recaudado.",
+    ],
+  },
+  {
+    page: "Actividades", label: "Actividades", emoji: "🎯",
+    helpId: "actividades", helpColor: "text-[#630027]", helpBg: "bg-[#630027]/10",
+    helpDesc: "Eventos y actividades organizadas por la asociación.",
+    helpItems: [
+      "Consulta todas las actividades programadas: excursiones, comidas, eventos deportivos, culturales y más.",
+      "Inscríbete directamente desde la app a las actividades que te interesen.",
+      "Los cargos y administradores pueden crear, editar y eliminar actividades.",
+      "Envía notificaciones a todos los integrantes al publicar una nueva actividad.",
+      "Pestaña de Sugerencias: cualquier integrante puede proponer actividades; los demás votan a favor.",
+      "Las sugerencias más votadas pueden ser aprobadas por los cargos para convertirse en actividades oficiales.",
+      "Historial de actividades pasadas y canceladas.",
+    ],
+  },
+  {
+    page: "Comunidad", label: "Comunidad", emoji: "💬",
+    helpId: "comunidad", helpColor: "text-teal-600", helpBg: "bg-teal-50",
+    helpDesc: "Sugerencias y votaciones para la participación colectiva.",
+    helpItems: [
+      "Sugerencias: cualquier integrante puede enviar ideas con título y texto; los demás pueden votar a favor.",
+      "Las sugerencias más votadas suben en el ranking. Los administradores pueden archivarlas o eliminarlas.",
+      "Votaciones: presidencia y administración crean votaciones con tema, descripción y opciones personalizadas.",
+      "Los resultados se muestran en tiempo real con porcentajes por opción.",
+      "Solo socios y cargos pueden votar; el resto puede ver los resultados pero no participar.",
+      "Las votaciones completadas se archivan y pueden consultarse o repetirse.",
+    ],
+  },
+
+  {
+    page: "Logros", label: "Logros", emoji: "🏆",
+    helpId: "logros", helpColor: "text-amber-600", helpBg: "bg-amber-50",
+    helpDesc: "Logros, retos y clasificación de la peña.",
+    helpItems: [
+      "Supera retos basados en tu actividad: cervezas, actividades, sugerencias, votaciones, chat y notas.",
+      "Desbloquea logros y acumula puntos para subir en la clasificación.",
+      "Comprueba tu progreso en cada logro y cuánto te falta para conseguirlo.",
+      "El administrador activa las gamificaciones y define los logros desde el Panel Admin.",
+    ],
+  },
+  {
+    page: "Perfil", label: "Mi perfil", emoji: "👤", fixedLast: true,
+    helpId: "perfil", helpColor: "text-[#630027]", helpBg: "bg-[#630027]/10",
+    helpDesc: "Configuración personal de tu cuenta.",
+    helpItems: [
+      "Cambia tu foto de avatar que aparece en el encabezado, en el chat y en el inicio.",
+      "Edita tu nombre visible en la app.",
+      "Consulta tu categoría dentro de la peña (socio, cargo, contribuyente...).",
+      "Vincula tu cuenta de usuario con tu ficha de integrante para que la app reconozca tu identidad.",
+      "Consulta tu historial de actividad reciente en la app.",
+      "Acceso rápido para cerrar sesión.",
+    ],
+  },
+  {
+    page: "TourGuia", label: "Tours guiados", emoji: "🧭",
+    helpId: "tourguia", helpColor: "text-[#630027]", helpBg: "bg-[#630027]/10",
+    helpDesc: "Tours guiados paso a paso por cada sección de la app.",
+    helpItems: [
+      "Tour general de la app: recorre las funciones principales de navegación en 10 pasos.",
+      "Tours por sección: elige cualquier sección y sigue un tour guiado paso a paso con instrucciones detalladas.",
+      "Preguntas frecuentes por sección: resuelve dudas específicas de cada apartado.",
+      "Guías exclusivas para cargos y administradores con sus secciones específicas.",
+      "Buscador para encontrar rápidamente cualquier funcionalidad en los tours.",
+    ],
+  },
+  {
+    page: "Ayuda", label: "Ayuda", emoji: "❓", fixedLast: true,
+    helpId: "ayuda", helpColor: "text-[#630027]", helpBg: "bg-[#630027]/10",
+    helpDesc: "Guía de uso de todas las secciones de la app.",
+    helpItems: [
+      "Busca cualquier funcionalidad usando el buscador.",
+      "Pulsa cualquier sección para ver su explicación detallada.",
+      "El icono ℹ️ en cada página te lleva directamente a su sección de ayuda.",
+    ],
+  },
+  {
+    page: "Ajustes", label: "Ajustes", emoji: "⚙️", fixedLast: true,
+    helpId: "ajustes", helpColor: "text-gray-600", helpBg: "bg-gray-100",
+    helpDesc: "Personalización de la experiencia en la app.",
+    helpItems: [
+      "Activa o desactiva el modo oscuro (dark mode) para toda la app.",
+      "Configura qué botones aparecen en la barra de navegación inferior (mínimo 2, máximo 6) y en qué orden.",
+      "Activa o desactiva la burbuja flotante del chat para acceso rápido desde cualquier página.",
+      "Activa o desactiva la burbuja flotante de notas personales.",
+      "Configura el orden de los elementos en el menú hamburguesa arrastrando y soltando.",
+      "Activa o desactiva la barra de búsqueda global en el encabezado.",
+      "Muestra u oculta el icono de redes sociales (Instagram, TikTok) en el encabezado.",
+      "Activa o desactiva el breadcrumb de navegación bajo el encabezado.",
+    ],
+  },
+];
+
+// Páginas extra que no están en el menú pero sí en Ayuda
+export const EXTRA_HELP_PAGES = [
+  {
+    page: "Admin", label: "Panel Administrador", emoji: "🛡️",
+    helpId: "admin", helpColor: "text-amber-600", helpBg: "bg-amber-50",
+    helpDesc: "Herramientas exclusivas para administradores.",
+    helpItems: [
+      "Gestión completa de integrantes, roles y permisos.",
+      "Acceso a los logs de actividad de la app.",
+      "Asistente de IA para creación de contenido y gestión.",
+      "Gestor de datos: importar/exportar información, limpiar registros.",
+      "Configuración de la cuenta atrás visible en el inicio.",
+    ],
+  },
+  {
+    page: "GestionCargos", label: "Área de Cargos", emoji: "💼",
+    helpId: "cargos", helpColor: "text-[#630027]", helpBg: "bg-[#630027]/10",
+    helpDesc: "Panel integral para cada cargo de la junta directiva.",
+    helpItems: [
+      "El presidente tiene dashboard ejecutivo, documentos, actas, presupuesto y socios.",
+      "El secretario gestiona actas, documentación y censo de socios.",
+      "El tesorero controla cuentas, pagos, tickets y presupuesto.",
+      "El vocal gestiona tareas, comisiones y sugerencias.",
+      "Guía de obligaciones legales, fiscales y burocráticas para cada cargo.",
+    ],
+  },
+];
+
+// Páginas que NUNCA se pueden desactivar
+export const UNDISABLEABLE = ["Inicio", "Perfil", "Ajustes", "Ayuda"];
+
+// Clave en AppConfig para páginas desactivadas globalmente por admin
+export const DISABLED_PAGES_CONFIG_KEY = "menu_desactivado";
+
+/**
+ * Lee las páginas desactivadas desde AppConfig (array JSON en campo valor).
+ */
+export function getDisabledPages(appConfigs = []) {
+  const cfg = appConfigs.find(c => c.clave === DISABLED_PAGES_CONFIG_KEY);
+  if (!cfg?.valor) return [];
+  try { return JSON.parse(cfg.valor); } catch { return []; }
+}
+
+/**
+ * Orden guardado por el usuario en localStorage.
+ */
+export function getSavedMenuOrder() {
+  const fixedFirst  = ALL_PAGES.filter(p => p.fixedFirst).map(p => p.page);
+  const fixedLast   = ALL_PAGES.filter(p => p.fixedLast).map(p => p.page);
+  const reorderable = ALL_PAGES.filter(p => !p.fixedFirst && !p.fixedLast).map(p => p.page);
+
+  try {
+    const saved = localStorage.getItem("pena_menu_order");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      const reord = parsed.filter(p => reorderable.includes(p));
+      reorderable.forEach(p => { if (!reord.includes(p)) reord.push(p); });
+      return [...fixedFirst, ...reord, ...fixedLast];
+    }
+  } catch {}
+  return [...fixedFirst, ...reorderable, ...fixedLast];
+}
+
+/**
+ * Devuelve la entrada de menuConfig para una página dada (incluye extras).
+ */
+export function getPageConfig(page) {
+  return ALL_PAGES.find(p => p.page === page)
+      || EXTRA_HELP_PAGES.find(p => p.page === page)
+      || null;
+}

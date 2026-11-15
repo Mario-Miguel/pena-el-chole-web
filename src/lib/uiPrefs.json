@@ -1,0 +1,94 @@
+[
+  {
+    "key": "pena_show_theme_toggle",
+    "label": "Botón modo claro/oscuro",
+    "group": "Cabecera",
+    "default": true
+  },
+  {
+    "key": "pena_show_search",
+    "label": "Búsqueda global",
+    "group": "Cabecera",
+    "default": false
+  },
+  {
+    "key": "pena_show_notif_bell",
+    "label": "Campana de notificaciones",
+    "group": "Cabecera",
+    "default": true
+  },
+  {
+    "key": "pena_show_avatar",
+    "label": "Avatar / acceso al perfil",
+    "group": "Cabecera",
+    "default": true
+  },
+  {
+    "key": "pena_show_notas_header",
+    "label": "Notas (botón cabecera)",
+    "group": "Cabecera",
+    "default": false
+  },
+  {
+    "key": "pena_show_hamburger",
+    "label": "Menú hamburguesa",
+    "group": "Cabecera",
+    "default": false
+  },
+  {
+    "key": "pena_show_instagram",
+    "label": "Botón Instagram",
+    "group": "Redes sociales",
+    "default": false
+  },
+  {
+    "key": "pena_show_tiktok",
+    "label": "Botón TikTok",
+    "group": "Redes sociales",
+    "default": false
+  },
+  {
+    "key": "pena_show_app_drawer",
+    "label": "Cajón de apps (cuadrícula)",
+    "group": "Navegación",
+    "default": true
+  },
+  {
+    "key": "pena_show_apps_label",
+    "label": "Etiqueta del cajón de apps",
+    "group": "Navegación",
+    "default": false
+  },
+  {
+    "key": "pena_sidebar_hidden",
+    "label": "Barra lateral (PC)",
+    "group": "Navegación",
+    "default": true,
+    "invertedKey": true
+  },
+  {
+    "key": "pena_bottom_nav_hidden",
+    "label": "Barra inferior",
+    "group": "Navegación",
+    "default": true,
+    "invertedKey": true
+  },
+  {
+    "key": "pena_burbuja_chat",
+    "label": "Burbuja de chat",
+    "group": "Navegación",
+    "default": false
+  },
+  {
+    "key": "pena_burbuja_notas",
+    "label": "Burbuja de notas",
+    "group": "Navegación",
+    "default": false
+  },
+  {
+    "key": "pena_show_breadcrumbs",
+    "label": "Migas de pan (ruta)",
+    "group": "Navegación",
+    "default": false
+  }
+]

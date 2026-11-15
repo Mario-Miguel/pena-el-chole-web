@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="https://base44.com/logo_v2.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+    <script>
+      (function() {
+        var saved = localStorage.getItem("pena_modo_apaisado");
+        var apaisado = saved !== null
+          ? saved === "true"
+          : (window.screen.width >= 768 || window.screen.height >= 768);
+        if (apaisado) {
+          document.querySelector('meta[name="viewport"]').content =
+            "width=device-width, initial-scale=1.0, viewport-fit=cover";
+        }
+      })();
+    </script>
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#630027" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="El Chole" />
+    <title>Peña El Chole</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js').catch(function() {});
+        });
+      }
+    </script>
+  </body>
+</html>
