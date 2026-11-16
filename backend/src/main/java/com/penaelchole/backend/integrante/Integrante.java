@@ -1,13 +1,17 @@
 package com.penaelchole.backend.integrante;
 
-import com.penaelchole.backend.common.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
 import java.time.LocalDate;
 
+import com.penaelchole.backend.common.BaseEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+
 /**
- * Miembro de la peña. Se mapea a la tabla "integrante" (V1__create_integrante.sql).
- * Spring Boot traduce los nombres camelCase a snake_case: fechaNacimiento -> fecha_nacimiento.
+ * Miembro de la peña. Se mapea a la tabla "integrante"
+ * (V1__create_integrante.sql).
+ * Spring Boot traduce los nombres camelCase a snake_case: fechaNacimiento ->
+ * fecha_nacimiento.
  */
 @Entity
 public class Integrante extends BaseEntity {
@@ -18,7 +22,10 @@ public class Integrante extends BaseEntity {
     /** cargos, socios, contribuyentes, socios_honorificos, patitas, especial... */
     private String categoria;
 
-    /** presidente, vicepresidente, tesorero, secretario, vocal... (solo si categoria = cargos) */
+    /**
+     * presidente, vicepresidente, tesorero, secretario, vocal... (solo si categoria
+     * = cargos)
+     */
     private String cargo;
 
     @Column(nullable = false)
@@ -75,4 +82,33 @@ public class Integrante extends BaseEntity {
     public void setFechaNacimiento(LocalDate fechaNacimiento) {
         this.fechaNacimiento = fechaNacimiento;
     }
+
+    public void applyChanges(IntegrantePatch changes) {
+        if (changes.nombre() != null) {
+            String nombre = changes.nombre().orElse(null);
+            if (nombre == null || nombre.isBlank()) {
+                throw new IllegalArgumentException("El nombre no puede estar vacío");
+            }
+            setNombre(nombre);
+        } else {
+            throw new IllegalArgumentException("No name given");
+        }
+
+        if (changes.categoria() != null) {
+            setCategoria(changes.categoria().orElse(null));
+        }
+
+        if (changes.cargo() != null) {
+            setCargo(changes.cargo().orElse(null));
+        }
+
+        if (changes.cervezas() != null) {
+            setCervezas(changes.cervezas().orElse(0));
+        }
+
+        if (changes.fechaNacimiento() != null) {
+            setFechaNacimiento(changes.fechaNacimiento().orElse(null));
+        }
+    }
+
 }
