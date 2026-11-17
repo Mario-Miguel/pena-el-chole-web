@@ -24,8 +24,10 @@ public record IntegrantePatch(
     }
 
     private static Optional<String> text(JsonNode json, String field) {
+        if (!json.has(field))
+            return null;
         JsonNode n = json.get(field);
-        return n.isNull() ? null : Optional.of(n.asString());
+        return n.isNull() ? Optional.empty() : Optional.of(n.asString());
     }
 
     private static Optional<LocalDate> date(JsonNode json, String field) {

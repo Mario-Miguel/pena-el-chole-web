@@ -90,10 +90,7 @@ public class Integrante extends BaseEntity {
                 throw new IllegalArgumentException("El nombre no puede estar vacío");
             }
             setNombre(nombre);
-        } else {
-            throw new IllegalArgumentException("No name given");
         }
-
         if (changes.categoria() != null) {
             setCategoria(changes.categoria().orElse(null));
         }

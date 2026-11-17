@@ -2,10 +2,10 @@ package com.penaelchole.backend.integrante;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
+
+import com.penaelchole.backend.common.ResourceNotFoundException;
 
 /**
  * Lógica de negocio de integrantes. El controller solo traduce HTTP <->
@@ -40,7 +40,7 @@ public class IntegranteService {
     @Transactional
     public IntegranteResponse update(String id, IntegrantePatch changes) {
         Integrante member = repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Integrante no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Integrante no encontrado"));
         member.applyChanges(changes);
         return IntegranteResponse.from(member);
     }
