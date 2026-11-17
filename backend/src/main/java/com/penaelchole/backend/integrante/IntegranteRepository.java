@@ -1,10 +1,6 @@
 package com.penaelchole.backend.integrante;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.penaelchole.backend.common.BaseRepository;
 
-/**
- * Spring Data genera la implementación en tiempo de ejecución:
- * findAll(), findById(), save(), deleteById()... sin escribir SQL.
- */
-public interface IntegranteRepository extends JpaRepository<Integrante, String> {
+public interface IntegranteRepository extends BaseRepository<Integrante> {
 }

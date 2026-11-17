@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.penaelchole.backend.common.ListQuery;
+
 import jakarta.validation.Valid;
 import tools.jackson.databind.JsonNode;
 
@@ -31,14 +33,25 @@ public class IntegranteController {
 
     // GET /api/entities/Integrante -> frontend: api.entities.Integrante.list()
     @GetMapping
-    public List<IntegranteResponse> list() {
-        return service.list();
+    public List<IntegranteResponse> list(ListQuery query) {
+        return service.list(query);
+    }
+
+    @GetMapping("/{id}")
+    public IntegranteResponse get(@PathVariable String id) {
+        return service.get(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public IntegranteResponse insert(@Valid @RequestBody IntegranteRequest request) {
         return service.insert(request);
+    }
+
+    @PostMapping("/bulk")
+    @ResponseStatus(HttpStatus.CREATED)
+    public List<IntegranteResponse> bulkCreate(@Valid @RequestBody List<IntegranteRequest> request) {
+        return service.bulkInsert(request);
     }
 
     @PatchMapping("/{id}")
@@ -52,4 +65,9 @@ public class IntegranteController {
         service.delete(id);
     }
 
+    @PostMapping("/delete-many")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void bulkDelete(@Valid @RequestBody DeleteManyRequest request) {
+        service.bulkDelete(request.ids());
+    }
 }
