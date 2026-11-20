@@ -1,4 +1,4 @@
-package com.penaelchole.backend.integrante;
+package com.penaelchole.backend.member;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -6,14 +6,14 @@ import java.util.Optional;
 
 import tools.jackson.databind.JsonNode;
 
-public record IntegrantePatch(
+public record MemberPatch(
         Optional<String> nombre,
         Optional<String> categoria,
         Optional<String> cargo,
         Optional<Integer> cervezas,
         Optional<LocalDate> fechaNacimiento) {
-    public static IntegrantePatch from(JsonNode json) {
-        return new IntegrantePatch(
+    public static MemberPatch from(JsonNode json) {
+        return new MemberPatch(
                 text(json, "nombre"),
                 text(json, "categoria"),
                 text(json, "cargo"),

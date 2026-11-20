@@ -1,7 +1,7 @@
 # Backend: Peña El Chole
 
 Spring Boot 4.1 · Java 21 · PostgreSQL 17 · Flyway · Spring Data JPA · Spring Security.
-`API.md` has the contract the frontend expects.
+`API.md` has the contract the frontend expects; `ROADMAP.md` has the step-by-step plan and the entities left to map.
 
 ## Run it
 
@@ -24,12 +24,12 @@ src/main/java/com/penaelchole/backend/
 │   └── SecurityConfig.java
 ├── common/                      # code shared by every feature
 │   └── BaseEntity.java          # id, created_date, updated_date, created_by_id
-└── integrante/                  # one package per entity
-    ├── Integrante.java          # JPA entity (= "integrante" table)
-    ├── IntegranteRepository.java# data access (Spring Data)
-    ├── IntegranteService.java   # business logic, transactions
-    ├── IntegranteController.java# HTTP endpoints (/api/entities/Integrante)
-    └── IntegranteResponse.java  # JSON returned to the frontend (snake_case)
+└── member/                      # one package per entity
+    ├── Member.java              # JPA entity (@Table "integrante")
+    ├── MemberRepository.java    # data access (Spring Data)
+    ├── MemberService.java       # business logic, transactions
+    ├── MemberController.java    # HTTP endpoints (/api/entities/Integrante)
+    └── MemberResponse.java      # JSON returned to the frontend (snake_case)
 
 src/main/resources/
 ├── application.properties

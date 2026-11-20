@@ -1,4 +1,4 @@
-package com.penaelchole.backend.integrante;
+package com.penaelchole.backend.member;
 
 import java.time.LocalDate;
 
@@ -7,7 +7,7 @@ import tools.jackson.databind.PropertyNamingStrategies;
 import tools.jackson.databind.annotation.JsonNaming;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public record IntegranteRequest (
+public record MemberRequest (
     @NotBlank String nombre,
     String categoria,
     String cargo,

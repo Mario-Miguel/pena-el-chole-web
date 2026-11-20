@@ -1,4 +1,4 @@
-package com.penaelchole.backend.integrante;
+package com.penaelchole.backend.member;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.penaelchole.backend.integrante;
+package com.penaelchole.backend.member;
 
 import java.util.List;
 
@@ -19,44 +19,44 @@ import jakarta.validation.Valid;
 import tools.jackson.databind.JsonNode;
 
 /**
- * Endpoints REST de Integrante. Contrato en backend/API.md, sección "Entities".
+ * Endpoints REST de Member. Contrato en backend/API.md, sección "Entities".
  */
 @RestController
 @RequestMapping("/api/entities/Integrante")
-public class IntegranteController {
+public class MemberController {
 
-    private final IntegranteService service;
+    private final MemberService service;
 
-    public IntegranteController(IntegranteService service) {
+    public MemberController(MemberService service) {
         this.service = service;
     }
 
     // GET /api/entities/Integrante -> frontend: api.entities.Integrante.list()
     @GetMapping
-    public List<IntegranteResponse> list(ListQuery query) {
+    public List<MemberResponse> list(ListQuery query) {
         return service.list(query);
     }
 
     @GetMapping("/{id}")
-    public IntegranteResponse get(@PathVariable String id) {
+    public MemberResponse get(@PathVariable String id) {
         return service.get(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public IntegranteResponse insert(@Valid @RequestBody IntegranteRequest request) {
+    public MemberResponse insert(@Valid @RequestBody MemberRequest request) {
         return service.insert(request);
     }
 
     @PostMapping("/bulk")
     @ResponseStatus(HttpStatus.CREATED)
-    public List<IntegranteResponse> bulkCreate(@Valid @RequestBody List<IntegranteRequest> request) {
+    public List<MemberResponse> bulkCreate(@Valid @RequestBody List<MemberRequest> request) {
         return service.bulkInsert(request);
     }
 
     @PatchMapping("/{id}")
-    public IntegranteResponse update(@PathVariable String id, @RequestBody JsonNode changes) {
-        return service.update(id, IntegrantePatch.from(changes));
+    public MemberResponse update(@PathVariable String id, @RequestBody JsonNode changes) {
+        return service.update(id, MemberPatch.from(changes));
     }
 
     @DeleteMapping("/{id}")

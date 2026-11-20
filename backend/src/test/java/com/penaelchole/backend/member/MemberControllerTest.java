@@ -1,4 +1,4 @@
-package com.penaelchole.backend.integrante;
+package com.penaelchole.backend.member;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -37,13 +37,13 @@ import com.penaelchole.backend.TestcontainersConfiguration;
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import(TestcontainersConfiguration.class)
-class IntegranteControllerTest {
+class MemberControllerTest {
 
     @Autowired
     MockMvc mockMvc;
 
     @Autowired
-    IntegranteRepository repository;
+    MemberRepository repository;
 
     @BeforeEach
     void limpiar() {
@@ -52,7 +52,7 @@ class IntegranteControllerTest {
 
     @Test
     void listaIntegrantesEnSnakeCase() throws Exception {
-        Integrante pepe = new Integrante("Pepe", "cargos", "tesorero");
+        Member pepe = new Member("Pepe", "cargos", "tesorero");
         pepe.setFechaNacimiento(LocalDate.of(1990, 5, 17));
         repository.save(pepe);
 
@@ -100,7 +100,7 @@ class IntegranteControllerTest {
 
     @Test
     void patchConFechaInvalidaDevuelve400ConMensaje() throws Exception {
-        Integrante pepe = repository.save(new Integrante("Pepe", "cargos", "tesorero"));
+        Member pepe = repository.save(new Member("Pepe", "cargos", "tesorero"));
 
         mockMvc.perform(patch("/api/entities/Integrante/{id}", pepe.getId())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -113,7 +113,7 @@ class IntegranteControllerTest {
 
     @Test
     void patchConNombreVacioDevuelve400ConMensaje() throws Exception {
-        Integrante pepe = repository.save(new Integrante("Pepe", "cargos", "tesorero"));
+        Member pepe = repository.save(new Member("Pepe", "cargos", "tesorero"));
 
         mockMvc.perform(patch("/api/entities/Integrante/{id}", pepe.getId())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -126,7 +126,7 @@ class IntegranteControllerTest {
 
     @Test
     void patchWithoutNameGives200Response() throws Exception {
-        Integrante pepe = repository.save(new Integrante("Pepe", "cargos", "tesorero"));
+        Member pepe = repository.save(new Member("Pepe", "cargos", "tesorero"));
 
         mockMvc.perform(patch("/api/entities/Integrante/{id}", pepe.getId())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -143,7 +143,7 @@ class IntegranteControllerTest {
 
     @Test
     void patchWithExplicitFieldWithNullEraseField() throws Exception {
-        Integrante pepe = repository.save(new Integrante("Pepe", "cargos", "tesorero"));
+        Member pepe = repository.save(new Member("Pepe", "cargos", "tesorero"));
 
         mockMvc.perform(patch("/api/entities/Integrante/{id}", pepe.getId())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -162,7 +162,7 @@ class IntegranteControllerTest {
 
     @Test
     void getPorIdDevuelveElIntegrante() throws Exception {
-        Integrante pepe = new Integrante("Pepe", "cargos", "tesorero");
+        Member pepe = new Member("Pepe", "cargos", "tesorero");
         pepe.setFechaNacimiento(LocalDate.of(1990, 5, 17));
         repository.save(pepe);
 
@@ -240,9 +240,9 @@ class IntegranteControllerTest {
 
     @Test
     void deleteManyBorraSoloLosIdsIndicados() throws Exception {
-        Integrante ana = repository.save(new Integrante("Ana", null, null));
-        Integrante luis = repository.save(new Integrante("Luis", null, null));
-        Integrante pepe = repository.save(new Integrante("Pepe", null, null));
+        Member ana = repository.save(new Member("Ana", null, null));
+        Member luis = repository.save(new Member("Luis", null, null));
+        Member pepe = repository.save(new Member("Pepe", null, null));
 
         mockMvc.perform(post("/api/entities/Integrante/delete-many")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -252,13 +252,13 @@ class IntegranteControllerTest {
                 .andExpect(status().isNoContent());
 
         assertThat(repository.findAll())
-                .extracting(Integrante::getId)
+                .extracting(Member::getId)
                 .containsExactly(pepe.getId());
     }
 
     @Test
     void deleteManyIgnoraIdsInexistentes() throws Exception {
-        Integrante pepe = repository.save(new Integrante("Pepe", null, null));
+        Member pepe = repository.save(new Member("Pepe", null, null));
 
         mockMvc.perform(post("/api/entities/Integrante/delete-many")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -284,7 +284,7 @@ class IntegranteControllerTest {
     /** Guarda uno a uno con flush para que cada created_date sea posterior al anterior. */
     private void guardarEnOrden(String... nombres) {
         for (String nombre : nombres) {
-            repository.saveAndFlush(new Integrante(nombre, null, null));
+            repository.saveAndFlush(new Member(nombre, null, null));
         }
     }
 
@@ -364,8 +364,8 @@ class IntegranteControllerTest {
 
     // --- GET con filtros de igualdad (Filters) ---
 
-    private Integrante guardar(String nombre, String categoria, String cargo) {
-        return repository.saveAndFlush(new Integrante(nombre, categoria, cargo));
+    private Member guardar(String nombre, String categoria, String cargo) {
+        return repository.saveAndFlush(new Member(nombre, categoria, cargo));
     }
 
     @Test
@@ -397,7 +397,7 @@ class IntegranteControllerTest {
     @Test
     void filtroPorIdDevuelveEseRegistro() throws Exception {
         guardar("Ana", null, null);
-        Integrante luis = guardar("Luis", null, null);
+        Member luis = guardar("Luis", null, null);
 
         mockMvc.perform(get("/api/entities/Integrante").param("id", luis.getId()))
                 .andExpect(status().isOk())
@@ -407,7 +407,7 @@ class IntegranteControllerTest {
 
     @Test
     void filtroNumericoConvierteElValor() throws Exception {
-        Integrante ana = new Integrante("Ana", null, null);
+        Member ana = new Member("Ana", null, null);
         ana.setCervezas(7);
         repository.saveAndFlush(ana);
         guardar("Luis", null, null);
@@ -419,7 +419,7 @@ class IntegranteControllerTest {
 
     @Test
     void filtroPorFechaEnSnakeCase() throws Exception {
-        Integrante ana = new Integrante("Ana", null, null);
+        Member ana = new Member("Ana", null, null);
         ana.setFechaNacimiento(LocalDate.of(1990, 5, 17));
         repository.saveAndFlush(ana);
         guardar("Luis", null, null);
@@ -487,7 +487,7 @@ class IntegranteControllerTest {
 
         // Comprueba también lo que quedó en la base de datos, no solo la respuesta
         String id = JsonPath.read(body, "$.id");
-        Integrante guardado = repository.findById(id).orElseThrow();
+        Member guardado = repository.findById(id).orElseThrow();
         assertThat(guardado.getNombre()).isEqualTo("Ana");
         assertThat(guardado.getCategoria()).isEqualTo("cargos");
         assertThat(guardado.getCargo()).isEqualTo("tesorero");
@@ -509,8 +509,8 @@ class IntegranteControllerTest {
 
     @Test
     void deleteBorraElIntegranteYDevuelve204() throws Exception {
-        Integrante ana = guardar("Ana", null, null);
-        Integrante luis = guardar("Luis", null, null);
+        Member ana = guardar("Ana", null, null);
+        Member luis = guardar("Luis", null, null);
 
         mockMvc.perform(delete("/api/entities/Integrante/{id}", ana.getId()))
                 .andExpect(status().isNoContent());

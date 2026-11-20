@@ -1,4 +1,4 @@
-package com.penaelchole.backend.integrante;
+package com.penaelchole.backend.member;
 
 import java.time.LocalDate;
 
@@ -6,15 +6,17 @@ import com.penaelchole.backend.common.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 /**
- * Miembro de la peña. Se mapea a la tabla "integrante"
+ * Miembro de la peña. Se mapea a la tabla "integrante" con @Table
  * (V1__create_integrante.sql).
  * Spring Boot traduce los nombres camelCase a snake_case: fechaNacimiento ->
  * fecha_nacimiento.
  */
 @Entity
-public class Integrante extends BaseEntity {
+@Table(name = "integrante")
+public class Member extends BaseEntity {
 
     @Column(nullable = false)
     private String nombre;
@@ -34,10 +36,10 @@ public class Integrante extends BaseEntity {
     private LocalDate fechaNacimiento;
 
     // JPA necesita un constructor sin argumentos
-    protected Integrante() {
+    protected Member() {
     }
 
-    public Integrante(String nombre, String categoria, String cargo) {
+    public Member(String nombre, String categoria, String cargo) {
         this.nombre = nombre;
         this.categoria = categoria;
         this.cargo = cargo;
@@ -83,7 +85,7 @@ public class Integrante extends BaseEntity {
         this.fechaNacimiento = fechaNacimiento;
     }
 
-    public void applyChanges(IntegrantePatch changes) {
+    public void applyChanges(MemberPatch changes) {
         if (changes.nombre() != null) {
             String nombre = changes.nombre().orElse(null);
             if (nombre == null || nombre.isBlank()) {

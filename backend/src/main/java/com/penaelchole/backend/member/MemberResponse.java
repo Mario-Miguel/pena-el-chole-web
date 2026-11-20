@@ -1,4 +1,4 @@
-package com.penaelchole.backend.integrante;
+package com.penaelchole.backend.member;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -11,7 +11,7 @@ import tools.jackson.databind.annotation.JsonNaming;
  * El frontend espera los campos en snake_case (created_date, fecha_nacimiento...).
  */
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public record IntegranteResponse(
+public record MemberResponse(
         String id,
         String nombre,
         String categoria,
@@ -22,8 +22,8 @@ public record IntegranteResponse(
         Instant updatedDate,
         String createdById) {
 
-    public static IntegranteResponse from(Integrante i) {
-        return new IntegranteResponse(
+    public static MemberResponse from(Member i) {
+        return new MemberResponse(
                 i.getId(),
                 i.getNombre(),
                 i.getCategoria(),
