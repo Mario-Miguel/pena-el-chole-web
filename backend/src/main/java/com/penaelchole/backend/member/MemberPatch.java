@@ -7,11 +7,12 @@ import java.util.Optional;
 import tools.jackson.databind.JsonNode;
 
 public record MemberPatch(
-        Optional<String> nombre,
-        Optional<String> categoria,
-        Optional<String> cargo,
-        Optional<Integer> cervezas,
-        Optional<LocalDate> fechaNacimiento) {
+        Optional<String> name,
+        Optional<String> category,
+        Optional<String> role,
+        Optional<Integer> beers,
+        Optional<LocalDate> birthDate) {
+    // Las claves JSON son las del frontend (español, snake_case)
     public static MemberPatch from(JsonNode json) {
         return new MemberPatch(
                 text(json, "nombre"),

@@ -19,18 +19,9 @@ public record ListQuery(
         if (sort == null || sort.isBlank())
             return Sort.unsorted();
         boolean desc = sort.startsWith("-");
-        String field = Fields.snakeToCamel(desc ? sort.substring(1) : sort);
-        if (!hasField(entity, field))
-            throw new IllegalArgumentException("No se puede ordenar por: " + sort);
+        String field = Fields.filterable(entity, desc ? sort.substring(1) : sort)
+                .orElseThrow(() -> new IllegalArgumentException("No se puede ordenar por: " + sort))
+                .getName();
         return desc ? Sort.by(field).descending() : Sort.by(field).ascending();
-    }
-
-    private static boolean hasField(Class<?> type, String name) {
-        for (Class<?> c = type; c != null; c = c.getSuperclass()) {
-            for (var f : c.getDeclaredFields())
-                if (f.getName().equals(name) && !f.isAnnotationPresent(NoFiltrable.class))
-                    return true;
-        }
-        return false;
     }
 }

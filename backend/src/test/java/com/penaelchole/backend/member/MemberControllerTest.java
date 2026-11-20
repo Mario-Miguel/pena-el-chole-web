@@ -46,14 +46,14 @@ class MemberControllerTest {
     MemberRepository repository;
 
     @BeforeEach
-    void limpiar() {
+    void cleanUp() {
         repository.deleteAll();
     }
 
     @Test
-    void listaIntegrantesEnSnakeCase() throws Exception {
+    void listReturnsMembersInSnakeCase() throws Exception {
         Member pepe = new Member("Pepe", "cargos", "tesorero");
-        pepe.setFechaNacimiento(LocalDate.of(1990, 5, 17));
+        pepe.setBirthDate(LocalDate.of(1990, 5, 17));
         repository.save(pepe);
 
         mockMvc.perform(get("/api/entities/Integrante"))
@@ -68,7 +68,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void listaVaciaDevuelveArrayVacio() throws Exception {
+    void emptyListReturnsEmptyArray() throws Exception {
         mockMvc.perform(get("/api/entities/Integrante"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
@@ -77,7 +77,7 @@ class MemberControllerTest {
     // --- Rutas de error (GlobalExceptionHandler) ---
 
     @Test
-    void patchDeIdInexistenteDevuelve404ConMensaje() throws Exception {
+    void patchUnknownIdReturns404WithMessage() throws Exception {
         mockMvc.perform(patch("/api/entities/Integrante/{id}", "no-existe")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
@@ -88,7 +88,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void postConNombreVacioDevuelve400ConMensaje() throws Exception {
+    void postWithBlankNameReturns400WithMessage() throws Exception {
         mockMvc.perform(post("/api/entities/Integrante")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
@@ -99,7 +99,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void patchConFechaInvalidaDevuelve400ConMensaje() throws Exception {
+    void patchWithInvalidDateReturns400WithMessage() throws Exception {
         Member pepe = repository.save(new Member("Pepe", "cargos", "tesorero"));
 
         mockMvc.perform(patch("/api/entities/Integrante/{id}", pepe.getId())
@@ -112,7 +112,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void patchConNombreVacioDevuelve400ConMensaje() throws Exception {
+    void patchWithBlankNameReturns400WithMessage() throws Exception {
         Member pepe = repository.save(new Member("Pepe", "cargos", "tesorero"));
 
         mockMvc.perform(patch("/api/entities/Integrante/{id}", pepe.getId())
@@ -125,7 +125,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void patchWithoutNameGives200Response() throws Exception {
+    void patchWithoutNameReturns200() throws Exception {
         Member pepe = repository.save(new Member("Pepe", "cargos", "tesorero"));
 
         mockMvc.perform(patch("/api/entities/Integrante/{id}", pepe.getId())
@@ -142,7 +142,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void patchWithExplicitFieldWithNullEraseField() throws Exception {
+    void patchWithExplicitNullClearsField() throws Exception {
         Member pepe = repository.save(new Member("Pepe", "cargos", "tesorero"));
 
         mockMvc.perform(patch("/api/entities/Integrante/{id}", pepe.getId())
@@ -161,9 +161,9 @@ class MemberControllerTest {
     // --- GET /{id} ---
 
     @Test
-    void getPorIdDevuelveElIntegrante() throws Exception {
+    void getByIdReturnsMember() throws Exception {
         Member pepe = new Member("Pepe", "cargos", "tesorero");
-        pepe.setFechaNacimiento(LocalDate.of(1990, 5, 17));
+        pepe.setBirthDate(LocalDate.of(1990, 5, 17));
         repository.save(pepe);
 
         mockMvc.perform(get("/api/entities/Integrante/{id}", pepe.getId()))
@@ -174,7 +174,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void getPorIdInexistenteDevuelve404ConMensaje() throws Exception {
+    void getUnknownIdReturns404WithMessage() throws Exception {
         mockMvc.perform(get("/api/entities/Integrante/{id}", "no-existe"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Integrante no encontrado"));
@@ -183,7 +183,7 @@ class MemberControllerTest {
     // --- POST (create) ---
 
     @Test
-    void postDevuelveLasFechasDeSistema() throws Exception {
+    void postReturnsSystemDates() throws Exception {
         mockMvc.perform(post("/api/entities/Integrante")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
@@ -197,7 +197,7 @@ class MemberControllerTest {
     // --- POST /bulk ---
 
     @Test
-    void bulkCreaTodosLosCamposEnElMismoOrden() throws Exception {
+    void bulkCreatesAllFieldsInOrder() throws Exception {
         mockMvc.perform(post("/api/entities/Integrante/bulk")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
@@ -224,7 +224,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void bulkConUnElementoInvalidoNoCreaNinguno() throws Exception {
+    void bulkWithOneInvalidItemCreatesNone() throws Exception {
         mockMvc.perform(post("/api/entities/Integrante/bulk")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
@@ -239,7 +239,7 @@ class MemberControllerTest {
     // --- POST /delete-many ---
 
     @Test
-    void deleteManyBorraSoloLosIdsIndicados() throws Exception {
+    void deleteManyDeletesOnlyGivenIds() throws Exception {
         Member ana = repository.save(new Member("Ana", null, null));
         Member luis = repository.save(new Member("Luis", null, null));
         Member pepe = repository.save(new Member("Pepe", null, null));
@@ -257,7 +257,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void deleteManyIgnoraIdsInexistentes() throws Exception {
+    void deleteManyIgnoresUnknownIds() throws Exception {
         Member pepe = repository.save(new Member("Pepe", null, null));
 
         mockMvc.perform(post("/api/entities/Integrante/delete-many")
@@ -271,7 +271,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void deleteManySinIdsDevuelve400ConMensaje() throws Exception {
+    void deleteManyWithoutIdsReturns400WithMessage() throws Exception {
         mockMvc.perform(post("/api/entities/Integrante/delete-many")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{}"))
@@ -282,15 +282,15 @@ class MemberControllerTest {
     // --- GET con sort / limit / skip (ListQuery) ---
 
     /** Guarda uno a uno con flush para que cada created_date sea posterior al anterior. */
-    private void guardarEnOrden(String... nombres) {
-        for (String nombre : nombres) {
-            repository.saveAndFlush(new Member(nombre, null, null));
+    private void saveInOrder(String... names) {
+        for (String name : names) {
+            repository.saveAndFlush(new Member(name, null, null));
         }
     }
 
     @Test
-    void sortDescendentePorCreatedDateDevuelveLosMasRecientesPrimero() throws Exception {
-        guardarEnOrden("Ana", "Luis", "Pepe");
+    void sortDescByCreatedDateReturnsNewestFirst() throws Exception {
+        saveInOrder("Ana", "Luis", "Pepe");
 
         mockMvc.perform(get("/api/entities/Integrante").param("sort", "-created_date"))
                 .andExpect(status().isOk())
@@ -298,8 +298,8 @@ class MemberControllerTest {
     }
 
     @Test
-    void sortAscendentePorNombreDevuelveOrdenAlfabetico() throws Exception {
-        guardarEnOrden("Luis", "Ana", "Pepe");
+    void sortAscByNameReturnsAlphabeticalOrder() throws Exception {
+        saveInOrder("Luis", "Ana", "Pepe");
 
         mockMvc.perform(get("/api/entities/Integrante").param("sort", "nombre"))
                 .andExpect(status().isOk())
@@ -307,8 +307,8 @@ class MemberControllerTest {
     }
 
     @Test
-    void limitYSkipDevuelvenLaVentanaPedida() throws Exception {
-        guardarEnOrden("Dani", "Ana", "Carla", "Beto");
+    void limitAndSkipReturnRequestedWindow() throws Exception {
+        saveInOrder("Dani", "Ana", "Carla", "Beto");
 
         // skip=1 no es múltiplo de limit=2: con paginación por número de página fallaría
         mockMvc.perform(get("/api/entities/Integrante")
@@ -320,8 +320,8 @@ class MemberControllerTest {
     }
 
     @Test
-    void paginarSinSortDevuelveCadaFilaUnaSolaVez() throws Exception {
-        guardarEnOrden("A", "B", "C", "D", "E");
+    void paginatingWithoutSortReturnsEachRowOnce() throws Exception {
+        saveInOrder("A", "B", "C", "D", "E");
 
         // Igual que la exportación de CopiaSeguridad: pedir lotes hasta recibir menos de limit
         List<String> ids = new ArrayList<>();
@@ -332,9 +332,9 @@ class MemberControllerTest {
                     .param("skip", String.valueOf(skip)))
                     .andExpect(status().isOk())
                     .andReturn().getResponse().getContentAsString();
-            List<String> lote = JsonPath.read(body, "$[*].id");
-            ids.addAll(lote);
-            if (lote.size() < limit)
+            List<String> batch = JsonPath.read(body, "$[*].id");
+            ids.addAll(batch);
+            if (batch.size() < limit)
                 break;
         }
 
@@ -342,21 +342,21 @@ class MemberControllerTest {
     }
 
     @Test
-    void sortPorCampoInexistenteDevuelve400ConMensaje() throws Exception {
+    void sortByUnknownFieldReturns400WithMessage() throws Exception {
         mockMvc.perform(get("/api/entities/Integrante").param("sort", "-no_existe"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(containsString("no_existe")));
     }
 
     @Test
-    void limitCeroDevuelve400ConMensaje() throws Exception {
+    void limitZeroReturns400WithMessage() throws Exception {
         mockMvc.perform(get("/api/entities/Integrante").param("limit", "0"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(not(emptyString())));
     }
 
     @Test
-    void limitNoNumericoDevuelve400ConMensaje() throws Exception {
+    void nonNumericLimitReturns400WithMessage() throws Exception {
         mockMvc.perform(get("/api/entities/Integrante").param("limit", "abc"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(containsString("limit")));
@@ -364,15 +364,15 @@ class MemberControllerTest {
 
     // --- GET con filtros de igualdad (Filters) ---
 
-    private Member guardar(String nombre, String categoria, String cargo) {
-        return repository.saveAndFlush(new Member(nombre, categoria, cargo));
+    private Member save(String name, String category, String role) {
+        return repository.saveAndFlush(new Member(name, category, role));
     }
 
     @Test
-    void filtroPorCampoDevuelveSoloLasCoincidencias() throws Exception {
-        guardar("Ana", "cargos", "tesorero");
-        guardar("Luis", "cargos", "vocal");
-        guardar("Pepe", "socios", "tesorero");
+    void filterByFieldReturnsOnlyMatches() throws Exception {
+        save("Ana", "cargos", "tesorero");
+        save("Luis", "cargos", "vocal");
+        save("Pepe", "socios", "tesorero");
 
         mockMvc.perform(get("/api/entities/Integrante")
                 .param("cargo", "tesorero")
@@ -382,10 +382,10 @@ class MemberControllerTest {
     }
 
     @Test
-    void variosFiltrosSeCombinanConAnd() throws Exception {
-        guardar("Ana", "cargos", "tesorero");
-        guardar("Luis", "cargos", "vocal");
-        guardar("Pepe", "socios", "tesorero");
+    void multipleFiltersAreCombinedWithAnd() throws Exception {
+        save("Ana", "cargos", "tesorero");
+        save("Luis", "cargos", "vocal");
+        save("Pepe", "socios", "tesorero");
 
         mockMvc.perform(get("/api/entities/Integrante")
                 .param("cargo", "tesorero")
@@ -395,9 +395,9 @@ class MemberControllerTest {
     }
 
     @Test
-    void filtroPorIdDevuelveEseRegistro() throws Exception {
-        guardar("Ana", null, null);
-        Member luis = guardar("Luis", null, null);
+    void filterByIdReturnsThatRow() throws Exception {
+        save("Ana", null, null);
+        Member luis = save("Luis", null, null);
 
         mockMvc.perform(get("/api/entities/Integrante").param("id", luis.getId()))
                 .andExpect(status().isOk())
@@ -406,11 +406,11 @@ class MemberControllerTest {
     }
 
     @Test
-    void filtroNumericoConvierteElValor() throws Exception {
+    void numericFilterConvertsValue() throws Exception {
         Member ana = new Member("Ana", null, null);
-        ana.setCervezas(7);
+        ana.setBeers(7);
         repository.saveAndFlush(ana);
-        guardar("Luis", null, null);
+        save("Luis", null, null);
 
         mockMvc.perform(get("/api/entities/Integrante").param("cervezas", "7"))
                 .andExpect(status().isOk())
@@ -418,11 +418,11 @@ class MemberControllerTest {
     }
 
     @Test
-    void filtroPorFechaEnSnakeCase() throws Exception {
+    void filterByDateInSnakeCase() throws Exception {
         Member ana = new Member("Ana", null, null);
-        ana.setFechaNacimiento(LocalDate.of(1990, 5, 17));
+        ana.setBirthDate(LocalDate.of(1990, 5, 17));
         repository.saveAndFlush(ana);
-        guardar("Luis", null, null);
+        save("Luis", null, null);
 
         mockMvc.perform(get("/api/entities/Integrante").param("fecha_nacimiento", "1990-05-17"))
                 .andExpect(status().isOk())
@@ -430,8 +430,8 @@ class MemberControllerTest {
     }
 
     @Test
-    void filtroSinCoincidenciasDevuelveArrayVacio() throws Exception {
-        guardar("Ana", "cargos", "tesorero");
+    void filterWithoutMatchesReturnsEmptyArray() throws Exception {
+        save("Ana", "cargos", "tesorero");
 
         mockMvc.perform(get("/api/entities/Integrante").param("cargo", "presidente"))
                 .andExpect(status().isOk())
@@ -439,10 +439,10 @@ class MemberControllerTest {
     }
 
     @Test
-    void filtrosSeCombinanConSortYLimit() throws Exception {
-        guardar("Pepe", null, "vocal");
-        guardar("Ana", null, "tesorero");
-        guardar("Luis", null, "vocal");
+    void filtersCombineWithSortAndLimit() throws Exception {
+        save("Pepe", null, "vocal");
+        save("Ana", null, "tesorero");
+        save("Luis", null, "vocal");
 
         mockMvc.perform(get("/api/entities/Integrante")
                 .param("cargo", "vocal")
@@ -453,14 +453,14 @@ class MemberControllerTest {
     }
 
     @Test
-    void filtroConValorNoValidoDevuelve400ConMensaje() throws Exception {
+    void filterWithInvalidValueReturns400WithMessage() throws Exception {
         mockMvc.perform(get("/api/entities/Integrante").param("cervezas", "abc"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Valor no válido para cervezas: abc"));
     }
 
     @Test
-    void filtroPorCampoInexistenteDevuelve400ConMensaje() throws Exception {
+    void filterByUnknownFieldReturns400WithMessage() throws Exception {
         mockMvc.perform(get("/api/entities/Integrante").param("no_existe", "x"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("No se puede filtrar por: no_existe"));
@@ -469,7 +469,7 @@ class MemberControllerTest {
     // --- POST con todos los campos y DELETE /{id} ---
 
     @Test
-    void postGuardaYDevuelveTodosLosCampos() throws Exception {
+    void postSavesAndReturnsAllFields() throws Exception {
         String body = mockMvc.perform(post("/api/entities/Integrante")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
@@ -487,16 +487,16 @@ class MemberControllerTest {
 
         // Comprueba también lo que quedó en la base de datos, no solo la respuesta
         String id = JsonPath.read(body, "$.id");
-        Member guardado = repository.findById(id).orElseThrow();
-        assertThat(guardado.getNombre()).isEqualTo("Ana");
-        assertThat(guardado.getCategoria()).isEqualTo("cargos");
-        assertThat(guardado.getCargo()).isEqualTo("tesorero");
-        assertThat(guardado.getCervezas()).isEqualTo(7);
-        assertThat(guardado.getFechaNacimiento()).isEqualTo(LocalDate.of(1990, 5, 17));
+        Member saved = repository.findById(id).orElseThrow();
+        assertThat(saved.getName()).isEqualTo("Ana");
+        assertThat(saved.getCategory()).isEqualTo("cargos");
+        assertThat(saved.getRole()).isEqualTo("tesorero");
+        assertThat(saved.getBeers()).isEqualTo(7);
+        assertThat(saved.getBirthDate()).isEqualTo(LocalDate.of(1990, 5, 17));
     }
 
     @Test
-    void postSinCervezasLasPoneACero() throws Exception {
+    void postWithoutBeersDefaultsToZero() throws Exception {
         mockMvc.perform(post("/api/entities/Integrante")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
@@ -508,9 +508,9 @@ class MemberControllerTest {
     }
 
     @Test
-    void deleteBorraElIntegranteYDevuelve204() throws Exception {
-        Member ana = guardar("Ana", null, null);
-        Member luis = guardar("Luis", null, null);
+    void deleteRemovesMemberAndReturns204() throws Exception {
+        Member ana = save("Ana", null, null);
+        Member luis = save("Luis", null, null);
 
         mockMvc.perform(delete("/api/entities/Integrante/{id}", ana.getId()))
                 .andExpect(status().isNoContent());
@@ -520,7 +520,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void deleteDeIdInexistenteDevuelve204() throws Exception {
+    void deleteUnknownIdReturns204() throws Exception {
         // Borrar algo que ya no existe deja el sistema igual: se trata como éxito
         mockMvc.perform(delete("/api/entities/Integrante/{id}", "no-existe"))
                 .andExpect(status().isNoContent());

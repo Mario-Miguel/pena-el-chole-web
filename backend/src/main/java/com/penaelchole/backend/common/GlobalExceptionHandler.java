@@ -24,7 +24,8 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> validationError(MethodArgumentNotValidException e) {
         String msg = e.getBindingResult().getFieldErrors().stream()
-                .map(f -> f.getField() + ": " + f.getDefaultMessage())
+                // Solo el mensaje: el nombre del campo Java (en inglés) no es el que ve el frontend
+                .map(f -> f.getDefaultMessage())
                 .collect(Collectors.joining(", "));
         return Map.of("message", msg);
     }

@@ -2,111 +2,114 @@ package com.penaelchole.backend.member;
 
 import java.time.LocalDate;
 
+import com.penaelchole.backend.common.ApiName;
 import com.penaelchole.backend.common.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 
 /**
- * Miembro de la peña. Se mapea a la tabla "integrante" con @Table
- * (V1__create_integrante.sql).
- * Spring Boot traduce los nombres camelCase a snake_case: fechaNacimiento ->
- * fecha_nacimiento.
+ * Miembro de la peña. Se mapea a la tabla "member" (V2__rename_integrante_to_member.sql).
+ * Spring Boot traduce los nombres camelCase a snake_case: birthDate -> birth_date.
+ * @ApiName indica el nombre que usa el frontend en filtros y sort.
  */
 @Entity
-@Table(name = "integrante")
 public class Member extends BaseEntity {
 
+    @ApiName("nombre")
     @Column(nullable = false)
-    private String nombre;
+    private String name;
 
     /** cargos, socios, contribuyentes, socios_honorificos, patitas, especial... */
-    private String categoria;
+    @ApiName("categoria")
+    private String category;
 
     /**
-     * presidente, vicepresidente, tesorero, secretario, vocal... (solo si categoria
+     * presidente, vicepresidente, tesorero, secretario, vocal... (solo si category
      * = cargos)
      */
-    private String cargo;
+    @ApiName("cargo")
+    private String role;
 
+    @ApiName("cervezas")
     @Column(nullable = false)
-    private int cervezas;
+    private int beers;
 
-    private LocalDate fechaNacimiento;
+    @ApiName("fecha_nacimiento")
+    private LocalDate birthDate;
 
     // JPA necesita un constructor sin argumentos
     protected Member() {
     }
 
-    public Member(String nombre, String categoria, String cargo) {
-        this.nombre = nombre;
-        this.categoria = categoria;
-        this.cargo = cargo;
+    public Member(String name, String category, String role) {
+        this.name = name;
+        this.category = category;
+        this.role = role;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getName() {
+        return name;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getCategoria() {
-        return categoria;
+    public String getCategory() {
+        return category;
     }
 
-    public void setCategoria(String categoria) {
-        this.categoria = categoria;
+    public void setCategory(String category) {
+        this.category = category;
     }
 
-    public String getCargo() {
-        return cargo;
+    public String getRole() {
+        return role;
     }
 
-    public void setCargo(String cargo) {
-        this.cargo = cargo;
+    public void setRole(String role) {
+        this.role = role;
     }
 
-    public int getCervezas() {
-        return cervezas;
+    public int getBeers() {
+        return beers;
     }
 
-    public void setCervezas(int cervezas) {
-        this.cervezas = cervezas;
+    public void setBeers(int beers) {
+        this.beers = beers;
     }
 
-    public LocalDate getFechaNacimiento() {
-        return fechaNacimiento;
+    public LocalDate getBirthDate() {
+        return birthDate;
     }
 
-    public void setFechaNacimiento(LocalDate fechaNacimiento) {
-        this.fechaNacimiento = fechaNacimiento;
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
     }
 
     public void applyChanges(MemberPatch changes) {
-        if (changes.nombre() != null) {
-            String nombre = changes.nombre().orElse(null);
-            if (nombre == null || nombre.isBlank()) {
+        if (changes.name() != null) {
+            String name = changes.name().orElse(null);
+            if (name == null || name.isBlank()) {
                 throw new IllegalArgumentException("El nombre no puede estar vacío");
             }
-            setNombre(nombre);
+            setName(name);
         }
-        if (changes.categoria() != null) {
-            setCategoria(changes.categoria().orElse(null));
-        }
-
-        if (changes.cargo() != null) {
-            setCargo(changes.cargo().orElse(null));
+        if (changes.category() != null) {
+            setCategory(changes.category().orElse(null));
         }
 
-        if (changes.cervezas() != null) {
-            setCervezas(changes.cervezas().orElse(0));
+        if (changes.role() != null) {
+            setRole(changes.role().orElse(null));
         }
 
-        if (changes.fechaNacimiento() != null) {
-            setFechaNacimiento(changes.fechaNacimiento().orElse(null));
+        if (changes.beers() != null) {
+            setBeers(changes.beers().orElse(0));
+        }
+
+        if (changes.birthDate() != null) {
+            setBirthDate(changes.birthDate().orElse(null));
         }
     }
 

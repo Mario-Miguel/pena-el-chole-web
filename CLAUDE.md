@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Management web app (PWA) for "Peña El Chole", a club/association. The frontend is React 18 + Vite 6 + Tailwind 3 + shadcn/ui. It was originally built on the Base44 platform and has been moved off it: it now talks to a custom REST backend (Spring Boot, in `backend/`) that the user is writing themselves **as a learning project**. Don't implement backend code unless explicitly asked. UI text, identifiers, entity names and comments are in **Spanish**; keep new code consistent with that.
+Management web app (PWA) for "Peña El Chole", a club/association. The frontend is React 18 + Vite 6 + Tailwind 3 + shadcn/ui. It was originally built on the Base44 platform and has been moved off it: it now talks to a custom REST backend (Spring Boot, in `backend/`) that the user is writing themselves **as a learning project**. Don't implement backend code unless explicitly asked. In the frontend, UI text, identifiers, entity names and comments are in **Spanish**; keep new code consistent with that. In the backend, code (classes, fields, methods, tests), tables and columns are in **English** (e.g. `Member` → table `member`), while the API contract (`/api/entities/Integrante`, JSON keys like `nombre`) stays in Spanish, mapped with `@JsonProperty` in DTOs and `@ApiName` on entity fields.
 
 ## Commands
 

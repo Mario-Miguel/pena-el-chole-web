@@ -10,7 +10,7 @@ import com.penaelchole.backend.common.ListQuery;
 import com.penaelchole.backend.common.ResourceNotFoundException;
 
 /**
- * Lógica de negocio de integrantes. El controller solo traduce HTTP <->
+ * Lógica de negocio de los miembros. El controller solo traduce HTTP <->
  * llamadas a este servicio.
  */
 @Service
@@ -69,10 +69,10 @@ public class MemberService {
     }
 
     private static Member toEntity(MemberRequest r) {
-        Member m = new Member(r.nombre(), r.categoria(), r.cargo());
-        if (r.cervezas() != null)
-            m.setCervezas(r.cervezas());
-        m.setFechaNacimiento(r.fechaNacimiento());
+        Member m = new Member(r.name(), r.category(), r.role());
+        if (r.beers() != null)
+            m.setBeers(r.beers());
+        m.setBirthDate(r.birthDate());
         return m;
     }
 }
