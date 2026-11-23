@@ -1,19 +1,25 @@
-package com.penaelchole.backend.auth;
+package com.penaelchole.backend.account;
 
+import com.penaelchole.backend.common.ApiName;
 import com.penaelchole.backend.common.BaseEntity;
+import com.penaelchole.backend.common.NotFilterable;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 
 @Entity
 public class UserAccount extends BaseEntity {
+    public static final String ADMIN_USERNAME = "__admin__";
 
+    @ApiName("integrante_id")
     @Column(nullable = false)
     private String memberId;
 
+    @ApiName("usuario")
     @Column(nullable = false)
     private String username;
 
+    @NotFilterable
     @Column(nullable = false)
     private String passwordHash;
 
@@ -23,6 +29,12 @@ public class UserAccount extends BaseEntity {
     private String avatarUrl;
 
     protected UserAccount() {
+    }
+
+    public UserAccount(String memberId, String username, String avatarUrl) {
+        this.memberId = memberId;
+        this.username = username;
+        this.avatarUrl = avatarUrl;
     }
 
     public UserAccount(String memberId, String username, String passwordHash, String avatarUrl) {
@@ -74,27 +86,19 @@ public class UserAccount extends BaseEntity {
 
     public void applyChanges(UserAccountPatch changes) {
         if (changes.memberId() != null) {
-            String memberId = changes.memberId().orElse(null);
-            if (memberId == null || memberId.isBlank()) {
-                throw new IllegalArgumentException("El memberId no puede estar vacío");
+            String member = changes.memberId().orElse(null);
+            if (member == null || member.isBlank()) {
+                throw new IllegalArgumentException("El miembro no puede estar vacío");
             }
-            setMemberId(memberId);
+            setMemberId(member);
         }
 
         if (changes.username() != null) {
             String name = changes.username().orElse(null);
             if (name == null || name.isBlank()) {
-                throw new IllegalArgumentException("El username no puede estar vacío");
+                throw new IllegalArgumentException("El nopmbre de usuario no puede estar vacío");
             }
             setUsername(name);
-        }
-
-        if (changes.passwordHash() != null) {
-            String passwordHash = changes.passwordHash().orElse(null);
-            if (passwordHash == null || passwordHash.isBlank()) {
-                throw new IllegalArgumentException("El passwordHash no puede estar vacío");
-            }
-            setPasswordHash(passwordHash);
         }
 
         if (changes.disabled() != null) {

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.penaelchole.backend.common.BaseEntityService;
 import com.penaelchole.backend.common.Filters;
 import com.penaelchole.backend.common.ListQuery;
 import com.penaelchole.backend.common.ResourceNotFoundException;
@@ -14,7 +15,8 @@ import com.penaelchole.backend.common.ResourceNotFoundException;
  * llamadas a este servicio.
  */
 @Service
-public class MemberService {
+public class MemberService
+        implements BaseEntityService<MemberRequest, MemberResponse, MemberPatch> {
 
     private final MemberRepository repository;
 
@@ -23,6 +25,7 @@ public class MemberService {
         this.repository = repository;
     }
 
+    @Override
     @Transactional(readOnly = true)
     public List<MemberResponse> list(ListQuery query) {
         return repository.findAll(Filters.<Member>byEquality(query.filters()),
@@ -31,6 +34,7 @@ public class MemberService {
                 .toList();
     }
 
+    @Override
     @Transactional(readOnly = true)
     public MemberResponse get(String id) {
         Member member = repository.findById(id)
@@ -38,18 +42,21 @@ public class MemberService {
         return MemberResponse.from(member);
     }
 
+    @Override
     @Transactional
     public MemberResponse insert(MemberRequest request) {
         Member member = MemberService.toEntity(request);
         return MemberResponse.from(repository.saveAndFlush(member));
     }
 
+    @Override
     @Transactional
     public List<MemberResponse> bulkInsert(List<MemberRequest> request) {
         List<Member> members = request.stream().map(MemberService::toEntity).toList();
         return repository.saveAllAndFlush(members).stream().map(MemberResponse::from).toList();
     }
 
+    @Override
     @Transactional
     public MemberResponse update(String id, MemberPatch changes) {
         Member member = repository.findById(id)
@@ -58,11 +65,13 @@ public class MemberService {
         return MemberResponse.from(member);
     }
 
+    @Override
     @Transactional
     public void delete(String id) {
         repository.deleteById(id);
     }
 
+    @Override
     @Transactional
     public void bulkDelete(List<String> ids) {
         repository.deleteAllByIdInBatch(ids);

@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -33,6 +34,8 @@ import com.penaelchole.backend.TestcontainersConfiguration;
 
 /**
  * Arranca la app completa contra un PostgreSQL real en Docker (Testcontainers).
+ * Todas las rutas exigen JWT: .with(jwt()) añade uno ya "validado" sin pasar
+ * por el JwtDecoder (spring-security-test).
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -56,7 +59,7 @@ class MemberControllerTest {
         pepe.setBirthDate(LocalDate.of(1990, 5, 17));
         repository.save(pepe);
 
-        mockMvc.perform(get("/api/entities/Integrante"))
+        mockMvc.perform(get("/api/entities/Integrante").with(jwt()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].id").value(notNullValue()))
@@ -69,7 +72,7 @@ class MemberControllerTest {
 
     @Test
     void emptyListReturnsEmptyArray() throws Exception {
-        mockMvc.perform(get("/api/entities/Integrante"))
+        mockMvc.perform(get("/api/entities/Integrante").with(jwt()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
     }
@@ -78,7 +81,7 @@ class MemberControllerTest {
 
     @Test
     void patchUnknownIdReturns404WithMessage() throws Exception {
-        mockMvc.perform(patch("/api/entities/Integrante/{id}", "no-existe")
+        mockMvc.perform(patch("/api/entities/Integrante/{id}", "no-existe").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {"nombre": "Juan"}
@@ -89,7 +92,7 @@ class MemberControllerTest {
 
     @Test
     void postWithBlankNameReturns400WithMessage() throws Exception {
-        mockMvc.perform(post("/api/entities/Integrante")
+        mockMvc.perform(post("/api/entities/Integrante").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {"nombre": "", "cargo": "vocal"}
@@ -102,7 +105,7 @@ class MemberControllerTest {
     void patchWithInvalidDateReturns400WithMessage() throws Exception {
         Member pepe = repository.save(new Member("Pepe", "cargos", "tesorero"));
 
-        mockMvc.perform(patch("/api/entities/Integrante/{id}", pepe.getId())
+        mockMvc.perform(patch("/api/entities/Integrante/{id}", pepe.getId()).with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {"fecha_nacimiento": "no-es-fecha"}
@@ -115,7 +118,7 @@ class MemberControllerTest {
     void patchWithBlankNameReturns400WithMessage() throws Exception {
         Member pepe = repository.save(new Member("Pepe", "cargos", "tesorero"));
 
-        mockMvc.perform(patch("/api/entities/Integrante/{id}", pepe.getId())
+        mockMvc.perform(patch("/api/entities/Integrante/{id}", pepe.getId()).with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {"nombre": ""}
@@ -128,7 +131,7 @@ class MemberControllerTest {
     void patchWithoutNameReturns200() throws Exception {
         Member pepe = repository.save(new Member("Pepe", "cargos", "tesorero"));
 
-        mockMvc.perform(patch("/api/entities/Integrante/{id}", pepe.getId())
+        mockMvc.perform(patch("/api/entities/Integrante/{id}", pepe.getId()).with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {"cargo": "vocal"}
@@ -145,7 +148,7 @@ class MemberControllerTest {
     void patchWithExplicitNullClearsField() throws Exception {
         Member pepe = repository.save(new Member("Pepe", "cargos", "tesorero"));
 
-        mockMvc.perform(patch("/api/entities/Integrante/{id}", pepe.getId())
+        mockMvc.perform(patch("/api/entities/Integrante/{id}", pepe.getId()).with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {"cargo": null}
@@ -166,7 +169,7 @@ class MemberControllerTest {
         pepe.setBirthDate(LocalDate.of(1990, 5, 17));
         repository.save(pepe);
 
-        mockMvc.perform(get("/api/entities/Integrante/{id}", pepe.getId()))
+        mockMvc.perform(get("/api/entities/Integrante/{id}", pepe.getId()).with(jwt()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(pepe.getId()))
                 .andExpect(jsonPath("$.nombre").value("Pepe"))
@@ -175,7 +178,7 @@ class MemberControllerTest {
 
     @Test
     void getUnknownIdReturns404WithMessage() throws Exception {
-        mockMvc.perform(get("/api/entities/Integrante/{id}", "no-existe"))
+        mockMvc.perform(get("/api/entities/Integrante/{id}", "no-existe").with(jwt()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Integrante no encontrado"));
     }
@@ -184,7 +187,7 @@ class MemberControllerTest {
 
     @Test
     void postReturnsSystemDates() throws Exception {
-        mockMvc.perform(post("/api/entities/Integrante")
+        mockMvc.perform(post("/api/entities/Integrante").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {"nombre": "Ana"}
@@ -198,7 +201,7 @@ class MemberControllerTest {
 
     @Test
     void bulkCreatesAllFieldsInOrder() throws Exception {
-        mockMvc.perform(post("/api/entities/Integrante/bulk")
+        mockMvc.perform(post("/api/entities/Integrante/bulk").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         [
@@ -225,7 +228,7 @@ class MemberControllerTest {
 
     @Test
     void bulkWithOneInvalidItemCreatesNone() throws Exception {
-        mockMvc.perform(post("/api/entities/Integrante/bulk")
+        mockMvc.perform(post("/api/entities/Integrante/bulk").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         [{"nombre": "Ana"}, {"nombre": ""}]
@@ -244,7 +247,7 @@ class MemberControllerTest {
         Member luis = repository.save(new Member("Luis", null, null));
         Member pepe = repository.save(new Member("Pepe", null, null));
 
-        mockMvc.perform(post("/api/entities/Integrante/delete-many")
+        mockMvc.perform(post("/api/entities/Integrante/delete-many").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {"ids": ["%s", "%s"]}
@@ -260,7 +263,7 @@ class MemberControllerTest {
     void deleteManyIgnoresUnknownIds() throws Exception {
         Member pepe = repository.save(new Member("Pepe", null, null));
 
-        mockMvc.perform(post("/api/entities/Integrante/delete-many")
+        mockMvc.perform(post("/api/entities/Integrante/delete-many").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {"ids": ["no-existe"]}
@@ -272,7 +275,7 @@ class MemberControllerTest {
 
     @Test
     void deleteManyWithoutIdsReturns400WithMessage() throws Exception {
-        mockMvc.perform(post("/api/entities/Integrante/delete-many")
+        mockMvc.perform(post("/api/entities/Integrante/delete-many").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{}"))
                 .andExpect(status().isBadRequest())
@@ -292,7 +295,7 @@ class MemberControllerTest {
     void sortDescByCreatedDateReturnsNewestFirst() throws Exception {
         saveInOrder("Ana", "Luis", "Pepe");
 
-        mockMvc.perform(get("/api/entities/Integrante").param("sort", "-created_date"))
+        mockMvc.perform(get("/api/entities/Integrante").with(jwt()).param("sort", "-created_date"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].nombre").value(contains("Pepe", "Luis", "Ana")));
     }
@@ -301,7 +304,7 @@ class MemberControllerTest {
     void sortAscByNameReturnsAlphabeticalOrder() throws Exception {
         saveInOrder("Luis", "Ana", "Pepe");
 
-        mockMvc.perform(get("/api/entities/Integrante").param("sort", "nombre"))
+        mockMvc.perform(get("/api/entities/Integrante").with(jwt()).param("sort", "nombre"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].nombre").value(contains("Ana", "Luis", "Pepe")));
     }
@@ -311,7 +314,7 @@ class MemberControllerTest {
         saveInOrder("Dani", "Ana", "Carla", "Beto");
 
         // skip=1 no es múltiplo de limit=2: con paginación por número de página fallaría
-        mockMvc.perform(get("/api/entities/Integrante")
+        mockMvc.perform(get("/api/entities/Integrante").with(jwt())
                 .param("sort", "nombre")
                 .param("limit", "2")
                 .param("skip", "1"))
@@ -327,7 +330,7 @@ class MemberControllerTest {
         List<String> ids = new ArrayList<>();
         int limit = 2;
         for (int skip = 0;; skip += limit) {
-            String body = mockMvc.perform(get("/api/entities/Integrante")
+            String body = mockMvc.perform(get("/api/entities/Integrante").with(jwt())
                     .param("limit", String.valueOf(limit))
                     .param("skip", String.valueOf(skip)))
                     .andExpect(status().isOk())
@@ -343,21 +346,21 @@ class MemberControllerTest {
 
     @Test
     void sortByUnknownFieldReturns400WithMessage() throws Exception {
-        mockMvc.perform(get("/api/entities/Integrante").param("sort", "-no_existe"))
+        mockMvc.perform(get("/api/entities/Integrante").with(jwt()).param("sort", "-no_existe"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(containsString("no_existe")));
     }
 
     @Test
     void limitZeroReturns400WithMessage() throws Exception {
-        mockMvc.perform(get("/api/entities/Integrante").param("limit", "0"))
+        mockMvc.perform(get("/api/entities/Integrante").with(jwt()).param("limit", "0"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(not(emptyString())));
     }
 
     @Test
     void nonNumericLimitReturns400WithMessage() throws Exception {
-        mockMvc.perform(get("/api/entities/Integrante").param("limit", "abc"))
+        mockMvc.perform(get("/api/entities/Integrante").with(jwt()).param("limit", "abc"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(containsString("limit")));
     }
@@ -374,7 +377,7 @@ class MemberControllerTest {
         save("Luis", "cargos", "vocal");
         save("Pepe", "socios", "tesorero");
 
-        mockMvc.perform(get("/api/entities/Integrante")
+        mockMvc.perform(get("/api/entities/Integrante").with(jwt())
                 .param("cargo", "tesorero")
                 .param("sort", "nombre"))
                 .andExpect(status().isOk())
@@ -387,7 +390,7 @@ class MemberControllerTest {
         save("Luis", "cargos", "vocal");
         save("Pepe", "socios", "tesorero");
 
-        mockMvc.perform(get("/api/entities/Integrante")
+        mockMvc.perform(get("/api/entities/Integrante").with(jwt())
                 .param("cargo", "tesorero")
                 .param("categoria", "cargos"))
                 .andExpect(status().isOk())
@@ -399,7 +402,7 @@ class MemberControllerTest {
         save("Ana", null, null);
         Member luis = save("Luis", null, null);
 
-        mockMvc.perform(get("/api/entities/Integrante").param("id", luis.getId()))
+        mockMvc.perform(get("/api/entities/Integrante").with(jwt()).param("id", luis.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].id").value(luis.getId()));
@@ -412,7 +415,7 @@ class MemberControllerTest {
         repository.saveAndFlush(ana);
         save("Luis", null, null);
 
-        mockMvc.perform(get("/api/entities/Integrante").param("cervezas", "7"))
+        mockMvc.perform(get("/api/entities/Integrante").with(jwt()).param("cervezas", "7"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].nombre").value(contains("Ana")));
     }
@@ -424,7 +427,7 @@ class MemberControllerTest {
         repository.saveAndFlush(ana);
         save("Luis", null, null);
 
-        mockMvc.perform(get("/api/entities/Integrante").param("fecha_nacimiento", "1990-05-17"))
+        mockMvc.perform(get("/api/entities/Integrante").with(jwt()).param("fecha_nacimiento", "1990-05-17"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].nombre").value(contains("Ana")));
     }
@@ -433,7 +436,7 @@ class MemberControllerTest {
     void filterWithoutMatchesReturnsEmptyArray() throws Exception {
         save("Ana", "cargos", "tesorero");
 
-        mockMvc.perform(get("/api/entities/Integrante").param("cargo", "presidente"))
+        mockMvc.perform(get("/api/entities/Integrante").with(jwt()).param("cargo", "presidente"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
     }
@@ -444,7 +447,7 @@ class MemberControllerTest {
         save("Ana", null, "tesorero");
         save("Luis", null, "vocal");
 
-        mockMvc.perform(get("/api/entities/Integrante")
+        mockMvc.perform(get("/api/entities/Integrante").with(jwt())
                 .param("cargo", "vocal")
                 .param("sort", "nombre")
                 .param("limit", "1"))
@@ -454,14 +457,14 @@ class MemberControllerTest {
 
     @Test
     void filterWithInvalidValueReturns400WithMessage() throws Exception {
-        mockMvc.perform(get("/api/entities/Integrante").param("cervezas", "abc"))
+        mockMvc.perform(get("/api/entities/Integrante").with(jwt()).param("cervezas", "abc"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Valor no válido para cervezas: abc"));
     }
 
     @Test
     void filterByUnknownFieldReturns400WithMessage() throws Exception {
-        mockMvc.perform(get("/api/entities/Integrante").param("no_existe", "x"))
+        mockMvc.perform(get("/api/entities/Integrante").with(jwt()).param("no_existe", "x"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("No se puede filtrar por: no_existe"));
     }
@@ -470,7 +473,7 @@ class MemberControllerTest {
 
     @Test
     void postSavesAndReturnsAllFields() throws Exception {
-        String body = mockMvc.perform(post("/api/entities/Integrante")
+        String body = mockMvc.perform(post("/api/entities/Integrante").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {"nombre": "Ana", "categoria": "cargos", "cargo": "tesorero",
@@ -497,7 +500,7 @@ class MemberControllerTest {
 
     @Test
     void postWithoutBeersDefaultsToZero() throws Exception {
-        mockMvc.perform(post("/api/entities/Integrante")
+        mockMvc.perform(post("/api/entities/Integrante").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {"nombre": "Luis"}
@@ -512,7 +515,7 @@ class MemberControllerTest {
         Member ana = save("Ana", null, null);
         Member luis = save("Luis", null, null);
 
-        mockMvc.perform(delete("/api/entities/Integrante/{id}", ana.getId()))
+        mockMvc.perform(delete("/api/entities/Integrante/{id}", ana.getId()).with(jwt()))
                 .andExpect(status().isNoContent());
 
         assertThat(repository.existsById(ana.getId())).isFalse();
@@ -522,7 +525,119 @@ class MemberControllerTest {
     @Test
     void deleteUnknownIdReturns204() throws Exception {
         // Borrar algo que ya no existe deja el sistema igual: se trata como éxito
-        mockMvc.perform(delete("/api/entities/Integrante/{id}", "no-existe"))
+        mockMvc.perform(delete("/api/entities/Integrante/{id}", "no-existe").with(jwt()))
                 .andExpect(status().isNoContent());
+    }
+
+    // --- Seguridad: sin token no se entra ---
+
+    @Test
+    void listWithoutTokenReturns401() throws Exception {
+        mockMvc.perform(get("/api/entities/Integrante"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void createWithoutTokenReturns401AndSavesNothing() throws Exception {
+        mockMvc.perform(post("/api/entities/Integrante")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"nombre": "Ana"}
+                        """))
+                .andExpect(status().isUnauthorized());
+
+        assertThat(repository.count()).isZero();
+    }
+
+    // --- created_by_id (JPA auditing: @CreatedBy + AuditorAware) ---
+
+    private String createdByOf(String body) {
+        String id = JsonPath.read(body, "$.id");
+        return repository.findById(id).orElseThrow().getCreatedById();
+    }
+
+    @Test
+    void postSavesTokenSubjectAsCreatedBy() throws Exception {
+        String body = mockMvc.perform(post("/api/entities/Integrante")
+                .with(jwt().jwt(j -> j.subject("user-1")))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"nombre": "Ana"}
+                        """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.created_by_id").value("user-1"))
+                .andReturn().getResponse().getContentAsString();
+
+        // También en la base de datos, no solo en la respuesta
+        assertThat(createdByOf(body)).isEqualTo("user-1");
+    }
+
+    @Test
+    void bulkSavesCreatedByOnEveryRow() throws Exception {
+        mockMvc.perform(post("/api/entities/Integrante/bulk")
+                .with(jwt().jwt(j -> j.subject("user-1")))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        [{"nombre": "Ana"}, {"nombre": "Luis"}]
+                        """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$[*].created_by_id").value(contains("user-1", "user-1")));
+    }
+
+    @Test
+    void createdByCannotBeSetFromRequestBody() throws Exception {
+        // Lo decide el token, no el cliente
+        mockMvc.perform(post("/api/entities/Integrante")
+                .with(jwt().jwt(j -> j.subject("user-1")))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"nombre": "Ana", "created_by_id": "otro"}
+                        """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.created_by_id").value("user-1"));
+    }
+
+    @Test
+    void patchByAnotherUserKeepsOriginalCreatedBy() throws Exception {
+        String body = mockMvc.perform(post("/api/entities/Integrante")
+                .with(jwt().jwt(j -> j.subject("user-1")))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"nombre": "Ana"}
+                        """))
+                .andReturn().getResponse().getContentAsString();
+        String id = JsonPath.read(body, "$.id");
+
+        mockMvc.perform(patch("/api/entities/Integrante/{id}", id)
+                .with(jwt().jwt(j -> j.subject("user-2")))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"cargo": "vocal", "created_by_id": "user-2"}
+                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cargo").value("vocal"))
+                .andExpect(jsonPath("$.created_by_id").value("user-1"));
+
+        assertThat(createdByOf(body)).isEqualTo("user-1");
+    }
+
+    @Test
+    void adminCreatedRowsHaveAdminAsCreatedBy() throws Exception {
+        mockMvc.perform(post("/api/entities/Integrante")
+                .with(jwt().jwt(j -> j.subject("__admin__")))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"nombre": "Ana"}
+                        """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.created_by_id").value("__admin__"));
+    }
+
+    @Test
+    void savingWithoutAuthenticatedUserLeavesCreatedByNull() {
+        // Fuera de una petición HTTP (p. ej. este setup de test) no hay usuario
+        Member ana = repository.saveAndFlush(new Member("Ana", null, null));
+
+        assertThat(ana.getCreatedById()).isNull();
     }
 }

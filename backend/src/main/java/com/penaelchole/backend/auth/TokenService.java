@@ -31,4 +31,5 @@ public class TokenService {
         JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
         return encoder.encode(JwtEncoderParameters.from(header, claims.build())).getTokenValue();
     }
+
 }

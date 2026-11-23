@@ -26,11 +26,11 @@ A step-by-step plan for replacing everything the frontend used to get from Base4
 
 - [x] `SesionUsuario` entity (see its table in Phase 2). Store `password_hash`, never the plain password. Use `BCryptPasswordEncoder` as a `PasswordEncoder` bean.
 - [x] `POST /api/auth/login`: check the password, return `{ token, sesion }`. Issue the JWT with `NimbusJwtEncoder`, which comes with the `oauth2-resource-server` starter you already have, and an HMAC secret from configuration.
-- [ ] The `__admin__` user, with its password read from an environment variable (`@Value` / `@ConfigurationProperties`).
-- [ ] `GET /api/auth/me` and the public `GET /api/auth/usuarios`.
-- [ ] Lock down `SecurityConfig`: `oauth2ResourceServer(jwt)`, and `authenticated()` everywhere except login, `/api/auth/usuarios` and `GET /api/files/**`.
-- [ ] Put `integranteId`, `cargo` and `esAdmin` in the JWT claims. Fill `created_by_id` from the authenticated user (look up `@AuthenticationPrincipal`, or JPA auditing with `@CreatedBy` + `AuditorAware`).
-- [ ] Permissions: admins manage any account, and users may only change their own password and avatar (see `API.md`). Look at `@PreAuthorize` and method security.
+- [x] The `__admin__` user, with its password read from an environment variable (`@Value` / `@ConfigurationProperties`).
+- [x] `GET /api/auth/me` and the public `GET /api/auth/usuarios`.
+- [x] Lock down `SecurityConfig`: `oauth2ResourceServer(jwt)`, and `authenticated()` everywhere except login, `/api/auth/usuarios` and `GET /api/files/**`.
+- [x] Put `integranteId`, `cargo` and `esAdmin` in the JWT claims. Fill `created_by_id` from the authenticated user (look up `@AuthenticationPrincipal`, or JPA auditing with `@CreatedBy` + `AuditorAware`).
+- [x] Permissions: admins manage any account, and users may only change their own password and avatar (see `API.md`). Look at `@PreAuthorize` and method security.
 
 ## Cross-cutting features (fit them in when a phase needs them)
 

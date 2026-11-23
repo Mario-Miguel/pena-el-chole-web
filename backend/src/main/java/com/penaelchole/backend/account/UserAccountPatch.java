@@ -1,4 +1,4 @@
-package com.penaelchole.backend.auth;
+package com.penaelchole.backend.account;
 
 import java.util.Optional;
 
@@ -7,7 +7,7 @@ import tools.jackson.databind.JsonNode;
 public record UserAccountPatch(
         Optional<String> memberId,
         Optional<String> username,
-        Optional<String> passwordHash,
+        Optional<String> password,
         Optional<Boolean> disabled,
         Optional<String> avatarUrl) {
     // Las claves JSON son las del frontend (español, snake_case)

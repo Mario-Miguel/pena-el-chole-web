@@ -1,15 +1,17 @@
 package com.penaelchole.backend.auth;
 
+import java.util.List;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.penaelchole.backend.account.UserAccount;
+import com.penaelchole.backend.account.UserAccountRepository;
 import com.penaelchole.backend.member.Member;
 import com.penaelchole.backend.member.MemberRepository;
 
 @Service
 public class AuthService {
-
-    public static final String ADMIN_ID = "__admin__";
 
     private final PasswordEncoder passwordEncoder;
     private final UserAccountRepository userAccountRepository;
@@ -31,7 +33,7 @@ public class AuthService {
     }
 
     public LoginResponse login(LoginRequest request) {
-        UserSession session = ADMIN_ID.equals(request.username()) ? loginAdmin(request.password())
+        UserSession session = UserAccount.ADMIN_USERNAME.equals(request.username()) ? loginAdmin(request.password())
                 : loginAccount(request);
         return new LoginResponse(tokenService.createToken(session), session);
     }
@@ -58,6 +60,19 @@ public class AuthService {
     }
 
     private static UserSession adminSession() {
-        return new UserSession(ADMIN_ID, "Admin", null, null, true);
+        return new UserSession(UserAccount.ADMIN_USERNAME, "Admin", null, null, true);
+    }
+
+    public UserSession me(String memberId) {
+        if (UserAccount.ADMIN_USERNAME.equals(memberId)) {
+            return adminSession();
+        }
+        UserAccount account = userAccountRepository.findByMemberId(memberId).filter(a -> !a.isDisabled())
+                .orElseThrow(InvalidCredentialsException::new);
+        return toSession(account);
+    }
+
+    public List<UsersResponse> users() {
+        return userAccountRepository.findLoginUsers();
     }
 }

@@ -86,6 +86,7 @@ Field names are snake_case (`integrante_id`, `fecha_entrega`, …). Clients may 
 Fields: `integrante_id`, `usuario`, `contrasena`, `disabled`, `avatar_url`.
 - `contrasena` is **write-only**. On create and update, hash it (e.g. BCrypt) and **never** return it in any response.
 - Who may write: admins (`esAdmin`, `presidente`, `vicepresidente`) can create, update and delete any account. A regular user may only update **their own** account (`integrante_id` = their `integranteId`), and only the `contrasena` and `avatar_url` fields (the profile page changes the password and avatar this way).
+- Anything else returns **403** with `{ "message": ... }` (e.g. `"Solo puedes modificar tu propia cuenta"`, `"Solo puedes cambiar tu contraseña y tu avatar"`). The permission check runs before validation, so a user without permission gets 403 rather than a 400 like `"Ese usuario ya existe"`. Reading accounts (`list`/`filter`/`get`) is open to any authenticated user.
 
 ### Entities used by the frontend (58)
 ```
