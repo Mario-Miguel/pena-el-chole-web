@@ -24,8 +24,8 @@ A step-by-step plan for replacing everything the frontend used to get from Base4
 
 ## Phase 1: Authentication
 
-- [ ] `SesionUsuario` entity (see its table in Phase 2). Store `password_hash`, never the plain password. Use `BCryptPasswordEncoder` as a `PasswordEncoder` bean.
-- [ ] `POST /api/auth/login`: check the password, return `{ token, sesion }`. Issue the JWT with `NimbusJwtEncoder`, which comes with the `oauth2-resource-server` starter you already have, and an HMAC secret from configuration.
+- [x] `SesionUsuario` entity (see its table in Phase 2). Store `password_hash`, never the plain password. Use `BCryptPasswordEncoder` as a `PasswordEncoder` bean.
+- [x] `POST /api/auth/login`: check the password, return `{ token, sesion }`. Issue the JWT with `NimbusJwtEncoder`, which comes with the `oauth2-resource-server` starter you already have, and an HMAC secret from configuration.
 - [ ] The `__admin__` user, with its password read from an environment variable (`@Value` / `@ConfigurationProperties`).
 - [ ] `GET /api/auth/me` and the public `GET /api/auth/usuarios`.
 - [ ] Lock down `SecurityConfig`: `oauth2ResourceServer(jwt)`, and `authenticated()` everywhere except login, `/api/auth/usuarios` and `GET /api/files/**`.

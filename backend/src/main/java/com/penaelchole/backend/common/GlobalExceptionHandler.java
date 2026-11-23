@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
+import com.penaelchole.backend.auth.InvalidCredentialsException;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
@@ -24,7 +26,8 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> validationError(MethodArgumentNotValidException e) {
         String msg = e.getBindingResult().getFieldErrors().stream()
-                // Solo el mensaje: el nombre del campo Java (en inglés) no es el que ve el frontend
+                // Solo el mensaje: el nombre del campo Java (en inglés) no es el que ve el
+                // frontend
                 .map(f -> f.getDefaultMessage())
                 .collect(Collectors.joining(", "));
         return Map.of("message", msg);
@@ -43,5 +46,11 @@ public class GlobalExceptionHandler {
                 .map(MessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.joining(", "));
         return Map.of("message", msg);
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public Map<String, String> unauthorized(InvalidCredentialsException e) {
+        return Map.of("message", e.getMessage());
     }
 }
