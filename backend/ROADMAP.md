@@ -3,6 +3,7 @@
 A step-by-step plan for replacing everything the frontend used to get from Base44. Tick the boxes as you go.
 
 - The endpoint contract is in [`API.md`](API.md). How to run the project and the package layout are in [`README.md`](README.md).
+- **New to the project?** Read [`GUIA_ENTIDADES.md`](GUIA_ENTIDADES.md) (step-by-step guide, in Spanish). Every pending entity has a folder in `src/main/java/com/penaelchole/backend/<package>/` with a `README.md` describing exactly what to implement.
 - **About the entity tables (Phase 2 onwards):** they were generated automatically by scanning the frontend's `api.entities.X.create/update/filter/list` calls. The field lists show what the frontend _sends_, so they can be incomplete: some fields are only ever read, or are built in another component. The types are guesses based on values and names. Before writing a migration, open the listed files and check.
 
 ---
