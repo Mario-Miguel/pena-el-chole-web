@@ -2,6 +2,8 @@ package com.penaelchole.backend.account;
 
 import java.util.Optional;
 
+import static com.penaelchole.backend.common.PatchFields.text;
+
 import tools.jackson.databind.JsonNode;
 
 public record UserAccountPatch(
@@ -20,12 +22,5 @@ public record UserAccountPatch(
                         ? Optional.ofNullable(json.get("disabled").isNull() ? null : json.get("disabled").asBoolean())
                         : null,
                 text(json, "avatar_url"));
-    }
-
-    private static Optional<String> text(JsonNode json, String field) {
-        if (!json.has(field))
-            return null;
-        JsonNode n = json.get(field);
-        return n.isNull() ? Optional.empty() : Optional.of(n.asString());
     }
 }

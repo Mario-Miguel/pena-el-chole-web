@@ -59,7 +59,7 @@ Needed to log in and render the layout.
 
 #### `SesionUsuario`
 
-- [ ] Migration · Entity · Repository · Service · Controller · Test
+- [x] Migration · Entity · Repository · Service · Controller · Test
 - methods: `create`, `delete`, `filter`, `list`, `update` · filters: `integrante_id`
 - used in 5 file(s): `src/pages/Admin.jsx`, `src/pages/Cerveza.jsx`, `src/pages/Chat.jsx` …
 
@@ -73,7 +73,7 @@ Needed to log in and render the layout.
 
 #### `AppConfig`
 
-- [ ] Migration · Entity · Repository · Service · Controller · Test
+- [x] Migration · Entity · Repository · Service · Controller · Test
 - methods: `create`, `delete`, `filter`, `list`, `update` · filters: `clave` · sort: `clave`
 - used in 22 file(s): `src/components/HamburgerMenu.jsx`, `src/components/admin/AjustesApp.jsx`, `src/components/admin/CodigoApp.jsx` …
 
@@ -84,7 +84,7 @@ Needed to log in and render the layout.
 
 #### `Notificacion`
 
-- [ ] Migration · Entity · Repository · Service · Controller · Test
+- [x] Migration · Entity · Repository · Service · Controller · Test
 - methods: `create`, `delete`, `filter`, `list`, `update` · filters: `archivada` · sort: `-created_date`
 - used in 12 file(s): `src/components/almacen/ItemAlmacenCard.jsx`, `src/components/cargos/PanelPresidente.jsx`, `src/components/cargos/PanelSecretario.jsx` …
 

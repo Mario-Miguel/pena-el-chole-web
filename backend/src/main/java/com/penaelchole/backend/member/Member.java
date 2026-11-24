@@ -9,8 +9,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 
 /**
- * Miembro de la peña. Se mapea a la tabla "member" (V2__rename_integrante_to_member.sql).
- * Spring Boot traduce los nombres camelCase a snake_case: birthDate -> birth_date.
+ * Miembro de la peña. Se mapea a la tabla "member"
+ * (V2__rename_integrante_to_member.sql).
+ * Spring Boot traduce los nombres camelCase a snake_case: birthDate ->
+ * birth_date.
+ * 
  * @ApiName indica el nombre que usa el frontend en filtros y sort.
  */
 @Entity
@@ -90,11 +93,11 @@ public class Member extends BaseEntity {
 
     public void applyChanges(MemberPatch changes) {
         if (changes.name() != null) {
-            String name = changes.name().orElse(null);
-            if (name == null || name.isBlank()) {
+            String newName = changes.name().orElse(null);
+            if (newName == null || newName.isBlank()) {
                 throw new IllegalArgumentException("El nombre no puede estar vacío");
             }
-            setName(name);
+            setName(newName);
         }
         if (changes.category() != null) {
             setCategory(changes.category().orElse(null));
