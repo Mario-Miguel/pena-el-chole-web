@@ -2,7 +2,7 @@ package com.penaelchole.backend.common;
 
 import java.util.List;
 
-public interface BaseEntityService<T, R, Q> {
+public interface BaseEntityService<T, R, P> {
 
     public List<R> list(ListQuery query);
 
@@ -12,7 +12,7 @@ public interface BaseEntityService<T, R, Q> {
 
     public List<R> bulkInsert(List<T> request);
 
-    public R update(String id, Q changes);
+    public R update(String id, P changes);
 
     public void delete(String id);
 

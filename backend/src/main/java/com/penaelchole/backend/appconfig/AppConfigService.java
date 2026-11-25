@@ -2,6 +2,7 @@ package com.penaelchole.backend.appconfig;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,6 +12,7 @@ import com.penaelchole.backend.common.ListQuery;
 import com.penaelchole.backend.common.ResourceNotFoundException;
 
 @Service
+@PreAuthorize("hasRole('ADMIN')")
 public class AppConfigService implements BaseEntityService<AppConfigRequest, AppConfigResponse, AppConfigPatch> {
     private final AppConfigRepository repository;
 
@@ -20,6 +22,7 @@ public class AppConfigService implements BaseEntityService<AppConfigRequest, App
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("isAuthenticated()")
     public List<AppConfigResponse> list(ListQuery query) {
         return repository.findAll(
                 Filters.<AppConfig>byEquality(query.filters()),
@@ -28,6 +31,7 @@ public class AppConfigService implements BaseEntityService<AppConfigRequest, App
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("isAuthenticated()")
     public AppConfigResponse get(String id) {
         AppConfig config = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Configuración no encontrada"));

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -51,6 +52,7 @@ public class UserAccountService
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public UserAccountResponse insert(UserAccountRequest request) {
         validate(request.memberId(), request.username(), null);
         UserAccount account = toEntity(request);
@@ -59,6 +61,7 @@ public class UserAccountService
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public List<UserAccountResponse> bulkInsert(List<UserAccountRequest> request) {
         request.forEach(r -> validate(r.memberId(), r.username(), null));
         List<UserAccount> accounts = request.stream().map(r -> toEntity(r)).toList();
@@ -84,12 +87,14 @@ public class UserAccountService
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public void delete(String id) {
         repository.deleteById(id);
     }
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public void bulkDelete(List<String> ids) {
         repository.deleteAllByIdInBatch(ids);
     }

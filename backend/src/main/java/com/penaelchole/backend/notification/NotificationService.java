@@ -3,6 +3,7 @@ package com.penaelchole.backend.notification;
 import java.time.Instant;
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,6 +47,7 @@ public class NotificationService
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public List<NotificationResponse> bulkInsert(List<NotificationRequest> request) {
         List<Notification> notifications = request.stream().map(NotificationService::toEntity).toList();
         return repository.saveAllAndFlush(notifications).stream().map(NotificationResponse::from).toList();
@@ -62,12 +64,14 @@ public class NotificationService
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public void delete(String id) {
         repository.deleteById(id);
     }
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public void bulkDelete(List<String> ids) {
         repository.deleteAllById(ids);
     }
