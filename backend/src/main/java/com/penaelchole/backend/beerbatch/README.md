@@ -9,24 +9,24 @@ Como ejemplo de una entidad ya terminada, mira el paquete [`appconfig`](../appco
 
 ## Nombres
 
-| Qué | Nombre |
-| --- | --- |
-| Nombre en el frontend y en la URL | `LoteCerveza` |
-| Endpoint | `/api/entities/LoteCerveza` |
-| Paquete Java (esta carpeta) | `com.penaelchole.backend.beerbatch` |
-| Tabla en la base de datos | `beer_batch` |
-| Migración | `src/main/resources/db/migration/V<n>__create_beer_batch.sql` (con `<n>` = siguiente número libre) |
+| Qué                               | Nombre                                                                                             |
+| --------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Nombre en el frontend y en la URL | `LoteCerveza`                                                                                      |
+| Endpoint                          | `/api/entities/LoteCerveza`                                                                        |
+| Paquete Java (esta carpeta)       | `com.penaelchole.backend.beerbatch`                                                                |
+| Tabla en la base de datos         | `beer_batch`                                                                                       |
+| Migración                         | `src/main/resources/db/migration/V<n>__create_beer_batch.sql` (con `<n>` = siguiente número libre) |
 
 ## Archivos que tienes que crear (en esta carpeta)
 
 - [ ] Migración `V<n>__create_beer_batch.sql` (en `src/main/resources/db/migration/`)
 - [ ] `BeerBatch.java`: la entidad (la tabla en Java)
-- [ ] `BeerBatchRepository.java`: acceso a la base de datos
-- [ ] `BeerBatchRequest.java`: lo que llega del frontend al **crear**
+- [x] `BeerBatchRepository.java`: acceso a la base de datos
+- [x] `BeerBatchRequest.java`: lo que llega del frontend al **crear**
 - [ ] `BeerBatchPatch.java`: lo que llega del frontend al **modificar**
-- [ ] `BeerBatchResponse.java`: lo que se devuelve al frontend
+- [x] `BeerBatchResponse.java`: lo que se devuelve al frontend
 - [ ] `BeerBatchService.java`: la lógica (con `@Service` y `@Transactional`)
-- [ ] `BeerBatchController.java`: los endpoints (con `@RestController` y `@RequestMapping("/api/entities/LoteCerveza")`)
+- [x] `BeerBatchController.java`: los endpoints (con `@RestController` y `@RequestMapping("/api/entities/LoteCerveza")`)
 - [ ] `BeerBatchControllerTest.java` en `src/test/java/com/penaelchole/backend/beerbatch/`
 - [ ] Marcar la casilla de `LoteCerveza` en `ROADMAP.md`
 
@@ -34,26 +34,26 @@ Como ejemplo de una entidad ya terminada, mira el paquete [`appconfig`](../appco
 
 Además de estos, todas las entidades tienen `id`, `created_date`, `updated_date` y `created_by_id`, que vienen de `BaseEntity` (no los declares otra vez, pero **sí** tienen que estar en la migración).
 
-| JSON (frontend) | Campo Java | Tipo Java | Columna SQL | Tipo SQL | Notas |
-| --- | --- | --- | --- | --- | --- |
-| `cantidad` | `quantity` | `Integer` | `quantity` | `INTEGER` |  |
-| `consumido_ajuste` | `consumedAdjustment` | `Integer` | `consumed_adjustment` | `INTEGER` |  |
-| `coste` | `cost` | `BigDecimal` | `cost` | `NUMERIC(10, 2)` | dinero: usa `BigDecimal`, nunca `double` |
-| `fecha` | `date` | `LocalDate` | `date` | `DATE` | solo el día, formato `"2026-03-01"`. |
-| `notas` | `notes` | `String` | `notes` | `TEXT` |  |
-| `stock_minimo` | `minimumStock` | `Integer` | `minimum_stock` | `INTEGER` |  |
-| `tipo` | `type` | `String` | `type` | `TEXT` |  |
+| JSON (frontend)    | Campo Java           | Tipo Java    | Columna SQL           | Tipo SQL         | Notas                                    |
+| ------------------ | -------------------- | ------------ | --------------------- | ---------------- | ---------------------------------------- |
+| `cantidad`         | `quantity`           | `Integer`    | `quantity`            | `INTEGER`        |                                          |
+| `consumido_ajuste` | `consumedAdjustment` | `Integer`    | `consumed_adjustment` | `INTEGER`        |                                          |
+| `coste`            | `cost`               | `BigDecimal` | `cost`                | `NUMERIC(10, 2)` | dinero: usa `BigDecimal`, nunca `double` |
+| `fecha`            | `date`               | `LocalDate`  | `date`                | `DATE`           | solo el día, formato `"2026-03-01"`.     |
+| `notas`            | `notes`              | `String`     | `notes`               | `TEXT`           |                                          |
+| `stock_minimo`     | `minimumStock`       | `Integer`    | `minimum_stock`       | `INTEGER`        |                                          |
+| `tipo`             | `type`               | `String`     | `type`                | `TEXT`           |                                          |
 
 > Los tipos salen de mirar lo que envía el frontend, pero el roadmap avisa de que la lista de campos puede estar incompleta: algunos campos solo se leen. Antes de escribir la migración, abre los archivos de abajo y busca `LoteCerveza`.
 
 ## Qué usa el frontend
 
-| Método en el frontend | Endpoint | Para qué |
-| --- | --- | --- |
-| `list` | `GET /api/entities/LoteCerveza` | listar (con `sort`, `limit`, `skip`) |
-| `create` | `POST /api/entities/LoteCerveza` | crear |
-| `update` | `PATCH /api/entities/LoteCerveza/{id}` | modificar algunos campos |
-| `delete` | `DELETE /api/entities/LoteCerveza/{id}` | borrar uno |
+| Método en el frontend | Endpoint                                | Para qué                             |
+| --------------------- | --------------------------------------- | ------------------------------------ |
+| `list`                | `GET /api/entities/LoteCerveza`         | listar (con `sort`, `limit`, `skip`) |
+| `create`              | `POST /api/entities/LoteCerveza`        | crear                                |
+| `update`              | `PATCH /api/entities/LoteCerveza/{id}`  | modificar algunos campos             |
+| `delete`              | `DELETE /api/entities/LoteCerveza/{id}` | borrar uno                           |
 
 - **Filtros:** —
 - **Orden (`sort`):** `-fecha`

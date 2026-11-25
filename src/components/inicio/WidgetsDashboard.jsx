@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { api } from "@/api/client";
+import { cargarCuentasCerveza } from "@/lib/cerveza";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -530,7 +531,7 @@ export default function WidgetsDashboard({ sesion }) {
       necesita(["stockbajo", "kpis"])                ? api.entities.ItemAlmacen.list("-created_date", 50) : Promise.resolve([]),
       necesita(["kpis", "chat"])                     ? api.entities.ChatMensaje.list("-created_date", 20) : Promise.resolve([]),
       necesita(["notifs"])                           ? api.entities.Notificacion.filter({ archivada: false }) : Promise.resolve([]),
-      necesita(["cerveza"])                          ? api.entities.CervezaEntrada.list("-cervezas", 3) : Promise.resolve([]),
+      necesita(["cerveza"])                          ? cargarCuentasCerveza() : Promise.resolve([]),
       necesita(["integrantes"])                      ? api.entities.Integrante.list() : Promise.resolve([]),
       necesita(["vehiculos"])                        ? api.entities.Vehiculo.list() : Promise.resolve([]),
       necesita(["actividades"])                      ? api.entities.Actividad.filter({ estado: "programada" }) : Promise.resolve([]),
@@ -542,7 +543,7 @@ export default function WidgetsDashboard({ sesion }) {
       necesita(["fondos"])                           ? api.entities.MovimientoCaja.list() : Promise.resolve([]),
     ];
 
-    Promise.all(peticiones).then(([comprasRaw, movimientos, votaciones, sugerenciasRaw, tareas, almacen, msgs, notifs, cervezasTop, integrantesRaw, vehiculos, actividadesRaw, cumpleanosIntegrantesRaw, cuotasPagadas, talonarios, loteriasCampanas, todosMovimientos]) => {
+    Promise.all(peticiones).then(([comprasRaw, movimientos, votaciones, sugerenciasRaw, tareas, almacen, msgs, notifs, cuentasCerveza, integrantesRaw, vehiculos, actividadesRaw, cumpleanosIntegrantesRaw, cuotasPagadas, talonarios, loteriasCampanas, todosMovimientos]) => {
       const integrantesParaCumple = necesita(["cumpleanos"]) ? (integrantesRaw.length > 0 ? integrantesRaw : (cumpleanosIntegrantesRaw || [])) : [];
       const cumpleanos = integrantesParaCumple
         .filter(i => i.fecha_nacimiento)
@@ -559,8 +560,8 @@ export default function WidgetsDashboard({ sesion }) {
         .slice(0, 3);
       const sugerencias = sugerenciasRaw.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).slice(0, 3);
       const cervezaData = {
-        total: cervezasTop.reduce((s, e) => s + (e.cervezas || 0), 0),
-        top: cervezasTop.slice(0, 3),
+        total: cuentasCerveza.reduce((s, c) => s + c.cervezas, 0),
+        top: cuentasCerveza.filter(c => c.cervezas > 0).sort((a, b) => b.cervezas - a.cervezas).slice(0, 3),
       };
       const catEmoji = { cargos: "⚜️", socios: "🤝", contribuyentes: "💛", socios_honorificos: "🏅", patitas: "🐾" };
       const integrantesResumen = Object.entries(

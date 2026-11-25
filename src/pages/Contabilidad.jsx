@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { BookOpen, Plus, RefreshCw, Users, ListFilter, BarChart3 } from "lucide-react";
 import { api } from "@/api/client";
+import { calcularCuentas, claveCuenta } from "@/lib/cerveza";
 import { useAuth } from "@/components/auth/AuthContext";
 import ResumenGeneral from "@/components/contabilidad/ResumenGeneral";
 import MovimientosConsolidados from "@/components/contabilidad/MovimientosConsolidados";
@@ -27,13 +28,14 @@ export default function Contabilidad() {
     try {
       // Cargar todas las fuentes en paralelo
       const [
-        movCaja, tickets, cuotas, cervezasEntrada, cervezasPago,
+        movCaja, tickets, cuotas, integrantes, consumosCerveza, cervezasPago,
         pagosRegistrados, lotesCerveza, deudasProveedor, loteria, talonarios
       ] = await Promise.all([
         api.entities.MovimientoCaja.list("-fecha", 500),
         api.entities.TicketFactura.list("-created_date", 200),
         api.entities.Cuota.list("-created_date", 500),
-        api.entities.CervezaEntrada.list("-created_date", 500),
+        api.entities.Integrante.list(),
+        api.entities.ConsumoCerveza.filter({ archivado: false }),
         api.entities.CervezaPago.list("-fecha", 500),
         api.entities.PagoRegistrado.list("-created_date", 500),
         api.entities.LoteCerveza.list("-fecha", 200),
@@ -117,9 +119,14 @@ export default function Contabilidad() {
         if (cfgPrecio[0]?.valor) precioCerveza = parseFloat(cfgPrecio[0].valor) || 1;
       } catch {}
 
-      (cervezasEntrada || []).forEach(ce => {
-        const cervezas = parseFloat(ce.cervezas) || 0;
-        const pagado = parseFloat(ce.pagado) || 0;
+      // Cuentas del año en curso: consumos y pagos sin archivar
+      const cuentasCerveza = calcularCuentas(
+        integrantes || [], consumosCerveza || [], (cervezasPago || []).filter(p => !p.archivado));
+      const nombreCuenta = Object.fromEntries(cuentasCerveza.map(c => [c.id, c.nombre]));
+
+      cuentasCerveza.forEach(ce => {
+        const cervezas = ce.cervezas;
+        const pagado = ce.pagado;
         const debeCerveza = cervezas * precioCerveza;
         const nombre = ce.nombre;
         if (nombre && (debeCerveza > 0 || pagado > 0)) {
@@ -134,11 +141,15 @@ export default function Contabilidad() {
       // Pagos de cerveza como movimientos
       (cervezasPago || []).forEach(p => {
         const importe = parseFloat(p.importe) || 0;
-        if (importe <= 0) return;
+        if (importe === 0) return;
+        const nombre = nombreCuenta[claveCuenta(p.integrante_id)]
+          || integrantes?.find(i => i.id === p.integrante_id)?.nombre || "";
+        // Los importes negativos son correcciones (descuentos) de pagos anteriores
         movs.push({
-          fecha: p.fecha || p.created_date, concepto: `Pago cerveza: ${p.integrante_nombre || ""}`,
-          categoria: "cerveza", tipo: "ingreso", cantidad: importe,
-          usuario: p.integrante_nombre, fuente: "cerveza",
+          fecha: p.fecha || p.created_date,
+          concepto: `${importe < 0 ? "Corrección pago cerveza" : "Pago cerveza"}: ${nombre}`,
+          categoria: "cerveza", tipo: importe < 0 ? "gasto" : "ingreso", cantidad: Math.abs(importe),
+          usuario: nombre, fuente: "cerveza",
         });
       });
 

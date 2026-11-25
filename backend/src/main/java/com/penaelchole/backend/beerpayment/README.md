@@ -1,6 +1,6 @@
 # `CervezaPago` → paquete `beerpayment`
 
-> Pago de cervezas hecho por una persona. Al cerrar el año se archivan.
+> Pago de cervezas de un integrante. Lo pagado es la suma de sus pagos; las correcciones son pagos negativos. Al cerrar el año se archivan.
 
 **Fase del ROADMAP:** Phase 4: Beer
 
@@ -19,65 +19,58 @@ Como ejemplo de una entidad ya terminada, mira el paquete [`appconfig`](../appco
 
 ## Archivos que tienes que crear (en esta carpeta)
 
-- [ ] Migración `V<n>__create_beer_payment.sql` (en `src/main/resources/db/migration/`)
-- [ ] `BeerPayment.java`: la entidad (la tabla en Java)
-- [ ] `BeerPaymentRepository.java`: acceso a la base de datos
-- [ ] `BeerPaymentRequest.java`: lo que llega del frontend al **crear**
-- [ ] `BeerPaymentPatch.java`: lo que llega del frontend al **modificar**
-- [ ] `BeerPaymentResponse.java`: lo que se devuelve al frontend
-- [ ] `BeerPaymentService.java`: la lógica (con `@Service` y `@Transactional`)
-- [ ] `BeerPaymentController.java`: los endpoints (con `@RestController` y `@RequestMapping("/api/entities/CervezaPago")`)
-- [ ] `BeerPaymentControllerTest.java` en `src/test/java/com/penaelchole/backend/beerpayment/`
-- [ ] Marcar la casilla de `CervezaPago` en `ROADMAP.md`
+- [x] Migración `V<n>__create_beer_payment.sql` (en `src/main/resources/db/migration/`)
+- [x] `BeerPayment.java`: la entidad (la tabla en Java)
+- [x] `BeerPaymentRepository.java`: acceso a la base de datos
+- [x] `BeerPaymentRequest.java`: lo que llega del frontend al **crear**
+- [x] `BeerPaymentPatch.java`: lo que llega del frontend al **modificar**
+- [x] `BeerPaymentResponse.java`: lo que se devuelve al frontend
+- [x] `BeerPaymentService.java`: la lógica (con `@Service` y `@Transactional`)
+- [x] `BeerPaymentController.java`: los endpoints (con `@RestController` y `@RequestMapping("/api/entities/CervezaPago")`)
+- [x] `BeerPaymentControllerTest.java` en `src/test/java/com/penaelchole/backend/beerpayment/`
+- [x] Marcar la casilla de `CervezaPago` en `ROADMAP.md`
 
 ## Campos
 
-Además de estos, todas las entidades tienen `id`, `created_date`, `updated_date` y `created_by_id`, que vienen de `BaseEntity` (no los declares otra vez, pero **sí** tienen que estar en la migración).
+Además de estos, todas las entidades tienen `id`, `created_date`, `updated_date` y `created_by_id`, que vienen de `BaseEntity`.
 
 | JSON (frontend) | Campo Java | Tipo Java | Columna SQL | Tipo SQL | Notas |
 | --- | --- | --- | --- | --- | --- |
-| `anio_archivo` | `archiveYear` | `Integer` | `archive_year` | `INTEGER` |  |
-| `archivado` | `archived` | `boolean` | `archived` | `BOOLEAN NOT NULL DEFAULT false` |  |
-| `fecha` | `date` | `Instant` | `date` | `TIMESTAMPTZ` | día y hora, formato `"2026-03-01T18:30:00.000Z"`. |
-| `importe` | `amount` | `BigDecimal` | `amount` | `NUMERIC(10, 2)` | dinero: usa `BigDecimal`, nunca `double` |
-| `integrante_nombre` | `memberName` | `String` | `member_name` | `TEXT` |  |
-| `notas` | `notes` | `String` | `notes` | `TEXT` |  |
-
-> Los tipos salen de mirar lo que envía el frontend, pero el roadmap avisa de que la lista de campos puede estar incompleta: algunos campos solo se leen. Antes de escribir la migración, abre los archivos de abajo y busca `CervezaPago`.
+| `integrante_id` | `memberId` | `String` | `member_id` | `VARCHAR(36)` | `REFERENCES member(id)`. `null` = invitados |
+| `importe` | `amount` | `BigDecimal` | `amount` | `NUMERIC(10, 2) NOT NULL` | puede ser negativo, nunca 0 |
+| `fecha` | `date` | `Instant` | `date` | `TIMESTAMPTZ` | `"2026-03-01T18:30:00.000Z"` |
+| `notas` | `notes` | `String` | `notes` | `TEXT` | |
+| `archivado` | `archived` | `boolean` | `archived` | `BOOLEAN NOT NULL DEFAULT false` | |
+| `anio_archivo` | `archiveYear` | `Integer` | `archive_year` | `INTEGER` | |
 
 ## Qué usa el frontend
 
 | Método en el frontend | Endpoint | Para qué |
 | --- | --- | --- |
-| `list` | `GET /api/entities/CervezaPago` | listar (con `sort`, `limit`, `skip`) |
-| `filter` | `GET /api/entities/CervezaPago?campo=valor` | listar filtrando por igualdad |
-| `create` | `POST /api/entities/CervezaPago` | crear |
-| `update` | `PATCH /api/entities/CervezaPago/{id}` | modificar algunos campos |
+| `list` | `GET /api/entities/CervezaPago?sort=-fecha` | movimientos en Contabilidad |
+| `filter` | `GET /api/entities/CervezaPago?campo=valor` | por `archivado` y por `integrante_id` |
+| `create` | `POST /api/entities/CervezaPago` | añadir pago, descontar o fijar (CuentasCerveza) |
+| `update` | `PATCH /api/entities/CervezaPago/{id}` | archivar el año |
 
-- **Filtros:** `archivado`, `integrante_nombre`
+- **Filtros:** `archivado`, `integrante_id`
 - **Orden (`sort`):** `-fecha`
 
-Archivos del frontend que usan `CervezaPago`:
-
-- `src/components/cerveza/CuentasCerveza.jsx`
-- `src/components/cerveza/MiCervezaPerfil.jsx`
-- `src/pages/Cerveza.jsx`
-- `src/pages/Contabilidad.jsx`
+Archivos del frontend que usan `CervezaPago`: `src/components/cerveza/CuentasCerveza.jsx`, `src/components/cerveza/MiCervezaPerfil.jsx`, `src/pages/Cerveza.jsx`, `src/pages/Contabilidad.jsx`, `src/lib/cerveza.js`.
 
 ## Cosas a tener en cuenta
 
-- Se identifica a la persona por `integrante_nombre`, no por id. El frontend filtra por `integrante_nombre` y por `archivado`.
-- Tiene importes de dinero: usa `BigDecimal` en Java y `NUMERIC(10, 2)` en SQL. Con `double` las cuentas acaban con decimales raros (0.1 + 0.2 = 0.30000000000000004).
-- El frontend no borra nunca esta entidad. Aun así, `delete` y `delete-many` tienen que existir (los usa la copia de seguridad); protégelos para que solo los use un admin.
+- Lo pagado por alguien es `SUM(importe)` de sus pagos con `archivado = false`. "Descontar" y "Fijar" crean un pago negativo (o positivo) por la diferencia, así queda rastro de todo.
+- Leer es para todos (cada integrante ve su historial en el perfil). Escribir, solo `ROLE_ADMIN` (admin, presidente, vicepresidente), igual que `puedeArchivar` en `Cerveza.jsx`.
+- Dinero: `BigDecimal` en Java y `NUMERIC(10, 2)` en SQL.
 
 ## Tests mínimos
 
-- [ ] Sin token → `401`.
-- [ ] Crear con los datos que manda el frontend → `201`, y la respuesta trae las claves en español.
-- [ ] `GET` por id → `200`; con un id que no existe → `404`.
-- [ ] Filtrar por `archivado` devuelve solo las filas que coinciden.
-- [ ] Filtrar por `integrante_nombre` devuelve solo las filas que coinciden.
-- [ ] Ordenar con `sort=-fecha` devuelve el orden correcto.
-- [ ] `PATCH` de un campo → `200` y el cambio **se ha guardado** (haz un `GET` después, o mira el repositorio).
-- [ ] `PATCH` sin un campo → ese campo no cambia.
-- [ ] Borrar → `204` y ya no existe. Si está protegido, un usuario normal recibe `403`.
+- [x] Sin token → `401`.
+- [x] Crear con los datos que manda el frontend → `201`, y la respuesta trae las claves en español.
+- [x] `GET` por id → `200`; con un id que no existe → `404`.
+- [x] Filtrar por `archivado` devuelve solo las filas que coinciden.
+- [x] Filtrar por `integrante_id` devuelve solo las filas que coinciden.
+- [x] Ordenar con `sort=-fecha` devuelve el orden correcto.
+- [x] `PATCH` de un campo → `200` y el cambio **se ha guardado** (haz un `GET` después, o mira el repositorio).
+- [x] `PATCH` sin un campo → ese campo no cambia.
+- [x] Borrar → `204` y ya no existe. Si está protegido, un usuario normal recibe `403`.

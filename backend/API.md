@@ -88,17 +88,25 @@ Fields: `integrante_id`, `usuario`, `contrasena`, `disabled`, `avatar_url`.
 - Who may write: admins (`esAdmin`, `presidente`, `vicepresidente`) can create, update and delete any account. A regular user may only update **their own** account (`integrante_id` = their `integranteId`), and only the `contrasena` and `avatar_url` fields (the profile page changes the password and avatar this way).
 - Anything else returns **403** with `{ "message": ... }` (e.g. `"Solo puedes modificar tu propia cuenta"`, `"Solo puedes cambiar tu contraseña y tu avatar"`). The permission check runs before validation, so a user without permission gets 403 rather than a 400 like `"Ese usuario ya existe"`. Reading accounts (`list`/`filter`/`get`) is open to any authenticated user.
 
-### Entities used by the frontend (58)
+### Special rules for beer (`ConsumoCerveza`, `CervezaPago`)
+There is no per-person beer counter. A person's beers are the sum of `cantidad` of their `ConsumoCerveza` rows with `archivado=false`, and what they have paid is the sum of `importe` of their `CervezaPago` rows with `archivado=false` (`src/lib/cerveza.js` does the maths).
+- Both are linked to a member by `integrante_id` (foreign key to `Integrante`). `integrante_id: null` means the guests ("Invitados").
+- `ConsumoCerveza`: `cantidad` (integer > 0, required), `integrante_id`, `tipo` (may be null), `archivado`, `anio_archivo`. Any authenticated user may create, update and delete.
+- `CervezaPago`: `importe` (required, not 0, **may be negative**: discounts and manual corrections are stored as negative payments), `integrante_id`, `fecha` (ISO instant), `notas`, `archivado`, `anio_archivo`. Reading is open to any authenticated user; writing (create, update, delete) only to admins (`esAdmin`, `presidente`, `vicepresidente`), otherwise **403**.
+- Closing the year does not delete anything: the frontend PATCHes every open consumption and payment with `{ archivado: true, anio_archivo }`.
+- An unknown `integrante_id` returns **409**, and so does deleting an `Integrante` that still has beer consumptions or payments.
+
+### Entities used by the frontend (57)
 ```
-ActaReunion Actividad AdminLog AppConfig Carpeta CervezaEntrada CervezaPago ChatGrupo
-ChatMensaje CompraArchivo ConcursoSeccion ConsumoCerveza CuentaAtras Cuota DeudaProveedor
-DiaCalendario Documento EnlaceUtil EntregaTalonario FeedbackApp GrupoTrabajo IAConversacion
-IARegistro Integrante ItemAlmacen ItemCompra Logro LoteCerveza Loteria Mascota MediaItem
-MovimientoAlmacen MovimientoCaja NotaPersonal Notificacion ObraAnio ObraDocumento
-PagoRegistrado Papelera PermisoSeccion PlazoCalendario PrestamoAlmacen Presupuesto Proveedor
-ResultadoAnio SesionUsuario Sugerencia SugerenciaActividad TalonarioLoteria Tarea
-TareaReunion TicketFactura Vehiculo VehiculoPieza VehiculoRevision VehiculoTarea Votacion
-VotoRespuesta
+ActaReunion Actividad AdminLog AppConfig Carpeta CervezaPago ChatGrupo ChatMensaje
+CompraArchivo ConcursoSeccion ConsumoCerveza CuentaAtras Cuota DeudaProveedor
+DiaCalendario Documento EnlaceUtil EntregaTalonario FeedbackApp GrupoTrabajo
+IAConversacion IARegistro Integrante ItemAlmacen ItemCompra Logro LoteCerveza Loteria
+Mascota MediaItem MovimientoAlmacen MovimientoCaja NotaPersonal Notificacion ObraAnio
+ObraDocumento PagoRegistrado Papelera PermisoSeccion PlazoCalendario PrestamoAlmacen
+Presupuesto Proveedor ResultadoAnio SesionUsuario Sugerencia SugerenciaActividad
+TalonarioLoteria Tarea TareaReunion TicketFactura Vehiculo VehiculoPieza VehiculoRevision
+VehiculoTarea Votacion VotoRespuesta
 ```
 `AppConfig` is a key/value store (`clave`, `valor`, where `valor` is often a JSON string). It holds app settings: colours, name, menu labels, disabled pages and so on.
 

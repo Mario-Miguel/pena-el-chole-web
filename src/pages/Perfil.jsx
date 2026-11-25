@@ -10,12 +10,14 @@ import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
 import NotasButton from "../components/notas/NotasButton";
 import MiCervezaPerfil from "../components/cerveza/MiCervezaPerfil";
+import { cargarMiCuentaCerveza, cargarPrecioCerveza } from "@/lib/cerveza";
 
 export default function Perfil() {
   const { sesion, logout, refreshSesion } = useAuth();
   const [integrante, setIntegrante] = useState(null);
   const [itemsDeuda, setItemsDeuda] = useState([]);
   const [deudaCerveza, setDeudaCerveza] = useState(0);
+  const [misCervezas, setMisCervezas] = useState(0);
   const [deudaCuotas, setDeudaCuotas] = useState(0);
   const [editandoCumple, setEditandoCumple] = useState(false);
   const [cumpleVal, setCumpleVal] = useState("");
@@ -37,11 +39,11 @@ export default function Perfil() {
     Promise.all([
       api.entities.Integrante.filter({ id: sesion.integranteId }),
       api.entities.ItemCompra.filter({ comprador_nombre: sesion.nombre }),
-      api.entities.CervezaEntrada.filter({ nombre: sesion.nombre }),
-      api.entities.AppConfig.filter({ clave: "cerveza_precio" }),
+      cargarMiCuentaCerveza(sesion.integranteId),
+      cargarPrecioCerveza(),
       api.entities.Cuota.list(),
       api.entities.TareaReunion.filter({ integrante_id: sesion.integranteId }),
-    ]).then(([ints, items, cervezaEntradas, precioCfg, cuotas, tareasR]) => {
+    ]).then(([ints, items, cuentaCerveza, precio, cuotas, tareasR]) => {
       const int = ints[0] || null;
       setIntegrante(int);
       const fn = int?.fecha_nacimiento || "";
@@ -56,9 +58,8 @@ export default function Perfil() {
       }
       setItemsDeuda(items.filter(i => i.comprado && !i.pagado));
       // Deuda cerveza
-      const precio = precioCfg.length > 0 ? parseFloat(precioCfg[0].valor) : 0.5;
-      const cervezas = cervezaEntradas[0]?.cervezas || 0;
-      setDeudaCerveza(cervezas * precio);
+      setMisCervezas(cuentaCerveza.cervezas);
+      setDeudaCerveza(Math.max(0, cuentaCerveza.cervezas * precio - cuentaCerveza.pagado));
       // Deuda cuotas pendientes
       const misCuotas = cuotas.filter(c => c.integrante_id === sesion.integranteId && !c.pagada);
       setDeudaCuotas(misCuotas.reduce((s, c) => s + (c.importe || 0), 0));
@@ -192,7 +193,7 @@ export default function Perfil() {
             className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-4 text-center"
           >
             <Beer className="w-6 h-6 text-amber-500 mx-auto mb-1" />
-            <p className="text-[#630027] text-2xl font-black">{integrante.cervezas || 0}</p>
+            <p className="text-[#630027] text-2xl font-black">{misCervezas}</p>
             <p className="text-xs text-gray-400">Cervezas consumidas</p>
           </motion.div>
         )}

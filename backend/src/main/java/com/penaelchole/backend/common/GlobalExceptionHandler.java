@@ -27,7 +27,9 @@ public class GlobalExceptionHandler {
     // Nombre de la constraint de Postgres -> mensaje para el usuario
     private static final Map<String, String> CONSTRAINT_MESSAGES = Map.of(
             "user_account_username_key", "Ese usuario ya existe",
-            "user_account_member_id_key", "Ese integrante ya tiene una cuenta");
+            "user_account_member_id_key", "Ese integrante ya tiene una cuenta",
+            "beer_consumption_member_id_fkey", "Ese integrante no existe o tiene cervezas apuntadas",
+            "beer_payment_member_id_fkey", "Ese integrante no existe o tiene pagos de cerveza");
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

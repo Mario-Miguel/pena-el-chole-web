@@ -34,10 +34,6 @@ public class Member extends BaseEntity {
     @ApiName("cargo")
     private String role;
 
-    @ApiName("cervezas")
-    @Column(nullable = false)
-    private int beers;
-
     @ApiName("fecha_nacimiento")
     private LocalDate birthDate;
 
@@ -75,14 +71,6 @@ public class Member extends BaseEntity {
         this.role = role;
     }
 
-    public int getBeers() {
-        return beers;
-    }
-
-    public void setBeers(int beers) {
-        this.beers = beers;
-    }
-
     public LocalDate getBirthDate() {
         return birthDate;
     }
@@ -105,10 +93,6 @@ public class Member extends BaseEntity {
 
         if (changes.role() != null) {
             setRole(changes.role().orElse(null));
-        }
-
-        if (changes.beers() != null) {
-            setBeers(changes.beers().orElse(0));
         }
 
         if (changes.birthDate() != null) {

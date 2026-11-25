@@ -24,7 +24,7 @@ export default function PanelPresidente() {
       api.entities.Tarea.list(),
       api.entities.Votacion.list(),
       api.entities.Notificacion.list("-created_date", 5),
-      api.entities.CervezaEntrada.list(),
+      api.entities.ConsumoCerveza.filter({ archivado: false }),
     ]);
     setDatos({ integrantes, items, tareas, votaciones, notifs, cervezas });
     setLoading(false);
@@ -76,7 +76,7 @@ export default function PanelPresidente() {
                 <div className="space-y-2 text-sm text-gray-600">
                   <p>• {votacionesActivas.length} votación(es) activa(s)</p>
                   <p>• {notifs.length} notificaciones recientes</p>
-                  <p>• {cervezas.reduce((s, e) => s + (e.cervezas || 0), 0)} cervezas registradas en total</p>
+                  <p>• {cervezas.reduce((s, c) => s + (c.cantidad || 0), 0)} cervezas registradas en total</p>
                   <div className="pt-2 flex flex-wrap gap-2">
                     <Link to={createPageUrl("Admin")} className="text-xs bg-[#630027] text-white px-3 py-1.5 rounded-xl hover:bg-[#4a001d] transition-colors">Panel Admin</Link>
                     <Link to={createPageUrl("Notificaciones")} className="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-xl hover:bg-gray-200 transition-colors">Notificaciones</Link>

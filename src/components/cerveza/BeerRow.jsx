@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 
 function BeerRow({
-  integrante, precioCerveza, onUpdate, avatarUrl,
+  integrante, precioCerveza, onRemove, onClear, avatarUrl,
   tiposCerveza = [], ultimoTipo = null,
   pendingTipos = [], onAddPending, onRemovePending, onClearPending,
   destacada = false
@@ -34,14 +34,13 @@ function BeerRow({
     if (pendingCount > 0) {
       onRemovePending();
     } else {
-      const newCount = Math.max(0, (integrante.cervezas || 0) - 1);
-      onUpdate(integrante.id, newCount, ultimoTipo || null, ultimoTipo ? "remove" : null);
+      onRemove(ultimoTipo || null);
     }
   };
 
   const handleClear = () => {
     if (pendingCount > 0) onClearPending();
-    if ((integrante.cervezas || 0) > 0) onUpdate(integrante.id, 0, null, null);
+    else if ((integrante.cervezas || 0) > 0) onClear();
   };
 
   const total = displayedCount * precioCerveza;

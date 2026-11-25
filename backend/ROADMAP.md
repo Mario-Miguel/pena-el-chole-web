@@ -238,45 +238,38 @@ Finanzas page (cash book, fees, budget) and Tickets.
 
 "La despensa de Simón" page.
 
-#### `CervezaEntrada`
+#### ~~`CervezaEntrada`~~ (removed)
 
-- [ ] Migration · Entity · Repository · Service · Controller · Test
-- methods: `create`, `delete`, `filter`, `list`, `update` · filters: `nombre` · sort: `-cervezas`, `-created_date`
-- used in 7 file(s): `src/components/cargos/PanelPresidente.jsx`, `src/components/cerveza/CuentasCerveza.jsx`, `src/components/cerveza/MiCervezaPerfil.jsx` …
-
-| field      | type (guessed) |
-| ---------- | -------------- |
-| `cervezas` | number         |
-| `nombre`   | String         |
-| `pagado`   | boolean        |
+Merged into `ConsumoCerveza` + `CervezaPago`: beers and amount paid are now computed from those rows (see API.md, "Special rules for beer").
 
 #### `ConsumoCerveza`
 
-- [ ] Migration · Entity · Repository · Service · Controller · Test
-- methods: `bulkCreate`, `create`, `delete`, `filter`, `list`, `update` · filters: `integrante_id`, `tipo`
-- used in 1 file(s): `src/pages/Cerveza.jsx`
+- [x] Migration · Entity · Repository · Service · Controller · Test
+- methods: `bulkCreate`, `create`, `delete`, `filter`, `list`, `update` · filters: `archivado`, `integrante_id`, `tipo`
+- used in 5 file(s): `src/pages/Cerveza.jsx`, `src/lib/cerveza.js`, `src/components/cerveza/MiCervezaPerfil.jsx` …
 
-| field               | type (guessed)           |
-| ------------------- | ------------------------ |
-| `cantidad`          | number                   |
-| `integrante_id`     | String (id → integrante) |
-| `integrante_nombre` | String                   |
-| `tipo`              | String                   |
+| field           | type                                         |
+| --------------- | -------------------------------------------- |
+| `anio_archivo`  | number                                       |
+| `archivado`     | boolean                                      |
+| `cantidad`      | number (> 0)                                 |
+| `integrante_id` | String (id → integrante, null = invitados)   |
+| `tipo`          | String                                       |
 
 #### `CervezaPago`
 
-- [ ] Migration · Entity · Repository · Service · Controller · Test
-- methods: `create`, `filter`, `list`, `update` · filters: `archivado`, `integrante_nombre` · sort: `-fecha`
-- used in 4 file(s): `src/components/cerveza/CuentasCerveza.jsx`, `src/components/cerveza/MiCervezaPerfil.jsx`, `src/pages/Cerveza.jsx` …
+- [x] Migration · Entity · Repository · Service · Controller · Test
+- methods: `create`, `filter`, `list`, `update` · filters: `archivado`, `integrante_id` · sort: `-fecha`
+- used in 5 file(s): `src/components/cerveza/CuentasCerveza.jsx`, `src/components/cerveza/MiCervezaPerfil.jsx`, `src/pages/Cerveza.jsx` …
 
-| field               | type (guessed)      |
-| ------------------- | ------------------- |
-| `anio_archivo`      | number              |
-| `archivado`         | boolean             |
-| `fecha`             | LocalDate / Instant |
-| `importe`           | number              |
-| `integrante_nombre` | String              |
-| `notas`             | String              |
+| field           | type                                         |
+| --------------- | -------------------------------------------- |
+| `anio_archivo`  | number                                       |
+| `archivado`     | boolean                                      |
+| `fecha`         | Instant                                      |
+| `importe`       | number (may be negative: corrections)        |
+| `integrante_id` | String (id → integrante, null = invitados)   |
+| `notas`         | String                                       |
 
 #### `LoteCerveza`
 

@@ -20,7 +20,6 @@ const ENTIDADES = [
   { key: "PagoRegistrado", label: "Pagos", emoji: "💰" },
   { key: "Cuota", label: "Cuotas", emoji: "💶" },
   { key: "Presupuesto", label: "Presupuestos", emoji: "📊" },
-  { key: "CervezaEntrada", label: "Cerveza (entradas)", emoji: "🍺" },
   { key: "ConsumoCerveza", label: "Consumo cerveza", emoji: "🍻" },
   { key: "CervezaPago", label: "Pagos cerveza", emoji: "🪙" },
   { key: "LoteCerveza", label: "Lotes cerveza", emoji: "📦" },

@@ -4,23 +4,29 @@ import { Beer, Wallet, Clock } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { cargarPrecioCerveza, formatoImporte } from "@/lib/cerveza";
 
 export default function MiCervezaPerfil({ sesion }) {
-  const [entrada, setEntrada] = useState(null);
+  const [cuenta, setCuenta] = useState(null); // { cervezas, pagado } sin archivar
   const [pagos, setPagos] = useState([]);
   const [precio, setPrecio] = useState(0.5);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!sesion?.nombre) { setLoading(false); return; }
+    if (!sesion?.integranteId) { setLoading(false); return; }
     Promise.all([
-      api.entities.CervezaEntrada.filter({ nombre: sesion.nombre }),
-      api.entities.CervezaPago.filter({ integrante_nombre: sesion.nombre }),
-      api.entities.AppConfig.filter({ clave: "cerveza_precio" }),
-    ]).then(([entradas, pagosData, configs]) => {
-      setEntrada(entradas[0] || null);
-      setPagos(pagosData.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)));
-      if (configs.length > 0) setPrecio(parseFloat(configs[0].valor));
+      api.entities.ConsumoCerveza.filter({ integrante_id: sesion.integranteId, archivado: false }),
+      // Todos los pagos (también los archivados) para el historial
+      api.entities.CervezaPago.filter({ integrante_id: sesion.integranteId }),
+      cargarPrecioCerveza(),
+    ]).then(([consumos, pagosData, precioCerveza]) => {
+      const pagado = pagosData.filter(p => !p.archivado).reduce((s, p) => s + (parseFloat(p.importe) || 0), 0);
+      setCuenta({
+        cervezas: consumos.reduce((s, c) => s + (c.cantidad || 0), 0),
+        pagado: Math.round(pagado * 100) / 100,
+      });
+      setPagos(pagosData.sort((a, b) => new Date(b.fecha || b.created_date) - new Date(a.fecha || a.created_date)));
+      setPrecio(precioCerveza);
       setLoading(false);
     });
   }, [sesion]);
@@ -31,10 +37,10 @@ export default function MiCervezaPerfil({ sesion }) {
     </div>
   );
 
-  if (!entrada) return null;
+  if (!cuenta) return null;
 
-  const totalConsumo = (entrada.cervezas || 0) * precio;
-  const totalPagado = entrada.pagado || 0;
+  const totalConsumo = cuenta.cervezas * precio;
+  const totalPagado = cuenta.pagado;
   const pendiente = Math.max(0, totalConsumo - totalPagado);
   const pct = totalConsumo > 0 ? Math.min(100, (totalPagado / totalConsumo) * 100) : 100;
 
@@ -50,7 +56,7 @@ export default function MiCervezaPerfil({ sesion }) {
       {/* Resumen */}
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div className="bg-amber-50 rounded-xl p-3 text-center">
-          <p className="text-lg font-black text-amber-600">{entrada.cervezas || 0}</p>
+          <p className="text-lg font-black text-amber-600">{cuenta.cervezas}</p>
           <p className="text-xs text-gray-400 mt-0.5">🍺 Cervezas</p>
         </div>
         <div className="bg-green-50 rounded-xl p-3 text-center">
@@ -99,7 +105,9 @@ export default function MiCervezaPerfil({ sesion }) {
                   </span>
                   {pago.notas && <span className="text-gray-400 italic truncate max-w-[80px]">{pago.notas}</span>}
                 </div>
-                <span className="font-bold text-green-600">+{pago.importe.toFixed(2).replace(".", ",")}€</span>
+                <span className={`font-bold ${pago.importe < 0 ? "text-amber-600" : pago.archivado ? "text-gray-400" : "text-green-600"}`}>
+                  {formatoImporte(pago.importe)}{pago.archivado && pago.anio_archivo ? ` (${pago.anio_archivo})` : ""}
+                </span>
               </div>
             ))}
           </div>

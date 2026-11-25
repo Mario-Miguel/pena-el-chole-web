@@ -7,8 +7,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { claveCuenta, integranteIdDeClave, formatoImporte } from "@/lib/cerveza";
 
-export default function CuentasCerveza({ entradas, precio, puedeGestionar, onUpdate }) {
+// entradas = cuentas calculadas en Cerveza.jsx ({ id, integranteId, nombre, cervezas, pagado })
+export default function CuentasCerveza({ entradas, precio, puedeGestionar, onChange }) {
   const [pagoOpen, setPagoOpen] = useState(false);
   const [selected, setSelected] = useState(null);
   const [importe, setImporte] = useState("");
@@ -16,7 +18,7 @@ export default function CuentasCerveza({ entradas, precio, puedeGestionar, onUpd
   const [modo, setModo] = useState("sumar"); // "sumar" | "restar" | "set"
   const [guardando, setGuardando] = useState(false);
   const [historialOpen, setHistorialOpen] = useState(null); // id de entrada con historial abierto
-  const [pagosMap, setPagosMap] = useState({}); // { [integrante_nombre]: [pagos] }
+  const [pagosMap, setPagosMap] = useState({}); // { [id de la cuenta]: [pagos] }
   const [loadingPagos, setLoadingPagos] = useState(false);
 
   const cargarPagos = async () => {
@@ -24,8 +26,9 @@ export default function CuentasCerveza({ entradas, precio, puedeGestionar, onUpd
     const pagos = await api.entities.CervezaPago.filter({ archivado: false });
     const mapa = {};
     pagos.forEach(p => {
-      if (!mapa[p.integrante_nombre]) mapa[p.integrante_nombre] = [];
-      mapa[p.integrante_nombre].push(p);
+      const clave = claveCuenta(p.integrante_id);
+      if (!mapa[clave]) mapa[clave] = [];
+      mapa[clave].push(p);
     });
     // ordenar cada lista por fecha desc
     Object.keys(mapa).forEach(k => mapa[k].sort((a, b) => new Date(b.fecha) - new Date(a.fecha)));
@@ -62,48 +65,35 @@ export default function CuentasCerveza({ entradas, precio, puedeGestionar, onUpd
   const handleConfirmar = async () => {
     if (!selected || !importe) return;
     setGuardando(true);
-    const val = parseFloat(importe) || 0;
-    let nuevoPagado;
-    if (modo === "sumar") {
-      nuevoPagado = (selected.pagado || 0) + val;
-    } else if (modo === "restar") {
-      nuevoPagado = Math.max(0, (selected.pagado || 0) - val);
-    } else {
-      nuevoPagado = val;
-    }
-    nuevoPagado = Math.round(nuevoPagado * 100) / 100;
-    await api.entities.CervezaEntrada.update(selected.id, { pagado: nuevoPagado });
-    onUpdate(selected.id, { pagado: nuevoPagado });
+    try {
+      const val = parseFloat(importe) || 0;
+      const pagadoActual = selected.pagado || 0;
+      // Lo pagado es la suma de los pagos: cada operación es un pago nuevo,
+      // con importe negativo si resta (así queda rastro de las correcciones)
+      let diferencia;
+      if (modo === "sumar") diferencia = val;
+      else if (modo === "restar") diferencia = -Math.min(val, pagadoActual);
+      else diferencia = val - pagadoActual;
+      diferencia = Math.round(diferencia * 100) / 100;
 
-    // Registrar pago en historial (solo si es "sumar" o "set" y hay importe real)
-    if (modo === "sumar" && val > 0) {
-      await api.entities.CervezaPago.create({
-        integrante_nombre: selected.nombre,
-        importe: val,
-        fecha: new Date().toISOString(),
-        notas: notas.trim() || undefined,
-        archivado: false,
-      });
-    } else if (modo === "set") {
-      // En modo set, calculamos la diferencia y registramos si es positiva
-      const diff = nuevoPagado - (selected.pagado || 0);
-      if (diff > 0) {
+      if (diferencia !== 0) {
+        const notaPorDefecto = modo === "sumar" ? undefined : modo === "restar" ? "Descuento" : "Corrección manual";
         await api.entities.CervezaPago.create({
-          integrante_nombre: selected.nombre,
-          importe: diff,
+          integrante_id: integranteIdDeClave(selected.id),
+          importe: diferencia,
           fecha: new Date().toISOString(),
-          notas: notas.trim() ? notas.trim() : "Corrección manual",
-          archivado: false,
+          notas: notas.trim() || notaPorDefecto,
         });
       }
-    }
 
-    await cargarPagos();
-    setGuardando(false);
-    setPagoOpen(false);
-    setSelected(null);
-    setImporte("");
-    setNotas("");
+      await Promise.all([cargarPagos(), onChange?.()]);
+      setPagoOpen(false);
+      setSelected(null);
+      setImporte("");
+      setNotas("");
+    } finally {
+      setGuardando(false);
+    }
   };
 
   if (conDeuda.length === 0) return (
@@ -132,7 +122,7 @@ export default function CuentasCerveza({ entradas, precio, puedeGestionar, onUpd
               const deuda = Math.max(0, total - pagado);
               const liquidado = deuda <= 0;
               const pct = total > 0 ? Math.min(100, (pagado / total) * 100) : 100;
-              const pagosPersona = pagosMap[entrada.nombre] || [];
+              const pagosPersona = pagosMap[entrada.id] || [];
               const histAbierto = historialOpen === entrada.id;
 
               return (
@@ -230,7 +220,7 @@ export default function CuentasCerveza({ entradas, precio, puedeGestionar, onUpd
                                 </span>
                                 {pago.notas && <span className="text-gray-400 italic truncate max-w-[100px]">{pago.notas}</span>}
                               </div>
-                              <span className="font-bold text-green-600">+{pago.importe.toFixed(2).replace(".", ",")}€</span>
+                              <span className={`font-bold ${pago.importe < 0 ? "text-amber-600" : "text-green-600"}`}>{formatoImporte(pago.importe)}</span>
                             </div>
                           ))}
                         </div>
@@ -303,19 +293,17 @@ export default function CuentasCerveza({ entradas, precio, puedeGestionar, onUpd
                 />
               </div>
 
-              {(modo === "sumar" || modo === "set") && (
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block">
-                    Notas (opcional)
-                  </label>
-                  <Input
-                    placeholder="Ej: Pago en efectivo"
-                    value={notas}
-                    onChange={e => setNotas(e.target.value)}
-                    className="rounded-xl border-gray-200"
-                  />
-                </div>
-              )}
+              <div>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block">
+                  Notas (opcional)
+                </label>
+                <Input
+                  placeholder="Ej: Pago en efectivo"
+                  value={notas}
+                  onChange={e => setNotas(e.target.value)}
+                  className="rounded-xl border-gray-200"
+                />
+              </div>
 
               <Button
                 onClick={handleConfirmar}

@@ -1,5 +1,6 @@
 package com.penaelchole.backend.common;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -28,6 +29,10 @@ public final class PatchFields {
 
     public static Optional<Integer> integer(JsonNode json, String name) {
         return field(json, name, JsonNode::asInt);
+    }
+
+    public static Optional<BigDecimal> decimal(JsonNode json, String name) {
+        return field(json, name, JsonNode::asDecimal);
     }
 
     public static Optional<Boolean> bool(JsonNode json, String name) {

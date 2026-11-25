@@ -1,6 +1,6 @@
 # `ConsumoCerveza` → paquete `beerconsumption`
 
-> Cada consumo de cerveza que apunta un integrante (cantidad y tipo).
+> Cada cerveza (o varias) que se apunta a un integrante. Es la única fuente de verdad: ya no hay contador `CervezaEntrada`.
 
 **Fase del ROADMAP:** Phase 4: Beer
 
@@ -19,60 +19,56 @@ Como ejemplo de una entidad ya terminada, mira el paquete [`appconfig`](../appco
 
 ## Archivos que tienes que crear (en esta carpeta)
 
-- [ ] Migración `V<n>__create_beer_consumption.sql` (en `src/main/resources/db/migration/`)
-- [ ] `BeerConsumption.java`: la entidad (la tabla en Java)
-- [ ] `BeerConsumptionRepository.java`: acceso a la base de datos
-- [ ] `BeerConsumptionRequest.java`: lo que llega del frontend al **crear**
-- [ ] `BeerConsumptionPatch.java`: lo que llega del frontend al **modificar**
-- [ ] `BeerConsumptionResponse.java`: lo que se devuelve al frontend
-- [ ] `BeerConsumptionService.java`: la lógica (con `@Service` y `@Transactional`)
-- [ ] `BeerConsumptionController.java`: los endpoints (con `@RestController` y `@RequestMapping("/api/entities/ConsumoCerveza")`)
-- [ ] `BeerConsumptionControllerTest.java` en `src/test/java/com/penaelchole/backend/beerconsumption/`
-- [ ] Marcar la casilla de `ConsumoCerveza` en `ROADMAP.md`
+- [x] Migración `V<n>__create_beer_consumption.sql` (en `src/main/resources/db/migration/`)
+- [x] `BeerConsumption.java`: la entidad (la tabla en Java)
+- [x] `BeerConsumptionRepository.java`: acceso a la base de datos
+- [x] `BeerConsumptionRequest.java`: lo que llega del frontend al **crear**
+- [x] `BeerConsumptionPatch.java`: lo que llega del frontend al **modificar**
+- [x] `BeerConsumptionResponse.java`: lo que se devuelve al frontend
+- [x] `BeerConsumptionService.java`: la lógica (con `@Service` y `@Transactional`)
+- [x] `BeerConsumptionController.java`: los endpoints (con `@RestController` y `@RequestMapping("/api/entities/ConsumoCerveza")`)
+- [x] `BeerConsumptionControllerTest.java` en `src/test/java/com/penaelchole/backend/beerconsumption/`
+- [x] Marcar la casilla de `ConsumoCerveza` en `ROADMAP.md`
 
 ## Campos
 
-Además de estos, todas las entidades tienen `id`, `created_date`, `updated_date` y `created_by_id`, que vienen de `BaseEntity` (no los declares otra vez, pero **sí** tienen que estar en la migración).
+Además de estos, todas las entidades tienen `id`, `created_date`, `updated_date` y `created_by_id`, que vienen de `BaseEntity`.
 
 | JSON (frontend) | Campo Java | Tipo Java | Columna SQL | Tipo SQL | Notas |
 | --- | --- | --- | --- | --- | --- |
-| `cantidad` | `quantity` | `Integer` | `quantity` | `INTEGER` |  |
-| `integrante_id` | `memberId` | `String` | `member_id` | `VARCHAR(36)` | id de un `Integrante` (tabla `member`). Clave foránea, ver la guía |
-| `integrante_nombre` | `memberName` | `String` | `member_name` | `TEXT` |  |
-| `tipo` | `type` | `String` | `type` | `TEXT` |  |
-
-> Los tipos salen de mirar lo que envía el frontend, pero el roadmap avisa de que la lista de campos puede estar incompleta: algunos campos solo se leen. Antes de escribir la migración, abre los archivos de abajo y busca `ConsumoCerveza`.
+| `cantidad` | `quantity` | `int` | `quantity` | `INTEGER NOT NULL` | mayor que 0 |
+| `integrante_id` | `memberId` | `String` | `member_id` | `VARCHAR(36)` | `REFERENCES member(id)`. `null` = invitados |
+| `tipo` | `type` | `String` | `type` | `TEXT` | puede ser `null` (si no hay inventario) |
+| `archivado` | `archived` | `boolean` | `archived` | `BOOLEAN NOT NULL DEFAULT false` | |
+| `anio_archivo` | `archiveYear` | `Integer` | `archive_year` | `INTEGER` | |
 
 ## Qué usa el frontend
 
 | Método en el frontend | Endpoint | Para qué |
 | --- | --- | --- |
-| `list` | `GET /api/entities/ConsumoCerveza` | listar (con `sort`, `limit`, `skip`) |
-| `filter` | `GET /api/entities/ConsumoCerveza?campo=valor` | listar filtrando por igualdad |
-| `create` | `POST /api/entities/ConsumoCerveza` | crear |
-| `bulkCreate` | `POST /api/entities/ConsumoCerveza/bulk` | crear varios a la vez |
-| `update` | `PATCH /api/entities/ConsumoCerveza/{id}` | modificar algunos campos |
-| `delete` | `DELETE /api/entities/ConsumoCerveza/{id}` | borrar uno |
+| `filter` | `GET /api/entities/ConsumoCerveza?archivado=false` | calcular las cervezas de cada uno (`src/lib/cerveza.js`) |
+| `bulkCreate` | `POST /api/entities/ConsumoCerveza/bulk` | guardar las cervezas pendientes |
+| `update` | `PATCH /api/entities/ConsumoCerveza/{id}` | quitar una cerveza (`cantidad - 1`) y archivar el año |
+| `delete` | `DELETE /api/entities/ConsumoCerveza/{id}` | quitar o limpiar cervezas |
 
-- **Filtros:** `integrante_id`, `tipo`
-- **Orden (`sort`):** —
+- **Filtros:** `archivado`, `integrante_id`, `tipo`
 
-Archivos del frontend que usan `ConsumoCerveza`:
-
-- `src/pages/Cerveza.jsx`
+Archivos del frontend que usan `ConsumoCerveza`: `src/pages/Cerveza.jsx`, `src/lib/cerveza.js`, `src/components/cerveza/MiCervezaPerfil.jsx`, `src/components/cargos/PanelPresidente.jsx`, `src/pages/Contabilidad.jsx`.
 
 ## Cosas a tener en cuenta
 
-- El frontend usa `bulkCreate` (`POST /bulk`) en el uso normal, no solo en las copias de seguridad: no lo protejas solo para admins.
-- Tiene ids de otras entidades: añade la clave foránea en la migración (`REFERENCES tabla(id)`). Decide qué pasa si se borra la fila a la que apunta (`ON DELETE CASCADE` o `ON DELETE SET NULL`). Ver la guía.
+- Las cervezas de alguien son `SUM(cantidad)` de sus consumos con `archivado = false`.
+- La clave foránea no tiene `ON DELETE`: no se puede borrar un integrante con consumos (409). Así no se pierde lo que debe.
+- Al archivar el año no se borra nada: se hace `PATCH { archivado: true, anio_archivo }` de cada consumo.
+- Cualquier usuario con sesión puede apuntar y quitar cervezas.
 
 ## Tests mínimos
 
-- [ ] Sin token → `401`.
-- [ ] Crear con los datos que manda el frontend → `201`, y la respuesta trae las claves en español.
-- [ ] `GET` por id → `200`; con un id que no existe → `404`.
-- [ ] Filtrar por `integrante_id` devuelve solo las filas que coinciden.
-- [ ] Filtrar por `tipo` devuelve solo las filas que coinciden.
-- [ ] `PATCH` de un campo → `200` y el cambio **se ha guardado** (haz un `GET` después, o mira el repositorio).
-- [ ] `PATCH` sin un campo → ese campo no cambia.
-- [ ] Borrar → `204` y ya no existe. Si está protegido, un usuario normal recibe `403`.
+- [x] Sin token → `401`.
+- [x] Crear con los datos que manda el frontend → `201`, y la respuesta trae las claves en español.
+- [x] `GET` por id → `200`; con un id que no existe → `404`.
+- [x] Filtrar por `integrante_id` devuelve solo las filas que coinciden.
+- [x] Filtrar por `tipo` devuelve solo las filas que coinciden.
+- [x] `PATCH` de un campo → `200` y el cambio **se ha guardado** (haz un `GET` después, o mira el repositorio).
+- [x] `PATCH` sin un campo → ese campo no cambia.
+- [x] Borrar → `204` y ya no existe. Si está protegido, un usuario normal recibe `403`.

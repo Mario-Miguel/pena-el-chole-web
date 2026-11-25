@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import CervezaChart from "../components/cerveza/CervezaChart";
 import { api } from "@/api/client";
-import { Plus, Trash2, Archive, ChevronDown, ChevronUp, Search, Wallet, Package, Users } from "lucide-react";
+import { Trash2, Archive, ChevronDown, ChevronUp, Search, Wallet, Package, Users } from "lucide-react";
 import HelpIcon from "../components/layout/HelpIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,72 +13,97 @@ import CuentasCerveza from "../components/cerveza/CuentasCerveza";
 import InventarioCerveza from "../components/cerveza/InventarioCerveza";
 import GuardarPendientes from "../components/cerveza/GuardarPendientes";
 import { useAuth } from "../components/auth/AuthContext";
+import {
+  PRECIO_CERVEZA_KEY, INVITADOS_ID, calcularCuentas, claveCuenta, integranteIdDeClave,
+} from "@/lib/cerveza";
 
-const PRICE_CONFIG_KEY = "cerveza_precio";
+const masRecienteAntes = (a, b) => (b.created_date || "").localeCompare(a.created_date || "");
 
 export default function Cerveza() {
   const { sesion } = useAuth();
   const puedeArchivar = sesion?.esAdmin || sesion?.cargo === "presidente" || sesion?.cargo === "vicepresidente";
 
-  const [todasPersonas, setTodasPersonas] = useState([]);
+  const [integrantes, setIntegrantes] = useState([]);
+  const [consumos, setConsumos] = useState([]); // ConsumoCerveza sin archivar
+  const [pagos, setPagos] = useState([]);       // CervezaPago sin archivar
   const [precio, setPrecio] = useState(0.5);
   const [loading, setLoading] = useState(true);
   const [cuentasOpen, setCuentasOpen] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [archiveAnio, setArchiveAnio] = useState(new Date().getFullYear().toString());
+  const [archivando, setArchivando] = useState(false);
   const [archivoOpen, setArchivoOpen] = useState(false);
   const [archivados, setArchivados] = useState([]);
   const [archivosAbiertos, setArchivosAbiertos] = useState({});
   const [sesiones, setSesiones] = useState([]);
   const [busqueda, setBusqueda] = useState("");
-  const [cervezaEntradas, setCervezaEntradas] = useState([]);
-  const [consumoPorTipo, setConsumoPorTipo] = useState({});
   const [tiposCerveza, setTiposCerveza] = useState([]);
-  const [ultimoTipoPorIntegrante, setUltimoTipoPorIntegrante] = useState({}); // { integrante_id: tipo }
   const [tab, setTab] = useState("consumo"); // "consumo" | "inventario"
-  const [pending, setPending] = useState({}); // { [entradaId]: [tipo1, ...] }
+  const [pending, setPending] = useState({}); // { [claveCuenta]: [tipo1, ...] }
   const [savingPending, setSavingPending] = useState(false);
 
-  const addPending = (entradaId, tipo) => {
-    setPending(prev => ({ ...prev, [entradaId]: [...(prev[entradaId] || []), tipo] }));
+  // Una cuenta por integrante (más invitados), calculada a partir de consumos y pagos
+  const cuentas = useMemo(() => calcularCuentas(integrantes, consumos, pagos), [integrantes, consumos, pagos]);
+
+  const consumoPorTipo = useMemo(() => {
+    const porTipo = {};
+    for (const c of consumos) {
+      if (!c.tipo) continue;
+      porTipo[c.tipo] = (porTipo[c.tipo] || 0) + (c.cantidad || 1);
+    }
+    return porTipo;
+  }, [consumos]);
+
+  // Último tipo que ha tomado cada cuenta (el consumo más reciente)
+  const ultimoTipoPorCuenta = useMemo(() => {
+    const ultimo = {};
+    for (const c of [...consumos].sort(masRecienteAntes)) {
+      const clave = claveCuenta(c.integrante_id);
+      if (c.tipo && !ultimo[clave]) ultimo[clave] = c.tipo;
+    }
+    return ultimo;
+  }, [consumos]);
+
+  const addPending = (clave, tipo) => {
+    setPending(prev => ({ ...prev, [clave]: [...(prev[clave] || []), tipo] }));
   };
-  const removePending = (entradaId) => {
+  const removePending = (clave) => {
     setPending(prev => {
-      const arr = prev[entradaId] || [];
+      const arr = prev[clave] || [];
       if (!arr.length) return prev;
-      return { ...prev, [entradaId]: arr.slice(0, -1) };
+      return { ...prev, [clave]: arr.slice(0, -1) };
     });
   };
-  const clearPending = (entradaId) => {
+  const clearPending = (clave) => {
     setPending(prev => {
       const next = { ...prev };
-      delete next[entradaId];
+      delete next[clave];
       return next;
     });
   };
   const totalPending = Object.values(pending).reduce((s, a) => s + a.length, 0);
 
+  // Recarga solo lo que cambia al apuntar cervezas o pagos
+  const recargarMovimientos = useCallback(async () => {
+    const [consumosData, pagosData] = await Promise.all([
+      api.entities.ConsumoCerveza.filter({ archivado: false }),
+      api.entities.CervezaPago.filter({ archivado: false }),
+    ]);
+    setConsumos(consumosData);
+    setPagos(pagosData);
+  }, []);
+
   const handleGuardarPendientes = async () => {
     if (totalPending === 0) return;
     setSavingPending(true);
     try {
-      for (const [entradaId, tipos] of Object.entries(pending)) {
-        const entrada = cervezaEntradas.find(e => e.id === entradaId);
-        if (!entrada) continue;
-        const newCount = (entrada.cervezas || 0) + tipos.length;
-        await api.entities.CervezaEntrada.update(entradaId, { cervezas: newCount });
-        const consumos = tipos.filter(Boolean).map(tipo => ({
-          tipo, cantidad: 1, integrante_id: entradaId, integrante_nombre: entrada.nombre || "",
-        }));
-        if (consumos.length) await api.entities.ConsumoCerveza.bulkCreate(consumos);
-        setConsumoPorTipo(prev => {
-          const next = { ...prev };
-          for (const t of tipos.filter(Boolean)) next[t] = (next[t] || 0) + 1;
-          return next;
-        });
-      }
+      // Cada cerveza pendiente es un consumo (tipo null si no hay inventario)
+      const nuevos = Object.entries(pending).flatMap(([clave, tipos]) =>
+        tipos.map(tipo => ({ tipo: tipo || null, cantidad: 1, integrante_id: integranteIdDeClave(clave) }))
+      );
+      if (nuevos.length) await api.entities.ConsumoCerveza.bulkCreate(nuevos);
       setPending({});
-      loadData();
+      await recargarMovimientos();
     } catch (e) {
       console.error("Error guardando pendientes:", e);
     } finally {
@@ -87,60 +112,25 @@ export default function Cerveza() {
   };
 
   const loadData = useCallback(async () => {
-    const [members, configs, entradas, sesionesData, consumos, lotes] = await Promise.all([
+    const [members, configs, sesionesData, consumosData, pagosData, lotes, allConfigs] = await Promise.all([
       api.entities.Integrante.list(),
-      api.entities.AppConfig.filter({ clave: PRICE_CONFIG_KEY }),
-      api.entities.CervezaEntrada.list("-created_date"),
+      api.entities.AppConfig.filter({ clave: PRECIO_CERVEZA_KEY }),
       api.entities.SesionUsuario.list(),
-      api.entities.ConsumoCerveza.list(),
+      api.entities.ConsumoCerveza.filter({ archivado: false }),
+      api.entities.CervezaPago.filter({ archivado: false }),
       api.entities.LoteCerveza.list(),
+      api.entities.AppConfig.list(),
     ]);
     setSesiones(sesionesData);
-    const membersSorted = members.sort((a, b) => a.nombre.localeCompare(b.nombre));
-    setTodasPersonas(membersSorted);
+    setIntegrantes(members);
+    setConsumos(consumosData);
+    setPagos(pagosData);
     if (configs.length > 0) setPrecio(parseFloat(configs[0].valor));
 
-    // Auto-añadir integrantes (no patitas) que no estén ya en la lista
-    const integrantesActivos = membersSorted.filter(m => m.categoria !== "patitas");
-    const enLista = new Set(entradas.map(e => e.nombre));
-    const faltantes = integrantesActivos.filter(m => !enLista.has(m.nombre));
-    let entradasFinal = [...entradas];
-    if (faltantes.length > 0) {
-      const nuevas = await Promise.all(
-        faltantes.map(m => api.entities.CervezaEntrada.create({ nombre: m.nombre, cervezas: 0 }))
-      );
-      entradasFinal = [...entradas, ...nuevas];
-    }
-    if (!entradasFinal.find(e => e.nombre.toLowerCase() === "invitados")) {
-      const nuevaInv = await api.entities.CervezaEntrada.create({ nombre: "Invitados", cervezas: 0, pagado: 0 });
-      entradasFinal = [...entradasFinal, nuevaInv];
-    }
-    setCervezaEntradas(entradasFinal);
+    // Tipos de cerveza del inventario
+    setTiposCerveza([...new Set(lotes.map(l => l.tipo).filter(Boolean))]);
 
-    // Cargar tipos de cerveza del inventario
-    const tipos = [...new Set(lotes.map(l => l.tipo).filter(Boolean))];
-    setTiposCerveza(tipos);
-
-    // Calcular consumo por tipo
-    const porTipo = {};
-    for (const c of consumos) {
-      if (!c.tipo) continue;
-      porTipo[c.tipo] = (porTipo[c.tipo] || 0) + (c.cantidad || 1);
-    }
-    setConsumoPorTipo(porTipo);
-
-    // Calcular último tipo por integrante (el consumo más reciente)
-    const ultimoPorInt = {};
-    const consumosOrdenados = [...consumos].sort((a, b) => (b.created_date || "").localeCompare(a.created_date || ""));
-    for (const c of consumosOrdenados) {
-      if (c.integrante_id && c.tipo && !ultimoPorInt[c.integrante_id]) {
-        ultimoPorInt[c.integrante_id] = c.tipo;
-      }
-    }
-    setUltimoTipoPorIntegrante(ultimoPorInt);
-
-    // Cargar archivos de cerveza
-    const allConfigs = await api.entities.AppConfig.list();
+    // Archivos de cerveza (resúmenes de años anteriores)
     const archivoCerveza = allConfigs
       .filter(c => c.clave.startsWith("cerveza_archivo_"))
       .sort((a, b) => b.created_date.localeCompare(a.created_date));
@@ -154,62 +144,35 @@ export default function Cerveza() {
   const handleSavePrecio = async (val) => {
     if (!puedeArchivar) return;
     setPrecio(val);
-    const existing = await api.entities.AppConfig.filter({ clave: PRICE_CONFIG_KEY });
+    const existing = await api.entities.AppConfig.filter({ clave: PRECIO_CERVEZA_KEY });
     if (existing.length > 0) {
       await api.entities.AppConfig.update(existing[0].id, { valor: val.toString() });
     } else {
-      await api.entities.AppConfig.create({ clave: PRICE_CONFIG_KEY, valor: val.toString() });
+      await api.entities.AppConfig.create({ clave: PRECIO_CERVEZA_KEY, valor: val.toString() });
     }
   };
 
-  // onUpdate recibe tipo y accion ("add" | "remove" | null)
-  const handleUpdateCervezas = async (id, newCount, tipoCerveza, accion) => {
-    const entrada = cervezaEntradas.find(e => e.id === id);
-    setCervezaEntradas(prev => prev.map(e => e.id === id ? { ...e, cervezas: newCount } : e));
-    await api.entities.CervezaEntrada.update(id, { cervezas: newCount });
-
-    if (tipoCerveza && accion === "add") {
-      // Registrar consumo
-      await api.entities.ConsumoCerveza.create({
-        tipo: tipoCerveza,
-        cantidad: 1,
-        integrante_id: id,
-        integrante_nombre: entrada?.nombre || "",
-      });
-      setConsumoPorTipo(prev => ({ ...prev, [tipoCerveza]: (prev[tipoCerveza] || 0) + 1 }));
-      setUltimoTipoPorIntegrante(prev => ({ ...prev, [id]: tipoCerveza }));
-    } else if (tipoCerveza && accion === "remove") {
-      // Revertir consumo: buscar y borrar un registro de consumo de ese tipo para ese integrante
-      const consumos = await api.entities.ConsumoCerveza.filter({ integrante_id: id, tipo: tipoCerveza });
-      if (consumos.length > 0) {
-        // Borrar el más reciente
-        const masReciente = consumos.sort((a, b) => (b.created_date || "").localeCompare(a.created_date || ""))[0];
-        if (masReciente.cantidad > 1) {
-          await api.entities.ConsumoCerveza.update(masReciente.id, { cantidad: masReciente.cantidad - 1 });
-        } else {
-          await api.entities.ConsumoCerveza.delete(masReciente.id);
-        }
-      }
-      setConsumoPorTipo(prev => ({ ...prev, [tipoCerveza]: Math.max(0, (prev[tipoCerveza] || 0) - 1) }));
+  // Quita una cerveza: el consumo más reciente de ese tipo (o el más reciente si no hay tipo)
+  const handleQuitarCerveza = async (clave, tipo) => {
+    const mios = consumos.filter(c => claveCuenta(c.integrante_id) === clave).sort(masRecienteAntes);
+    const consumo = (tipo && mios.find(c => c.tipo === tipo)) || mios[0];
+    if (!consumo) return;
+    if (consumo.cantidad > 1) {
+      await api.entities.ConsumoCerveza.update(consumo.id, { cantidad: consumo.cantidad - 1 });
+    } else {
+      await api.entities.ConsumoCerveza.delete(consumo.id);
     }
+    await recargarMovimientos();
   };
 
-  const handleUpdateCampo = (id, campos) => {
-    setCervezaEntradas(prev => prev.map(e => e.id === id ? { ...e, ...campos } : e));
-  };
-
-  const handleDelete = async (id) => {
-    const entrada = cervezaEntradas.find(e => e.id === id);
-    if (entrada) {
-      await api.entities.Papelera.create({
-        entidad: "CervezaEntrada",
-        descripcion: `${entrada.nombre} (${entrada.cervezas || 0} cervezas)`,
-        datos_json: JSON.stringify(entrada),
-        eliminado_por: sesion?.nombre || "Desconocido",
-      });
-    }
-    await api.entities.CervezaEntrada.delete(id);
-    setCervezaEntradas(prev => prev.filter(e => e.id !== id));
+  // Borra todas las cervezas (sin archivar) de una cuenta
+  const handleLimpiarCervezas = async (clave) => {
+    const cuenta = cuentas.find(c => c.id === clave);
+    if (!cuenta || cuenta.cervezas === 0) return;
+    if (!confirm(`¿Borrar las ${cuenta.cervezas} cervezas de ${cuenta.nombre}?`)) return;
+    const mios = consumos.filter(c => claveCuenta(c.integrante_id) === clave);
+    await Promise.all(mios.map(c => api.entities.ConsumoCerveza.delete(c.id)));
+    await recargarMovimientos();
   };
 
   const handleEliminarArchivo = async (id) => {
@@ -220,57 +183,53 @@ export default function Cerveza() {
 
   const handleArchivar = async () => {
     if (!puedeArchivar) return;
-    const anio = archiveAnio.trim() || new Date().getFullYear().toString();
-    const totalCerv = cervezaEntradas.reduce((sum, e) => sum + (e.cervezas || 0), 0);
-    const pagosActuales = await api.entities.CervezaPago.filter({ archivado: false });
+    const anio = parseInt(archiveAnio.trim(), 10) || new Date().getFullYear();
+    setArchivando(true);
+    try {
+      const nombrePorClave = Object.fromEntries(cuentas.map(c => [c.id, c.nombre]));
 
-    const claveArchivo = `cerveza_archivo_${anio}_${Date.now()}`;
-    const valorArchivo = JSON.stringify({
-      anio,
-      total: totalCerv,
-      precio,
-      entradas: cervezaEntradas.map(e => ({
-        nombre: e.nombre,
-        cervezas: e.cervezas || 0,
-        pagado: e.pagado || 0,
-      })),
-      pagos: pagosActuales.map(p => ({
-        nombre: p.integrante_nombre,
-        importe: p.importe,
-        fecha: p.fecha,
-        notas: p.notas,
-      })),
-    });
+      // Resumen del año (se sigue guardando para la sección "Archivo")
+      const claveArchivo = `cerveza_archivo_${anio}_${Date.now()}`;
+      const valorArchivo = JSON.stringify({
+        anio,
+        total: totalCervezas,
+        precio,
+        entradas: cuentas
+          .filter(c => c.cervezas > 0 || c.pagado !== 0)
+          .map(c => ({ nombre: c.nombre, integrante_id: c.integranteId, cervezas: c.cervezas, pagado: c.pagado })),
+        pagos: pagos.map(p => ({
+          nombre: nombrePorClave[claveCuenta(p.integrante_id)],
+          integrante_id: p.integrante_id,
+          importe: p.importe,
+          fecha: p.fecha,
+          notas: p.notas,
+        })),
+      });
+      await api.entities.AppConfig.create({ clave: claveArchivo, valor: valorArchivo });
 
-    await api.entities.AppConfig.create({ clave: claveArchivo, valor: valorArchivo });
-    await Promise.all(cervezaEntradas.map(e =>
-      api.entities.CervezaEntrada.update(e.id, { cervezas: 0, pagado: 0 })
-    ));
-    await Promise.all(pagosActuales.map(p =>
-      api.entities.CervezaPago.update(p.id, { archivado: true, anio_archivo: anio })
-    ));
-
-    // También borrar consumos registrados
-    const todosConsumos = await api.entities.ConsumoCerveza.list();
-    await Promise.all(todosConsumos.map(c => api.entities.ConsumoCerveza.delete(c.id)));
-    setConsumoPorTipo({});
-
-    setCervezaEntradas(prev => prev.map(e => ({ ...e, cervezas: 0, pagado: 0 })));
-    setArchiveOpen(false);
-    loadData();
+      // Consumos y pagos no se borran: se archivan y dejan de contar
+      const cambios = { archivado: true, anio_archivo: anio };
+      await Promise.all([
+        ...consumos.map(c => api.entities.ConsumoCerveza.update(c.id, cambios)),
+        ...pagos.map(p => api.entities.CervezaPago.update(p.id, cambios)),
+      ]);
+      setArchiveOpen(false);
+    } finally {
+      setArchivando(false);
+      loadData();
+    }
   };
 
-  const totalCervezas = cervezaEntradas.reduce((sum, e) => sum + (e.cervezas || 0), 0);
-  const sociosEntradas = cervezaEntradas.filter(e => e.nombre.toLowerCase() !== "invitados");
-  const invitadosEntry = cervezaEntradas.find(e => e.nombre.toLowerCase() === "invitados");
-  const sorted = [...sociosEntradas].sort((a, b) => (b.cervezas || 0) - (a.cervezas || 0));
+  const totalCervezas = cuentas.reduce((sum, c) => sum + c.cervezas, 0);
+  const sociosCuentas = cuentas.filter(c => c.id !== INVITADOS_ID);
+  const invitadosCuenta = cuentas.find(c => c.id === INVITADOS_ID);
+  const sorted = [...sociosCuentas].sort((a, b) => b.cervezas - a.cervezas || a.nombre.localeCompare(b.nombre));
   const q = busqueda.trim().toLowerCase();
-  const sortedFiltrado = q ? sorted.filter(e => e.nombre.toLowerCase().includes(q)) : sorted;
+  const sortedFiltrado = q ? sorted.filter(c => c.nombre.toLowerCase().includes(q)) : sorted;
 
-  const getAvatarUrl = (nombre) => {
-    const integrante = todasPersonas.find(i => i.nombre?.toLowerCase() === nombre.toLowerCase());
-    if (!integrante) return null;
-    const sesionUsuario = sesiones.find(s => s.integrante_id === integrante.id);
+  const getAvatarUrl = (cuenta) => {
+    if (!cuenta.integranteId) return null;
+    const sesionUsuario = sesiones.find(s => s.integrante_id === cuenta.integranteId);
     return sesionUsuario?.avatar_url || null;
   };
 
@@ -332,7 +291,7 @@ export default function Cerveza() {
 
       {tab === "consumo" && (
         <>
-          <CervezaChart entradas={cervezaEntradas} />
+          <CervezaChart entradas={cuentas} />
 
           {/* Total cervezas */}
           <motion.div
@@ -384,11 +343,11 @@ export default function Cerveza() {
 
             <div className="space-y-2">
               <AnimatePresence>
-                {sortedFiltrado.map((entrada, idx) => {
-                  const podio = getPodio(sorted.indexOf(entrada));
+                {sortedFiltrado.map((cuenta, idx) => {
+                  const podio = getPodio(sorted.indexOf(cuenta));
                   return (
                     <motion.div
-                      key={entrada.id}
+                      key={cuenta.id}
                       initial={{ opacity: 0, x: -14 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 14, transition: { duration: 0.16 } }}
@@ -404,29 +363,24 @@ export default function Cerveza() {
                       )}
                       <div className={podio ? "ml-10" : ""}>
                         <BeerRow
-                          integrante={entrada}
+                          integrante={cuenta}
                           precioCerveza={precio}
-                          onUpdate={handleUpdateCervezas}
-                          avatarUrl={getAvatarUrl(entrada.nombre)}
+                          onRemove={(tipo) => handleQuitarCerveza(cuenta.id, tipo)}
+                          onClear={() => handleLimpiarCervezas(cuenta.id)}
+                          avatarUrl={getAvatarUrl(cuenta)}
                           tiposCerveza={tiposCerveza}
-                          ultimoTipo={ultimoTipoPorIntegrante[entrada.id] || null}
-                          pendingTipos={pending[entrada.id] || []}
-                          onAddPending={(tipo) => addPending(entrada.id, tipo)}
-                          onRemovePending={() => removePending(entrada.id)}
-                          onClearPending={() => clearPending(entrada.id)}
+                          ultimoTipo={ultimoTipoPorCuenta[cuenta.id] || null}
+                          pendingTipos={pending[cuenta.id] || []}
+                          onAddPending={(tipo) => addPending(cuenta.id, tipo)}
+                          onRemovePending={() => removePending(cuenta.id)}
+                          onClearPending={() => clearPending(cuenta.id)}
                         />
                       </div>
-                      <button
-                        onClick={() => handleDelete(entrada.id)}
-                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-100 text-red-400 hover:bg-red-200 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                      >
-                        <Trash2 className="w-2.5 h-2.5" />
-                      </button>
                     </motion.div>
                   );
                 })}
               </AnimatePresence>
-              {cervezaEntradas.length === 0 && (
+              {sociosCuentas.length === 0 && (
                 <div className="text-center py-12 text-gray-300">
                   <p className="text-4xl mb-3">🍺</p>
                   <p className="text-sm">Aún no hay nadie en la lista.</p>
@@ -436,19 +390,20 @@ export default function Cerveza() {
           </div>
 
           {/* Invitados (fijo abajo) */}
-          {invitadosEntry && (
+          {invitadosCuenta && (
             <div className="mt-2 pt-3 border-t-2 border-dashed border-gray-200">
               <BeerRow
-                integrante={invitadosEntry}
+                integrante={invitadosCuenta}
                 precioCerveza={precio}
-                onUpdate={handleUpdateCervezas}
+                onRemove={(tipo) => handleQuitarCerveza(INVITADOS_ID, tipo)}
+                onClear={() => handleLimpiarCervezas(INVITADOS_ID)}
                 avatarUrl={null}
                 tiposCerveza={tiposCerveza}
-                ultimoTipo={ultimoTipoPorIntegrante[invitadosEntry.id] || null}
-                pendingTipos={pending[invitadosEntry.id] || []}
-                onAddPending={(tipo) => addPending(invitadosEntry.id, tipo)}
-                onRemovePending={() => removePending(invitadosEntry.id)}
-                onClearPending={() => clearPending(invitadosEntry.id)}
+                ultimoTipo={ultimoTipoPorCuenta[INVITADOS_ID] || null}
+                pendingTipos={pending[INVITADOS_ID] || []}
+                onAddPending={(tipo) => addPending(INVITADOS_ID, tipo)}
+                onRemovePending={() => removePending(INVITADOS_ID)}
+                onClearPending={() => clearPending(INVITADOS_ID)}
                 destacada
               />
             </div>
@@ -566,7 +521,7 @@ export default function Cerveza() {
             </DialogTitle>
           </DialogHeader>
           <div className="mt-2 max-h-[70vh] overflow-y-auto">
-            <CuentasCerveza entradas={cervezaEntradas} precio={precio} puedeGestionar={puedeArchivar} onUpdate={handleUpdateCampo} />
+            <CuentasCerveza entradas={cuentas} precio={precio} puedeGestionar={puedeArchivar} onChange={recargarMovimientos} />
           </div>
         </DialogContent>
       </Dialog>
@@ -578,7 +533,7 @@ export default function Cerveza() {
             <DialogTitle className="text-[#630027]">Archivar cervezas</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-2">
-            <p className="text-sm text-gray-500">Se guardará un resumen del año y se reiniciarán los contadores a 0 (incluido el inventario de consumo).</p>
+            <p className="text-sm text-gray-500">Se guardará un resumen del año y las cervezas y pagos actuales se archivarán: los contadores vuelven a 0 (incluido el inventario de consumo).</p>
             <div>
               <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block">Año</label>
               <Input value={archiveAnio} onChange={e => setArchiveAnio(e.target.value)} placeholder="Ej: 2025" className="rounded-xl border-gray-200" />
@@ -587,7 +542,7 @@ export default function Cerveza() {
               <p className="font-semibold text-gray-700 mb-1">Resumen a archivar:</p>
               <p>{totalCervezas} cervezas en total</p>
             </div>
-            <Button onClick={handleArchivar} className="w-full bg-amber-600 hover:bg-amber-700 text-white rounded-xl">
+            <Button onClick={handleArchivar} disabled={archivando} className="w-full bg-amber-600 hover:bg-amber-700 text-white rounded-xl">
               <Archive className="w-4 h-4 mr-2" /> Archivar "Archivo cerveza {archiveAnio}"
             </Button>
           </div>

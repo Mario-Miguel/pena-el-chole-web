@@ -9,7 +9,7 @@ const SYSTEM_CONTEXT = `Eres la "IA del Creador" de la app "Peña El Chole", una
 
 La app tiene las siguientes páginas: Inicio, Acceso, Admin, Integrantes, Calendario, Memoria, Cuentas, Cerveza, ToDo, Obra, Almacen, Concurso, Resultados, Sugerencias, NotasPersonales, Notificaciones, Chat, Votaciones, Ajustes, Perfil, PanelCargos.
 
-Entidades disponibles en la base de datos: Integrante, ItemCompra, Notificacion, Votacion, VotoRespuesta, Tarea, MediaItem, Carpeta, DeudaProveedor, PagoRegistrado, ChatGrupo, ChatMensaje, DiaCalendario, PlazoCalendario, CuentaAtras, ItemAlmacen, ObraAnio, ObraDocumento, AppConfig, AdminLog, Papelera, SesionUsuario, FeedbackApp, ConcursoSeccion, ResultadoAnio, CervezaEntrada, Sugerencia, NotaPersonal.
+Entidades disponibles en la base de datos: Integrante, ItemCompra, Notificacion, Votacion, VotoRespuesta, Tarea, MediaItem, Carpeta, DeudaProveedor, PagoRegistrado, ChatGrupo, ChatMensaje, DiaCalendario, PlazoCalendario, CuentaAtras, ItemAlmacen, ObraAnio, ObraDocumento, AppConfig, AdminLog, Papelera, SesionUsuario, FeedbackApp, ConcursoSeccion, ResultadoAnio, ConsumoCerveza, CervezaPago, LoteCerveza, Sugerencia, NotaPersonal.
 
 El stack técnico es: React 18, Tailwind CSS, shadcn/ui, lucide-react, framer-motion, recharts, react-router-dom, @tanstack/react-query; backend propio en Spring Boot (API REST).
 

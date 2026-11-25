@@ -79,8 +79,6 @@ public class MemberService
 
     private static Member toEntity(MemberRequest r) {
         Member m = new Member(r.name(), r.category(), r.role());
-        if (r.beers() != null)
-            m.setBeers(r.beers());
         m.setBirthDate(r.birthDate());
         return m;
     }
